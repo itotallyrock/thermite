@@ -1,7 +1,7 @@
 use crate::uci::UciConfig;
 
 pub enum UciCommand {
+    Uci,
     IsReady,
-    Quit,
     SetOption(UciConfig)
 }

@@ -3,6 +3,8 @@ use crate::uci::search_result::SearchResult;
 use crate::uci::uci_options::{UciConfig, UciOption};
 
 pub trait UciChessEngine {
+    fn name() -> String;
+    fn authors() -> String;
     fn available_options() -> Vec<UciOption>;
     fn set_option(&mut self, config: UciConfig);
     fn setup(&mut self);

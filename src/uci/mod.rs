@@ -17,5 +17,5 @@ pub use search_result::SearchResult;
 pub use uci_command::UciCommand;
 pub use uci_response::UciResponse;
 pub use uci_info::UciInfo;
-pub use uci_options::{UciOption, UciConfig};
+pub use uci_options::{UciOption, UciConfig, UciOptionType};
 pub use driver::UciDriver;

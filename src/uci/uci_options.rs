@@ -8,20 +8,20 @@ pub struct UciOption {
 pub enum UciOptionType {
     Button,
     Check {
-        default: Option<bool>,
+        default: bool,
     },
     Spin {
-        min: Option<i64>,
-        max: Option<i64>,
-        default: Option<i64>,
+        min: i64,
+        max: i64,
+        default: i64,
     },
     Combo {
         // TODO: See if we can use a better type than Vec
         options: Vec<String>,
-        default: Option<String>,
+        default: String,
     },
     String {
-        default: Option<String>,
+        default: String,
     },
 }
 

@@ -1,4 +1,5 @@
-use crate::uci::{SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption};
+use std::num::NonZeroUsize;
+use crate::uci::{SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption, UciOptionType};
 
 pub struct ThermiteEngine {
 
@@ -14,8 +15,26 @@ impl ThermiteEngine {
 
 impl UciChessEngine for ThermiteEngine {
 
+    fn name() -> String {
+        "Thermite".into()
+    }
+
+    fn authors() -> String {
+        "Jeffrey Meyer".into()
+    }
+
     fn available_options() -> Vec<UciOption> {
-        todo!()
+        let max_parallelism = std::thread::available_parallelism().unwrap_or(NonZeroUsize::new(1).unwrap()).get() as _;
+        vec![
+            UciOption {
+                name: "Threads".into(),
+                option: UciOptionType::Spin {
+                    min: 1,
+                    max: max_parallelism,
+                    default: max_parallelism,
+                }
+            }
+        ]
     }
 
     fn set_option(&mut self, config: UciConfig) {
@@ -23,7 +42,7 @@ impl UciChessEngine for ThermiteEngine {
     }
 
     fn setup(&mut self) {
-
+        // Nothing to do here yet
     }
 
     fn start_search(&mut self, params: SearchParameters) {
@@ -35,6 +54,7 @@ impl UciChessEngine for ThermiteEngine {
     }
 
     fn shutdown(self) {
-        todo!()
+        // Nothing to do here yet
+        // Eventually we'll need to join the search threads and cleanup held resources
     }
 }

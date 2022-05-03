@@ -28,15 +28,21 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
                 reader.read_line(&mut line).map_err(|err| UciReaderError::IoError(err.kind()))?;
                 // TODO: parse line better
                 let command = match line.as_str().trim() {
+                    "uci" => UciCommand::Uci,
                     "isready" => UciCommand::IsReady,
-                    "quit" => {
-                        command_sender.send(UciCommand::Quit).map_err(|err| UciReaderError::SendError(err))?;
-                        break
+                    "quit" => break,
+                    _ => {
+                        eprintln!("unknown command: '{}'", line);
+                        continue;
                     },
-                    _ => panic!("unknown command"),
                 };
 
-                command_sender.send(command).map_err(|err| UciReaderError::SendError(err))?;
+                // Send the command to the receiver
+                command_sender.send(command)
+                    .map_err(|err| UciReaderError::SendError(err))?;
+
+                // Clear the line buffer for the next command
+                line.clear();
             }
 
             Ok(reader)
