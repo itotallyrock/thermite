@@ -1,6 +1,7 @@
 use crate::engine_types::SimpleMoveList;
 
 /// The initial position
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub enum InitialPosition {
     /// FIDE standard chess starting position
     StandardStartingPosition,
@@ -9,6 +10,7 @@ pub enum InitialPosition {
 }
 
 /// Position set from UCI command
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct UciPosition {
     /// The starting position
     initial_position: InitialPosition,

@@ -10,6 +10,7 @@ mod uci_info;
 mod uci_reader;
 mod uci_options;
 mod uci_position;
+mod uci_score;
 
 pub use info_writer::InfoWriter;
 pub use engine::UciChessEngine;
@@ -20,4 +21,5 @@ pub use uci_response::UciResponse;
 pub use uci_info::UciInfo;
 pub use uci_options::{UciOption, UciConfig, UciOptionType};
 pub use uci_position::{UciPosition, InitialPosition};
+pub use uci_score::{UciScore, ScoreBoundsType};
 pub use driver::UciDriver;

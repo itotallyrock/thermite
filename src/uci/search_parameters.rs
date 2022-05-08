@@ -1,6 +1,5 @@
 use std::time::Duration;
 use crate::engine_types::{NodeCount, SearchDepth, SimpleMoveList};
-use crate::game::SimpleChessMove;
 
 /// General search constraints that apply to all searches.
 #[derive(Clone, Eq, PartialEq, Debug, Default)]

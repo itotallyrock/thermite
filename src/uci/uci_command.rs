@@ -1,5 +1,7 @@
 use crate::uci::{SearchParameters, UciConfig, UciPosition};
 
+/// Incoming command from the GUI
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub enum UciCommand {
     Uci,
     IsReady,
@@ -13,6 +15,7 @@ pub enum UciCommand {
     Other(String),
 }
 
+/// Print unrecognized command error message
 #[macro_export]
 macro_rules! unknown_command_error {
     ($input:expr) => {{
