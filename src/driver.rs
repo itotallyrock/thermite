@@ -38,6 +38,10 @@ impl Driver {
                     chess_engine.set_option(config);
                 },
 
+                UciCommand::Debug(enabled) => {
+                    chess_engine.set_debug(enabled);
+                }
+
                 UciCommand::Position(position) => {
                     if is_searching {
                         chess_engine.stop_search();

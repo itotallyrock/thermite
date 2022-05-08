@@ -17,6 +17,9 @@ pub trait UciChessEngine {
         Vec::new()
     }
 
+    /// Enable/disable debug output of info to the GUI
+    fn set_debug(&mut self, _: bool) {}
+
     /// Assign a value to an available option
     fn set_option(&mut self, _: UciConfig) {}
 

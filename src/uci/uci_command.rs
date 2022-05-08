@@ -3,6 +3,7 @@ use crate::uci::{SearchParameters, UciConfig, UciPosition};
 pub enum UciCommand {
     Uci,
     IsReady,
+    Debug(bool),
     SetOption(UciConfig),
     Position(UciPosition),
     Go(SearchParameters),
