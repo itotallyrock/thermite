@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crate::uci::{UciInfo, UciResponse};
+use crate::uci::{SearchResult, UciInfo, UciResponse};
 use crate::uci::uci_options::UciOptionType;
 
 pub struct UciWriter<W: Write> {
@@ -16,7 +16,7 @@ impl<W: Write> UciWriter<W> {
     }
     pub fn debug(&mut self, info: UciInfo) -> std::io::Result<()> {
         match info {
-            UciInfo::NodesPerSecond(nodes_per_second) => write!(self.writer, "info nodes {nodes_per_second}"),
+            UciInfo::NodesPerSecond(nodes_per_second) => write!(self.writer, "info nodes {}", nodes_per_second),
         }
     }
     pub fn respond(&mut self, response: UciResponse) -> std::io::Result<()> {
@@ -31,6 +31,10 @@ impl<W: Write> UciWriter<W> {
                 UciOptionType::Spin { min, max, default } => writeln!(self.writer, "option name {} type spin min {} max {} default {}", uci_option.name, min, max, default)?,
                 UciOptionType::Combo { options, default } => writeln!(self.writer, "option name {} type combo {} default {}", uci_option.name, options.into_iter().map(|variant| format!("var {}", variant)).collect::<String>(), default)?,
                 UciOptionType::String { default } => writeln!(self.writer, "option name {} type string default {}", uci_option.name, default)?,
+            },
+            UciResponse::BestMove(SearchResult { best_move, ponder_move }) => match ponder_move {
+                None => writeln!(self.writer, "bestmove {}", best_move)?,
+                Some(ponder_move) => writeln!(self.writer, "bestmove {} ponder {}", best_move, ponder_move)?,
             },
         }
         self.writer.flush()

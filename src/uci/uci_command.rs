@@ -1,9 +1,12 @@
-use crate::uci::UciConfig;
+use crate::uci::{SearchParameters, UciConfig, UciPosition};
 
 pub enum UciCommand {
     Uci,
     IsReady,
     SetOption(UciConfig),
+    Position(UciPosition),
+    Go(SearchParameters),
+    Stop,
     Other(String),
 }
 

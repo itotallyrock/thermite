@@ -1,10 +1,13 @@
 
 /// An option that a UCI GUI can use to configure an engine
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct UciOption {
     pub name: String,
     pub option: UciOptionType,
 }
 
+/// Different option kinds and their configurations
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub enum UciOptionType {
     Button,
     Check {
@@ -26,6 +29,7 @@ pub enum UciOptionType {
 }
 
 /// Key value pair for a [UciOption]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct UciConfig {
     // TODO: See if we can instead reference the original &UciOption
     pub name: String,

@@ -7,6 +7,7 @@ impl Driver {
     /// Block the current thread receiving UCI commands and triggering engine evaluation
     pub fn start<E: UciChessEngine>(mut chess_engine: E) -> anyhow::Result<()> {
         let mut uci_driver = UciDriver::start(BufReader::new(stdin()), stdout());
+        let mut is_searching = false;
 
         for command in uci_driver.receiver.iter() {
             match command {
@@ -27,13 +28,35 @@ impl Driver {
 
                 UciCommand::IsReady => {
                     // Setup the chess engine and once its completed tell the GUI we're ready
-                    chess_engine.setup();
+                    if !is_searching {
+                        chess_engine.setup();
+                    }
                     uci_driver.uci_writer.respond(UciResponse::ReadyOk)?;
                 },
 
                 UciCommand::SetOption(config) => {
                     chess_engine.set_option(config);
                 },
+
+                UciCommand::Position(position) => {
+                    if is_searching {
+                        chess_engine.stop_search();
+                    }
+                    chess_engine.set_position(position);
+                },
+
+                UciCommand::Go(search_parameters) => {
+                    chess_engine.start_search(search_parameters);
+                    is_searching = true;
+                },
+
+                UciCommand::Stop => {
+                    if is_searching {
+                        let search_result = chess_engine.stop_search();
+                        is_searching = false;
+                        uci_driver.uci_writer.respond(UciResponse::BestMove(search_result))?;
+                    }
+                }
 
                 UciCommand::Other(input) => {
                     chess_engine.custom_command_handler(&input);
@@ -44,4 +67,5 @@ impl Driver {
         chess_engine.shutdown();
         uci_driver.shutdown()
     }
+
 }

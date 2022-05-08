@@ -9,7 +9,7 @@ mod engine_types;
 
 fn main() {
     let engine = ThermiteEngine::new();
-    
+
     if let Err(err) = Driver::start(engine) {
         eprintln!("Fatal Error: {}", err);
     }

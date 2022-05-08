@@ -1,5 +1,5 @@
 use std::num::NonZeroUsize;
-use crate::uci::{SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption, UciOptionType};
+use crate::uci::{SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption, UciOptionType, UciPosition};
 
 /// Hard maximum number of threads for the container for threads
 const MAX_THREADS: usize = 32;
@@ -53,6 +53,10 @@ impl UciChessEngine for ThermiteEngine {
     }
 
     fn set_option(&mut self, config: UciConfig) {
+        todo!()
+    }
+
+    fn set_position(&mut self, position: UciPosition) {
         todo!()
     }
 
