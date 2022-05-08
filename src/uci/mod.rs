@@ -12,7 +12,7 @@ mod uci_options;
 
 pub use info_writer::InfoWriter;
 pub use engine::UciChessEngine;
-pub use search_parameters::SearchParameters;
+pub use search_parameters::{SearchParameters, SearchConstraints, TimeConstraints, TimeControls};
 pub use search_result::SearchResult;
 pub use uci_command::UciCommand;
 pub use uci_response::UciResponse;
