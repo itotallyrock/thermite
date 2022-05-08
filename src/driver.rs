@@ -8,6 +8,7 @@ impl Driver {
     pub fn start<E: UciChessEngine>(mut chess_engine: E) -> anyhow::Result<()> {
         let mut uci_driver = UciDriver::start(BufReader::new(stdin()), stdout());
         let mut is_searching = false;
+        let mut is_pondering = false;
 
         for command in uci_driver.receiver.iter() {
             match command {
@@ -42,34 +43,31 @@ impl Driver {
                     chess_engine.set_debug(enabled);
                 },
 
-                UciCommand::UciNewGame => {
+                UciCommand::UciNewGame | UciCommand::Stop | UciCommand::Position(_) => {
                     if is_searching {
                         let search_result = chess_engine.stop_search();
                         is_searching = false;
+                        is_pondering = false;
                         uci_driver.uci_writer.respond(UciResponse::BestMove(search_result))?;
                     }
-                    chess_engine.new_game();
-                }
-
-                UciCommand::Position(position) => {
-                    if is_searching {
-                        chess_engine.stop_search();
+                    match command {
+                        UciCommand::UciNewGame => chess_engine.new_game(),
+                        UciCommand::Position(position) => chess_engine.set_position(position),
+                        _ => unreachable!("inside nested match"),
                     }
-                    chess_engine.set_position(position);
                 },
 
                 UciCommand::Go(search_parameters) => {
+                    is_pondering = search_parameters.ponder;
                     chess_engine.start_search(search_parameters);
                     is_searching = true;
                 },
 
-                UciCommand::Stop => {
-                    if is_searching {
-                        let search_result = chess_engine.stop_search();
-                        is_searching = false;
-                        uci_driver.uci_writer.respond(UciResponse::BestMove(search_result))?;
+                UciCommand::PonderHit => {
+                    if is_pondering {
+                        chess_engine.ponder_hit();
                     }
-                },
+                }
 
                 UciCommand::Other(input) => {
                     chess_engine.custom_command_handler(&input);

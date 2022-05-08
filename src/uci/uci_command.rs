@@ -8,6 +8,7 @@ pub enum UciCommand {
     SetOption(UciConfig),
     Position(UciPosition),
     Go(SearchParameters),
+    PonderHit,
     Stop,
     Other(String),
 }

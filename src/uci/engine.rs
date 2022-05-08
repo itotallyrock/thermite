@@ -44,6 +44,10 @@ pub trait UciChessEngine {
     /// Stop the search and provide the best move and optionally the opponents response
     fn stop_search(&mut self) -> SearchResult;
 
+    /// Switch search mode to active instead of ponder using prior search parameters
+    /// Called when the opponent made the expected move the engine was pondering.
+    fn ponder_hit(&mut self);
+
     /// The GUI has asked this engine to exit
     fn shutdown(self) where Self: Sized {}
 

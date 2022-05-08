@@ -73,6 +73,10 @@ impl UciChessEngine for ThermiteEngine {
         todo!()
     }
 
+    fn ponder_hit(&mut self) {
+        todo!()
+    }
+
     fn shutdown(self) {
         // Nothing to do here yet
         // Eventually we'll need to join the search threads and cleanup held resources
