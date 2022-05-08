@@ -40,6 +40,15 @@ impl Driver {
 
                 UciCommand::Debug(enabled) => {
                     chess_engine.set_debug(enabled);
+                },
+
+                UciCommand::UciNewGame => {
+                    if is_searching {
+                        let search_result = chess_engine.stop_search();
+                        is_searching = false;
+                        uci_driver.uci_writer.respond(UciResponse::BestMove(search_result))?;
+                    }
+                    chess_engine.new_game();
                 }
 
                 UciCommand::Position(position) => {
@@ -60,7 +69,7 @@ impl Driver {
                         is_searching = false;
                         uci_driver.uci_writer.respond(UciResponse::BestMove(search_result))?;
                     }
-                }
+                },
 
                 UciCommand::Other(input) => {
                     chess_engine.custom_command_handler(&input);

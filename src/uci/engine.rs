@@ -29,6 +29,7 @@ pub trait UciChessEngine {
     /// Clear any internal state specific to a single game.
     ///
     /// Should reset internal state and position data, clear transposition tables, reset evaluation.
+    /// Will never be called during a search.
     /// [Self::setup] should be called afterwards.
     fn new_game(&mut self) {}
 

@@ -4,6 +4,7 @@ pub enum UciCommand {
     Uci,
     IsReady,
     Debug(bool),
+    UciNewGame,
     SetOption(UciConfig),
     Position(UciPosition),
     Go(SearchParameters),
