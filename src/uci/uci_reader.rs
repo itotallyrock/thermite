@@ -31,10 +31,7 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
                     "uci" => UciCommand::Uci,
                     "isready" => UciCommand::IsReady,
                     "quit" => break,
-                    _ => {
-                        eprintln!("unknown command: '{}'", line);
-                        continue;
-                    },
+                    _ => UciCommand::Other(line.clone()),
                 };
 
                 // Send the command to the receiver

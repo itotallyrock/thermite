@@ -34,6 +34,10 @@ impl Driver {
                 UciCommand::SetOption(config) => {
                     chess_engine.set_option(config);
                 },
+
+                UciCommand::Other(input) => {
+                    chess_engine.custom_command_handler(&input);
+                },
             }
         }
 
