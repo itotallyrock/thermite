@@ -59,15 +59,16 @@ impl Driver {
 
                 UciCommand::Go(search_parameters) => {
                     is_pondering = search_parameters.ponder;
-                    chess_engine.start_search(search_parameters);
                     is_searching = true;
+                    chess_engine.start_search(search_parameters);
                 },
 
                 UciCommand::PonderHit => {
                     if is_pondering {
+                        is_pondering = false;
                         chess_engine.ponder_hit();
                     }
-                }
+                },
 
                 UciCommand::Other(input) => {
                     chess_engine.custom_command_handler(&input);
