@@ -371,4 +371,41 @@ mod test {
         let expected = format!(" multipv {}", VARIATION_INDEX + 1);
         assert!(uci_info_response.to_string().contains(&expected));
     }
+
+    #[test]
+    fn selective_search_depth_shadows_search_depth() {
+        let shadowed_depth = SearchDepth::new(23).unwrap();
+        let depth = SearchDepth::new(25).unwrap();
+        let selective_depth = SearchDepth::new(32).unwrap();
+        assert_ne!(shadowed_depth, depth);
+        let uci_info_response = UciInfoResponse::new()
+            .with_search_depth(shadowed_depth)
+            .with_selective_search_depth(selective_depth, depth);
+
+        let result = uci_info_response.to_string();
+        assert!(!result.contains(&format!(" depth {}", shadowed_depth)));
+        assert!(result.contains(&format!(" depth {}", depth)));
+        assert!(result.contains(&format!(" seldepth {}", selective_depth)));
+    }
+
+    #[test]
+    fn multiple_pvs_shadows_pv() {
+        const PV_INDEX: u8 = 3;
+        const SHADOWED_DURATION: Duration = Duration::from_millis(3913);
+        const DURATION: Duration = Duration::from_millis(20123);
+        assert_ne!(SHADOWED_DURATION, DURATION);
+        let shadowed_variation: SimpleMoveList = [SimpleChessMove::new(SquareOffset::A4, SquareOffset::B6)].into_iter().collect();
+        let variation: SimpleMoveList = [SimpleChessMove::new(SquareOffset::C5, SquareOffset::G3)].into_iter().collect();
+        assert_ne!(shadowed_variation, variation);
+
+        let uci_info_response = UciInfoResponse::new()
+            .with_principle_variation(SHADOWED_DURATION, shadowed_variation.clone())
+            .with_multi_principle_variation(DURATION, variation.clone(), PV_INDEX);
+
+        let result = uci_info_response.to_string();
+        assert!(!result.contains(&format!(" time {}", SHADOWED_DURATION.as_millis())));
+        assert!(result.contains(&format!(" time {}", DURATION.as_millis())));
+        assert!(!result.contains(&format!(" pv {}", shadowed_variation.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(" "))));
+        assert!(result.contains(&format!(" pv {}", variation.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(" "))));
+    }
 }
