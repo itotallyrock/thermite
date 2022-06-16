@@ -5,7 +5,6 @@ use crate::uci::UciPosition;
 use crate::unknown_command_error;
 
 pub trait UciChessEngine {
-
     /// The name for this engine
     fn name() -> String;
 
@@ -49,7 +48,11 @@ pub trait UciChessEngine {
     fn ponder_hit(&mut self);
 
     /// The GUI has asked this engine to exit
-    fn shutdown(self) where Self: Sized {}
+    fn shutdown(self)
+    where
+        Self: Sized,
+    {
+    }
 
     /// Function called when an unknown uci command is sent.
     /// Used to handle custom commands from the UCI driver.

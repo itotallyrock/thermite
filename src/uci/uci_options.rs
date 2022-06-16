@@ -1,4 +1,3 @@
-
 /// An option that a UCI GUI can use to configure an engine
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct UciOption {

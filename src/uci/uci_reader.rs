@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 use std::io::BufRead;
-use std::sync::mpsc::{Sender, SendError};
+use std::sync::mpsc::{SendError, Sender};
 use std::thread::JoinHandle;
 
 use crate::uci::UciCommand;
@@ -25,7 +25,9 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
         let reader_thread_handle = std::thread::spawn(move || {
             let mut line = String::with_capacity(256);
             loop {
-                reader.read_line(&mut line).map_err(|err| UciReaderError::IoError(err.kind()))?;
+                reader
+                    .read_line(&mut line)
+                    .map_err(|err| UciReaderError::IoError(err.kind()))?;
                 // TODO: parse line better
                 let command = match line.as_str().trim() {
                     "uci" => UciCommand::Uci,
@@ -35,8 +37,9 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
                 };
 
                 // Send the command to the receiver
-                command_sender.send(command)
-                    .map_err(|err| UciReaderError::SendError(err))?;
+                command_sender
+                    .send(command)
+                    .map_err(UciReaderError::SendError)?;
 
                 // Clear the line buffer for the next command
                 line.clear();
@@ -51,10 +54,10 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
     }
 
     pub fn shutdown(self) -> Result<(), UciReaderError> {
-        self.reader_thread_handle.join()
+        self.reader_thread_handle
+            .join()
             .map_err(|_| UciReaderError::ThreadPanicked)
             .and_then(|reader_error| reader_error)
             .map(|_| ())
     }
 }
-

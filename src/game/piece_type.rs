@@ -82,9 +82,19 @@ mod test {
 
     #[test]
     fn promotional_piece_is_commutative() {
-        const PROMOTIONAL_PIECES: [PromotionPieceType; 4] = [PromotionPieceType::Bishop, PromotionPieceType::Knight, PromotionPieceType::Rook, PromotionPieceType::Queen];
+        const PROMOTIONAL_PIECES: [PromotionPieceType; 4] = [
+            PromotionPieceType::Bishop,
+            PromotionPieceType::Knight,
+            PromotionPieceType::Rook,
+            PromotionPieceType::Queen,
+        ];
         for promotional_piece in PROMOTIONAL_PIECES {
-            assert_eq!(PromotionPieceType::try_from(PieceType::from(promotional_piece)), Ok(promotional_piece), "{} was not the same after converting to regular PieceType", promotional_piece);
+            assert_eq!(
+                PromotionPieceType::try_from(PieceType::from(promotional_piece)),
+                Ok(promotional_piece),
+                "{} was not the same after converting to regular PieceType",
+                promotional_piece
+            );
         }
     }
 
@@ -92,7 +102,12 @@ mod test {
     fn illegal_promotional_pieces_error() {
         const ILLEGAL_PROMOTIONAL_PIECES: [PieceType; 2] = [PieceType::Pawn, PieceType::King];
         for piece in ILLEGAL_PROMOTIONAL_PIECES {
-            assert_eq!(PromotionPieceType::try_from(piece), Err(InvalidPromotionPieceError { piece }), "expected {} to return an error when converting to PromotionalPieceType", piece);
+            assert_eq!(
+                PromotionPieceType::try_from(piece),
+                Err(InvalidPromotionPieceError { piece }),
+                "expected {} to return an error when converting to PromotionalPieceType",
+                piece
+            );
         }
     }
 }

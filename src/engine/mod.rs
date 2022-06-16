@@ -1,5 +1,8 @@
+use crate::uci::{
+    SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption, UciOptionType,
+    UciPosition,
+};
 use std::num::NonZeroUsize;
-use crate::uci::{SearchParameters, SearchResult, UciChessEngine, UciConfig, UciOption, UciOptionType, UciPosition};
 
 /// Hard maximum number of threads for the container for threads
 const MAX_THREADS: usize = 32;
@@ -13,20 +16,15 @@ const ENGINE_NAME: &str = "Thermite";
 const ENGINE_AUTHORS: &str = "Jeffrey Meyer";
 
 /// Thermite chess search engine
-pub struct ThermiteEngine {
-
-}
+pub struct ThermiteEngine {}
 
 impl ThermiteEngine {
     pub fn new() -> Self {
-        Self {
-
-        }
+        Self {}
     }
 }
 
 impl UciChessEngine for ThermiteEngine {
-
     fn name() -> String {
         ENGINE_NAME.into()
     }
@@ -40,16 +38,14 @@ impl UciChessEngine for ThermiteEngine {
             .unwrap_or(NonZeroUsize::new(MIN_THREADS).unwrap())
             .get() as _;
 
-        vec![
-            UciOption {
-                name: "Threads".into(),
-                option: UciOptionType::Spin {
-                    min: MIN_THREADS as _,
-                    max: MAX_THREADS as _,
-                    default: default_parallelism,
-                }
-            }
-        ]
+        vec![UciOption {
+            name: "Threads".into(),
+            option: UciOptionType::Spin {
+                min: MIN_THREADS as _,
+                max: MAX_THREADS as _,
+                default: default_parallelism,
+            },
+        }]
     }
 
     fn set_option(&mut self, config: UciConfig) {

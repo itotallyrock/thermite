@@ -1,9 +1,9 @@
 use std::io::{BufRead, Write};
 use std::sync::mpsc::{channel, Receiver};
 
-use crate::uci::UciCommand;
 use crate::uci::uci_reader::UciReader;
 use crate::uci::uci_writer::UciWriter;
+use crate::uci::UciCommand;
 
 pub struct UciDriver<R: BufRead, W: Write> {
     pub receiver: Receiver<UciCommand>,

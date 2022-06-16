@@ -1,8 +1,6 @@
-use crate::engine_types::Score;
-use std::fmt::Display;
 use std::io::Write;
 
-use crate::uci::{ScoreBoundsType, SearchResult, UciInfoResponse, UciOptionType, UciResponse};
+use crate::uci::{SearchResult, UciInfoResponse, UciOptionType, UciResponse};
 
 pub struct UciWriter<W: Write> {
     writer: W,
