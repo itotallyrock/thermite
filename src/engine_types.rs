@@ -3,17 +3,6 @@ use std::num::{NonZeroU64, NonZeroU8};
 
 use crate::game::SimpleChessMove;
 
-/// Number of principle variations, typically for outputting multiple lines
-#[repr(u8)]
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum PvCount {
-    One = 1,
-    Two = 2,
-    Three = 3,
-    Four = 4,
-    Five = 5,
-}
-
 /// Number of hits in the endgame table database
 pub type TableBaseHits = u64;
 /// Number of positions (nodes) visited in a search tree (non-zero)
@@ -28,33 +17,13 @@ pub type SimpleMoveList = Vec<SimpleChessMove>;
 /// Approximate board evaluation in 1 / 100th pawns
 pub type CentiPawns = i16;
 
-/// Positional evaluation
+/// Engine's evaluation/rating for a given position.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Score {
+    /// Approximate valuation of the position as an integer of 1/100ths of a pawn
     Centipawns(CentiPawns),
+    /// The number of moves until a mate
     Mate(SearchDepth),
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum InvalidPvCount {
-    TooSmall,
-    TooBig,
-}
-
-impl TryFrom<u8> for PvCount {
-    type Error = InvalidPvCount;
-
-    fn try_from(value: u8) -> Result<Self, Self::Error> {
-        match value {
-            0 => Err(InvalidPvCount::TooSmall),
-            1 => Ok(Self::One),
-            2 => Ok(Self::Two),
-            3 => Ok(Self::Three),
-            4 => Ok(Self::Four),
-            5 => Ok(Self::Five),
-            _ => Err(InvalidPvCount::TooBig),
-        }
-    }
 }
 
 impl Display for Score {

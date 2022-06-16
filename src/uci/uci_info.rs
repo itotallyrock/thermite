@@ -1,7 +1,8 @@
 use std::fmt::{Display, Formatter};
+use std::num::{NonZeroU8, NonZeroUsize};
 use std::time::Duration;
 
-use crate::engine_types::{NodeCount, PvCount, SearchDepth, SimpleMoveList, TableBaseHits};
+use crate::engine_types::{NodeCount, SearchDepth, SimpleMoveList, TableBaseHits};
 use crate::game::SimpleChessMove;
 use crate::uci::UciScore;
 
@@ -19,7 +20,7 @@ pub struct UciInfoResponse {
     /// The root move currently being explored
     current_move: Option<SimpleChessMove>,
     /// The current root move index, starting at 1
-    current_move_number: Option<usize>,
+    current_move_number: Option<NonZeroUsize>,
     /// How many moves ahead the search has looked
     search_depth: Option<SearchDepth>,
     /// If searching selectively deeper, to what depth
@@ -31,7 +32,7 @@ pub struct UciInfoResponse {
     /// The current best line
     principle_variation: Option<SimpleMoveList>,
     /// Multi-PV Nth best variation index
-    multi_pv_index: Option<PvCount>,
+    multi_pv_index: Option<NonZeroU8>,
     /// Evaluation for the current move
     evaluation: Option<UciScore>,
     /// Hash table usage
@@ -86,8 +87,12 @@ impl UciInfoResponse {
     /// * `current_move` - The current move being searched
     /// * `move_index` - The current move's search index (zero indexed)
     pub fn with_current_move(mut self, current_move: SimpleChessMove, move_index: usize) -> Self {
+        debug_assert!(
+            move_index < usize::MAX,
+            "currmovenumber would saturate at usize::MAX"
+        );
         self.current_move = Some(current_move);
-        self.current_move_number = Some(move_index + 1);
+        self.current_move_number = Some(NonZeroUsize::new(move_index.saturating_add(1)).unwrap());
         self
     }
 
@@ -160,11 +165,16 @@ impl UciInfoResponse {
         mut self,
         search_duration: Duration,
         variation: SimpleMoveList,
-        multi_pv_index: PvCount,
+        multi_pv_index: u8,
     ) -> Self {
+        debug_assert!(!variation.is_empty(), "Cannot print an empty PV");
+        debug_assert!(
+            multi_pv_index < u8::MAX,
+            "MultiPV would saturate at u8::MAX"
+        );
         self.time_searched = Some(search_duration);
         self.principle_variation = Some(variation);
-        self.multi_pv_index = Some(multi_pv_index);
+        self.multi_pv_index = Some(NonZeroU8::new(multi_pv_index.saturating_add(1)).unwrap());
         self
     }
 }
@@ -213,6 +223,10 @@ impl Display for UciInfoResponse {
             write!(f, " nodes {}", nodes_searched)?;
         }
 
+        if let Some(nodes_per_second) = nodes_per_second {
+            write!(f, " nps {}", nodes_per_second)?;
+        }
+
         if let Some(principle_variation) = principle_variation {
             write!(f, " pv")?;
             for pv_move in principle_variation {
@@ -225,7 +239,7 @@ impl Display for UciInfoResponse {
                 principle_variation.is_some(),
                 "Cannot send multipv without a pv"
             );
-            write!(f, " multipv {}", *multi_pv_index as u8)?;
+            write!(f, " multipv {}", multi_pv_index)?;
         }
 
         if let Some(evaluation) = evaluation {
@@ -252,15 +266,109 @@ impl Display for UciInfoResponse {
             write!(f, " tbhits {}", endgame_table_base_hits)?;
         }
 
-        if let Some(nodes_per_second) = nodes_per_second {
-            write!(f, " nps {}", nodes_per_second)?;
-        }
-
-        // String must be last
+        // String must be last because it can contain "string" which would be recursive
         if let Some(string) = string {
             write!(f, " string {}", string)?;
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::engine_types::Score;
+    use crate::game::SquareOffset;
+    use crate::uci::ScoreBoundsType;
+
+    use super::*;
+
+    #[test]
+    fn string_works() {
+        const MESSAGE: &str = "The Ther-Mitey Quinn";
+        let uci_info_response = UciInfoResponse::new().with_message(MESSAGE.to_owned());
+        assert_eq!(
+            uci_info_response.to_string(),
+            format!(" string {}", MESSAGE)
+        );
+    }
+
+    #[test]
+    fn is_empty_by_default() {
+        let uci_info_response = UciInfoResponse::new();
+        assert_eq!(uci_info_response.to_string().as_str(), "");
+    }
+
+    #[test]
+    fn string_is_always_last() {
+        const MESSAGE: &str = "Oxide was a pretty cool engine";
+        let uci_info_response = UciInfoResponse::new()
+            .with_message(MESSAGE.to_owned())
+            .with_nodes_per_second(NodeCount::new(623233).unwrap())
+            .with_nodes_searched(NodeCount::new(1404992).unwrap())
+            .with_evaluation(UciScore::new(Score::Centipawns(30), ScoreBoundsType::Exact))
+            .with_current_move(SimpleChessMove::new(SquareOffset::A1, SquareOffset::A2), 0)
+            .with_table_base_hits(312)
+            .with_hash_table_usage(0.01)
+            .with_cpu_usage(0.282828)
+            .with_selective_search_depth(
+                SearchDepth::new(42).unwrap(),
+                SearchDepth::new(23).unwrap(),
+            )
+            .with_multi_principle_variation(
+                Duration::from_millis(13742),
+                [SimpleChessMove::new(SquareOffset::C5, SquareOffset::H5)]
+                    .into_iter()
+                    .collect(),
+                1.try_into().unwrap(),
+            );
+
+        let expected = format!(" string {}", MESSAGE);
+        assert!(uci_info_response.to_string().ends_with(&expected));
+    }
+
+    #[test]
+    fn hash_table_usage_is_permil() {
+        const PERCENT: f64 = 0.42;
+        let uci_info_response = UciInfoResponse::new().with_hash_table_usage(PERCENT);
+
+        let expected = format!(" hashfull {}", (PERCENT * 1000.0) as u32);
+        assert_eq!(uci_info_response.to_string(), expected);
+    }
+
+    #[test]
+    fn cpu_usage_is_permil() {
+        const PERCENT: f64 = 0.31415;
+        let uci_info_response = UciInfoResponse::new().with_cpu_usage(PERCENT);
+
+        let expected = format!(" cpuload {}", (PERCENT * 1000.0) as u32);
+        assert_eq!(uci_info_response.to_string(), expected);
+    }
+
+    #[test]
+    fn current_move_index_is_one_indexed() {
+        const MOVE_INDEX: usize = 0;
+        let uci_info_response = UciInfoResponse::new().with_current_move(
+            SimpleChessMove::new(SquareOffset::E2, SquareOffset::E4),
+            MOVE_INDEX,
+        );
+
+        let expected = format!(" currmovenumber {}", MOVE_INDEX + 1);
+        assert!(uci_info_response.to_string().contains(&expected));
+    }
+
+    #[test]
+    fn multi_pv_index_is_one_indexed() {
+        const VARIATION_INDEX: u8 = 2;
+        let uci_info_response = UciInfoResponse::new().with_multi_principle_variation(
+            Duration::from_millis(9001),
+            [SimpleChessMove::new(SquareOffset::E2, SquareOffset::E4)]
+                .into_iter()
+                .collect(),
+            VARIATION_INDEX,
+        );
+
+        let expected = format!(" multipv {}", VARIATION_INDEX + 1);
+        assert!(uci_info_response.to_string().contains(&expected));
     }
 }

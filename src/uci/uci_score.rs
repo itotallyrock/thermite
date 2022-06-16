@@ -1,17 +1,31 @@
 use crate::engine_types::Score;
 use std::fmt::{Display, Formatter};
 
+/// The application of a score in terms of its range limitations.
+///
+/// Used to indicate a range of possible scores.
 #[derive(Copy, Clone, Debug)]
 pub enum ScoreBoundsType {
+    /// The score represents an exact evaluation
     Exact,
+    /// The score represents an upper bound, or maximum value
     Upper,
+    /// The score represents a lower bound, or minimum value
     Lower,
 }
 
-#[derive(Clone, Debug)]
+/// A [score](Score) with its [bounds type](ScoreBoundsType)
+#[derive(Copy, Clone, Debug)]
 pub struct UciScore {
-    pub score: Score,
-    pub bounds_type: ScoreBoundsType,
+    score: Score,
+    bounds_type: ScoreBoundsType,
+}
+
+impl UciScore {
+    /// Create a new score
+    pub fn new(score: Score, bounds_type: ScoreBoundsType) -> Self {
+        Self { score, bounds_type }
+    }
 }
 
 impl Display for UciScore {
