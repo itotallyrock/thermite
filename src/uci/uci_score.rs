@@ -17,8 +17,8 @@ pub enum ScoreBoundsType {
 /// A [score](Score) with its [bounds type](ScoreBoundsType)
 #[derive(Copy, Clone, Debug)]
 pub struct UciScore {
-    score: Score,
-    bounds_type: ScoreBoundsType,
+    pub score: Score,
+    pub bounds_type: ScoreBoundsType,
 }
 
 impl UciScore {
