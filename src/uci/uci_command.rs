@@ -12,6 +12,7 @@ pub enum UciCommand {
     Go(SearchParameters),
     PonderHit,
     Stop,
+    Quit,
     Other(String),
 }
 
