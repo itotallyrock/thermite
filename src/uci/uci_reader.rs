@@ -35,11 +35,17 @@ impl<R: BufRead + Send + 'static> UciReader<R> {
                     "quit" => break,
                     _ => UciCommand::Other(line.clone()),
                 };
+                let is_quitting = command == UciCommand::Quit;
 
                 // Send the command to the receiver
                 command_sender
                     .send(command)
                     .map_err(UciReaderError::SendError)?;
+
+                // Stop taking input if we're quitting
+                if is_quitting {
+                    break;
+                }
 
                 // Clear the line buffer for the next command
                 line.clear();

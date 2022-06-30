@@ -77,7 +77,7 @@ impl Driver {
                     }
                 }
 
-                UciCommand::Quit => unreachable!(),
+                UciCommand::Quit => {},
 
                 UciCommand::Other(input) => {
                     chess_engine.custom_command_handler(&input);
