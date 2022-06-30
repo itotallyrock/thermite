@@ -394,8 +394,13 @@ mod test {
         const SHADOWED_DURATION: Duration = Duration::from_millis(3913);
         const DURATION: Duration = Duration::from_millis(20123);
         assert_ne!(SHADOWED_DURATION, DURATION);
-        let shadowed_variation: SimpleMoveList = [SimpleChessMove::new(SquareOffset::A4, SquareOffset::B6)].into_iter().collect();
-        let variation: SimpleMoveList = [SimpleChessMove::new(SquareOffset::C5, SquareOffset::G3)].into_iter().collect();
+        let shadowed_variation: SimpleMoveList =
+            [SimpleChessMove::new(SquareOffset::A4, SquareOffset::B6)]
+                .into_iter()
+                .collect();
+        let variation: SimpleMoveList = [SimpleChessMove::new(SquareOffset::C5, SquareOffset::G3)]
+            .into_iter()
+            .collect();
         assert_ne!(shadowed_variation, variation);
 
         let uci_info_response = UciInfoResponse::new()
@@ -405,7 +410,21 @@ mod test {
         let result = uci_info_response.to_string();
         assert!(!result.contains(&format!(" time {}", SHADOWED_DURATION.as_millis())));
         assert!(result.contains(&format!(" time {}", DURATION.as_millis())));
-        assert!(!result.contains(&format!(" pv {}", shadowed_variation.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(" "))));
-        assert!(result.contains(&format!(" pv {}", variation.iter().map(|m| m.to_string()).collect::<Vec<_>>().join(" "))));
+        assert!(!result.contains(&format!(
+            " pv {}",
+            shadowed_variation
+                .iter()
+                .map(|m| m.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        )));
+        assert!(result.contains(&format!(
+            " pv {}",
+            variation
+                .iter()
+                .map(|m| m.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        )));
     }
 }
