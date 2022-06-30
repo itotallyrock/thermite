@@ -1,6 +1,5 @@
 pub use driver::UciDriver;
 pub use engine::UciChessEngine;
-pub use info_writer::InfoWriter;
 pub use search_parameters::{SearchConstraints, SearchParameters, TimeConstraints, TimeControls};
 pub use search_result::SearchResult;
 pub use uci_command::UciCommand;
@@ -12,7 +11,6 @@ pub use uci_score::{ScoreBoundsType, UciScore};
 
 mod driver;
 mod engine;
-mod info_writer;
 mod search_parameters;
 mod search_result;
 mod uci_command;
