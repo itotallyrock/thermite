@@ -7,11 +7,11 @@ use std::fmt::{Display, Formatter};
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct SimpleChessMove {
     /// The square the piece being moved is starting on
-    from: SquareOffset,
+    pub from: SquareOffset,
     /// The square the piece is moved to
-    to: SquareOffset,
+    pub to: SquareOffset,
     /// If the piece was a promoting pawn, then the promotion piece type.
-    promotion: Option<PromotionPieceType>,
+    pub promotion: Option<PromotionPieceType>,
 }
 
 impl SimpleChessMove {
