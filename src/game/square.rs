@@ -1,8 +1,10 @@
 use std::fmt::{Display, Formatter};
+use num_enum::TryFromPrimitive;
 
 /// Little-Endian square offset 0-63
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, TryFromPrimitive)]
 #[rustfmt::skip]
+#[repr(u8)]
 pub enum SquareOffset {
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
@@ -89,5 +91,29 @@ impl Display for SquareOffset {
             SquareOffset::G8 => write!(f, "g8"),
             SquareOffset::H8 => write!(f, "h8"),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use test_case::test_case;
+
+    #[test_case(0, SquareOffset::A1; "a1")]
+    #[test_case(1, SquareOffset::B1; "b1")]
+    #[test_case(7, SquareOffset::H1; "h1")]
+    #[test_case(63, SquareOffset::H8; "h8")]
+    #[test_case(56, SquareOffset::A8; "a8")]
+    #[test_case(28, SquareOffset::E4; "e4")]
+    #[test_case(37, SquareOffset::F5; "f5")]
+    fn valid_u8_try_from_works(input: u8, expected: SquareOffset) {
+        assert_eq!(SquareOffset::try_from(input), Ok(expected));
+    }
+
+    #[test_case(64; "64")]
+    #[test_case(255; "255")]
+    #[test_case(-1i8 as u8; "-1")]
+    fn invalid_u8_try_from_errors(input: u8) {
+        assert!(matches!(SquareOffset::try_from(input), Err(_)));
     }
 }
