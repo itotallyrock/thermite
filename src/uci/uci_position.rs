@@ -13,7 +13,7 @@ pub enum InitialPosition {
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub struct UciPosition {
     /// The starting position
-    initial_position: InitialPosition,
+    pub initial_position: InitialPosition,
     /// Optional number of moves to apply to the initial position
-    moves: Option<SimpleMoveList>,
+    pub moves: Option<SimpleMoveList>,
 }
