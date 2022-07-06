@@ -23,6 +23,9 @@ pub type CentiPawns = i16;
 /// Negative for getting checkmated, positive for checkmating.
 pub type MateDepth = NonZeroI16;
 
+/// Board mask where each bit an a 64 bit binary number represents the binary state of a square on a chess board.
+pub type BitBoard = u64;
+
 /// Engine's evaluation/rating for a given position.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Score {
@@ -70,9 +73,7 @@ impl Ord for Score {
                 }
             }
             // Pawn values can be directly compared
-            (Score::Centipawns(self_centipawns), Score::Centipawns(other_centipawns)) => {
-                self_centipawns.cmp(other_centipawns)
-            }
+            (Score::Centipawns(self_centipawns), Score::Centipawns(other_centipawns)) => self_centipawns.cmp(other_centipawns),
             // Any mate > any pawn value
             (Score::Mate(_), Score::Centipawns(_)) => Ordering::Greater,
             // Any pawn value < any mate value
@@ -87,9 +88,7 @@ impl Neg for Score {
     fn neg(self) -> Self::Output {
         match self {
             Score::Centipawns(centipawns) => Score::Centipawns(centipawns.neg()),
-            Score::Mate(mate_plies) => Score::Mate(
-                MateDepth::new(mate_plies.get().neg()).expect("negated zero is still non-zero"),
-            ),
+            Score::Mate(mate_plies) => Score::Mate(MateDepth::new(mate_plies.get().neg()).expect("negated zero is still non-zero")),
         }
     }
 }
