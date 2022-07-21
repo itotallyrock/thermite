@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["zobrist", "static_exchange_eval", "chess_960"]
+default = ["zobrist", "static_exchange_eval", "chess_960", "repetitions"]
 chess_960 = []
+repetitions = []
 zobrist = []
 static_exchange_eval = []
 
