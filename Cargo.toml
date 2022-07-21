@@ -9,7 +9,6 @@ authors = ["Jeffrey Meyer <itotallyrock>"]
 
 [dependencies]
 uci_driver = { path = "./uci_driver" }
-thermite_core = { path = "./thermite_core" }
 thermite_search = { path = "./thermite_search" }
 
 [workspace]

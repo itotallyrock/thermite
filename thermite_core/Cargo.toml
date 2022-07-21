@@ -5,4 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = ["zobrist", "static_exchange_eval", "chess_960"]
+chess_960 = []
+zobrist = []
+static_exchange_eval = []
+
 [dependencies]
