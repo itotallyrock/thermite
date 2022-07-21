@@ -5,3 +5,39 @@ version = 3
 [[package]]
 name = "thermite"
 version = "0.1.0"
+dependencies = [
+ "thermite_core",
+ "thermite_search",
+ "uci_driver",
+]
+
+[[package]]
+name = "thermite_core"
+version = "0.1.0"
+
+[[package]]
+name = "thermite_evaluation"
+version = "0.1.0"
+dependencies = [
+ "thermite_core",
+]
+
+[[package]]
+name = "thermite_movegen"
+version = "0.1.0"
+dependencies = [
+ "thermite_core",
+]
+
+[[package]]
+name = "thermite_search"
+version = "0.1.0"
+dependencies = [
+ "thermite_core",
+ "thermite_evaluation",
+ "thermite_movegen",
+]
+
+[[package]]
+name = "uci_driver"
+version = "0.1.0"

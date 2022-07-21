@@ -1,0 +1,11 @@
+[package]
+name = "thermite_search"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thermite_core = { path = "../thermite_core" }
+thermite_movegen = { path = "../thermite_movegen" }
+thermite_evaluation = { path = "../thermite_evaluation" }

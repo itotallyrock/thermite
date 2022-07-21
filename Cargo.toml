@@ -8,3 +8,16 @@ authors = ["Jeffrey Meyer <itotallyrock>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+uci_driver = { path = "./uci_driver" }
+thermite_core = { path = "./thermite_core" }
+thermite_search = { path = "./thermite_search" }
+
+[workspace]
+members = [
+    ".",
+    "thermite_core",
+    "thermite_movegen",
+    "thermite_evaluation",
+    "thermite_search",
+    "uci_driver",
+]
