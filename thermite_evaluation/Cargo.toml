@@ -6,10 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["evaluation_table", "endgame_table"]
+default = ["evaluation_table"]
 piece_square_evaluation = []
 evaluation_table = ["thermite_core/zobrist", "dashmap"]
-endgame_table = ["dashmap"]
 
 [dependencies]
 thermite_core = { path = "../thermite_core" }

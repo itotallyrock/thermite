@@ -7,13 +7,14 @@ edition = "2021"
 
 [features]
 default = ["q_search", "move_ordering", "transposition_table", "progress_reporting", "multipv", "opening_book", "reductions", "pruning", "aspiration_windows"]
-q_search = ["thermite_movegen/q_moves", "thermite_core/static_exchange_eval"]
-move_ordering = ["killer_heuristic", "history_heuristic", "countermove_heuristic", "static_exchange_eval"]
+q_search = ["thermite_movegen/q_moves"]
+move_ordering = ["killer_heuristic", "history_heuristic", "countermove_heuristic", "static_exchange_eval", "piece_square_heuristic"]
 transposition_table = ["thermite_core/zobrist", "dashmap"]
 killer_heuristic = []
 history_heuristic = []
 countermove_heuristic = []
-static_exchange_eval = ["thermite_core/static_exchange_eval", "thermite_evaluation/piece_square_evaluation"]
+piece_square_heuristic = ["thermite_evaluation/piece_square_evaluation"]
+static_exchange_eval = []
 progress_reporting = [] # To support UCI info commands
 opening_book = []
 pondering = []
