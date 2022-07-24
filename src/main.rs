@@ -44,9 +44,21 @@
 //!
 //! # Features
 //!
+//! ## Thermite
 //! Starting out, the root workspace-level-crate won't support features.
 //! This is to try and design it to be the most optimal for general use on all systems.
-//! But mainly to keep things simple.  It's a huge time-sink to optimize one chess engine's performance, let alone a bunch of permutations of that engine.
+//! But mainly to keep things simple.
+//! 1. It's a huge time-sink to optimize one chess engine's performance, let alone a bunch of permutations of that engine.
+//! 2. As the root binary will be the primary crate, features should be [more stable](#library-stability).
+//! 3. Can require sizable refactoring or the near duplication of massive chunks of code.
+//!
+//! It's possible some features might be added for my own convenience while working on the engine:
+//! - `file_io` - supporting reading from and writing to files from args instead of stdin/stderr/stdout
+//! - `binary_info` - get information on which CPU architecture and feature-sets, optimization level, debug symbols, etc
+//!
+//! Eventually, it would be nice to support some features beneficial to end-user, but **these aren't likely to happen soon or at all**:
+//! - `std` - to support `#[no_std]` environments
+//! - [more chess variants](https://en.wikipedia.org/wiki/List_of_chess_variants).
 //!
 //! ## Core Features
 //! - `chess960` - [Chess variant with shuffled back rank](https://en.wikipedia.org/wiki/Fischer_random_chess).
