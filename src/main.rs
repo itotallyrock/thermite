@@ -55,6 +55,7 @@
 //! It's possible some features might be added for my own convenience while working on the engine:
 //! - `file_io` - supporting reading from and writing to files from args instead of stdin/stderr/stdout
 //! - `binary_info` - get information on which CPU architecture and feature-sets, optimization level, debug symbols, etc
+//! - `persist_tt` - export the transposition table to a file (maybe binary format but likely JSON)
 //!
 //! Eventually, it would be nice to support some features beneficial to end-user, but **these aren't likely to happen soon or at all**:
 //! - `std` - to support `#[no_std]` environments
