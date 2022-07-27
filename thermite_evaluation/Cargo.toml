@@ -6,11 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["evaluation_table"]
+default = []
 piece_square_evaluation = []
 evaluation_table = ["thermite_core/zobrist", "dashmap"]
+nnue_eval = ["thermite_core/nnue_accumulator", "dfdx"]
 
 [dependencies]
-thermite_core = { path = "../thermite_core" }
-dfdx = "0.8.0"
+thermite_core = { path = "../thermite_core", features = [] }
+dfdx = { version = "0.8.0", optional = true }
 dashmap = { version = "5.3.4", optional = true }

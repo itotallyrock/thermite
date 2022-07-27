@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["q_moves"]
+default = []
 q_moves = []
+chess_960 = ["thermite_core/chess_960"]
 
 [dependencies]
-thermite_core = { path = "../thermite_core" }
+thermite_core = { path = "../thermite_core", features = ["move_generation"] }

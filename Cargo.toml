@@ -9,7 +9,7 @@ authors = ["Jeffrey Meyer <itotallyrock>"]
 
 [dependencies]
 uci_driver = { path = "./uci_driver" }
-thermite_search = { path = "./thermite_search" }
+thermite_search = { path = "./thermite_search", features = ["q_search", "move_ordering", "transposition_table", "progress_reporting", "multipv", "opening_book", "reductions", "pruning", "aspiration_windows"] }
 
 [workspace]
 members = [

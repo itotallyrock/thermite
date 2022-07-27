@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["q_search", "move_ordering", "transposition_table", "progress_reporting", "multipv", "opening_book", "reductions", "pruning", "aspiration_windows"]
+default = []
 q_search = ["thermite_movegen/q_moves"]
 move_ordering = ["killer_heuristic", "history_heuristic", "countermove_heuristic", "static_exchange_eval", "piece_square_heuristic"]
 transposition_table = ["thermite_core/zobrist", "dashmap"]
@@ -26,9 +26,10 @@ razoring = []
 pruning = ["futility_pruning", "null_move_pruning"]
 futility_pruning = []
 null_move_pruning = []
+chess_960 = ["thermite_core/chess_960", "thermite_movegen/chess_960"]
 
 [dependencies]
-thermite_core = { path = "../thermite_core", default-features = false, features = ["chess_960", "repetitions"] }
+thermite_core = { path = "../thermite_core", default-features = false, features = ["repetitions"] }
 thermite_movegen = { path = "../thermite_movegen", default-features = false }
-thermite_evaluation = { path = "../thermite_evaluation", default-features = true }
+thermite_evaluation = { path = "../thermite_evaluation", features = ["nnue_eval", "piece_square_evaluation", "evaluation_table"] }
 dashmap = { version = "5.3.4", optional = true }

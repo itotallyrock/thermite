@@ -65,6 +65,8 @@
 //! - `chess960` - [Chess variant with shuffled back rank](https://en.wikipedia.org/wiki/Fischer_random_chess).
 //! - `repetitions` - Keep track of the last 50 moves to properly evaluate against [threefold_repetitions](https://www.chessprogramming.org/Repetitions).
 //! - `zobrist` - [Zobrist incremental chess positional hashing](https://www.chessprogramming.org/Zobrist_Hashing).
+//! - `move_generation` - Keep track of state necessary for [generating moves](https://www.chessprogramming.org/Move_Generation).
+//! - `nnue_accumulator` - Keep track of state necessary for evaluating a position using [NNUE](https://www.chessprogramming.org/NNUE).
 //!
 //! ## Search Features
 //! - `pondering` - [UCI search mode](https://backscattering.de/chess/uci/#gui-go-ponder) allowing the engine to search for a best move during the opponents turn.
@@ -83,13 +85,16 @@
 //! - `razoring` - Assuming the opponent can always make a good move if we pass (the [null move hypothesis](https://www.chessprogramming.org/Null_Move_Observation)), we can [prune a move if it doesn't immediately grant an advantage](https://www.chessprogramming.org/Razoring).
 //! - `futility_pruning` - When the search is nearing its maximum depth ([frontier nodes](https://www.chessprogramming.org/Frontier_Nodes)) the score is unlikely to change much. Knowing this [we can prune frontier nodes that are below beta by a threshold](https://www.chessprogramming.org/Futility_Pruning)
 //! - `null_move_pruning` - Applying the [null move observation](https://www.chessprogramming.org/Null_Move_Observation), we can [search using a more advantageous lower-bound, relative to the current evaluation, in order to prune moves](https://www.chessprogramming.org/Null_Move_Pruning)
+//! - `chess_960` - Allow properly searching (generating moves and evaluating) [chess 960](https://en.wikipedia.org/wiki/Fischer_random_chess) positions.
 //!
 //! ## Evaluation Features
 //! - `piece_square_evaluation` - [Quick and dirty constant evaluation](https://www.chessprogramming.org/Piece-Square_Tables) based on placing specific pieces on certain squares.
 //! - `evaluation_table` - [Evaluation cache](https://www.chessprogramming.org/Evaluation_Hash_Table) to avoid recomputing frequently visited nodes.
+//! - `nnue_eval` - Evaluate positions using an [efficiently updated neural network](https://www.chessprogramming.org/NNUE) instead of a simple classic evaluation.
 //!
 //! ## Move Generation Features
 //! - `q_moves` - [Quiescent search](https://www.chessprogramming.org/Quiescence_Search) move generation.
+//! - `chess_960` - Support generating castles for [Fischer random chess](https://en.wikipedia.org/wiki/Fischer_random_chess).
 
 /// Run thermite search using a UCI engine driver based on stdin/stdout/stderr
 fn main() {
