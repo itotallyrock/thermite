@@ -1,7 +1,14 @@
 [package]
 name = "uci_driver"
-version = "0.1.0"
-edition = "2021"
+description = "A universal chess interface (UCI) parser and protocol implementor providing a friendly interface for chess engines, designed for use with Thermite."
+categories = ["games", "parser-implementations", "game-engines"]
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+readme.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

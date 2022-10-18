@@ -1,9 +1,14 @@
 [package]
 name = "thermite"
 description = "Another rust chess engine"
-version = "0.1.0"
-edition = "2021"
-authors = ["Jeffrey Meyer <itotallyrock>"]
+categories = ["games", "command-line-utilities"]
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+readme.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,3 +25,12 @@ members = [
     "thermite_search",
     "uci_driver",
 ]
+
+[workspace.package]
+authors = ["Jeffrey Meyer <itotallyrock>"]
+repository = "https://github.com/itotallyrock/thermite"
+keywords = ["chess"]
+version = "0.1.0"
+edition = "2021"
+license-file = "./LICENSE.md"
+readme = "./README.md"
