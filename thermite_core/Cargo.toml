@@ -24,3 +24,6 @@ material_eval = ["score"]
 piece_square_eval = ["score"]
 
 [dependencies]
+
+[dev-dependencies]
+test-case = "2.2.1"
