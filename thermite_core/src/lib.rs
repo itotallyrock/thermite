@@ -29,3 +29,7 @@ pub mod side;
 pub mod piece_type;
 /// Piece types for distinguishing what type of a piece a pawn should promote to.
 pub mod promotion_piece_type;
+/// Board mask based on a unsigned 64-bit integer, with each bit representing a single square on an 8x8 chess board.
+pub mod bitboard;
+/// A single tile on an 8x8 chess board.
+pub mod square;
