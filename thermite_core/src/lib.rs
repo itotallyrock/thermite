@@ -1,6 +1,5 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+
+#![cfg_attr(test, feature(test))]
 
 #![warn(missing_docs)]
 #![deny(clippy::all)]
