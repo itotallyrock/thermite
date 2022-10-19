@@ -2,9 +2,13 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#![warn(missing_docs)]
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+#![warn(rustdoc::missing_doc_code_examples)]
+#![warn(clippy::nursery)]
+#![warn(clippy::cargo)]
+#![warn(clippy::style)]
 
 //! Thermite chess essential types.
 //! - `Piece` - A piece on the board: King, Queen, Rook, Bishop, Knight, Pawn
