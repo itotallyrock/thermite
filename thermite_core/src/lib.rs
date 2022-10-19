@@ -42,3 +42,6 @@ pub mod castles;
 pub mod move_type;
 /// Chess moves that can be made on a chess board
 pub mod chess_move;
+/// Zobrist hashing for matching board transpositions, or positions with the same piece arrangement and game state (side to move, en-passant, castle rights).
+#[cfg(feature = "zobrist")]
+pub mod zobrist;
