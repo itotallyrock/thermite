@@ -23,6 +23,9 @@
 //! - `Board` - The position: piece-arrangement, or where each piece is placed on the board, and side to move along with a myriad of featured gated metadata, for move-generation, evaluation, searching, and more.
 //! - `Score` - With `#[cfg(feature = "score")]` an evaluation of a [`Board`](crate::board::Board)
 
+/// A single player's chess move
+pub type PlyCount = u16;
+
 /// The side to move, represented by their piece's color.
 pub mod side;
 /// Piece types for distinguishing what type of a piece is on a square.
