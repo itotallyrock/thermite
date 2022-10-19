@@ -38,3 +38,7 @@ pub mod bitboard;
 pub mod square;
 /// The castle abilities for a game of a chess, containing the rights information for both sides.
 pub mod castles;
+/// The types of chess moves
+pub mod move_type;
+/// Chess moves that can be made on a chess board
+pub mod chess_move;
