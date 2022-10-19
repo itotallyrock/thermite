@@ -25,3 +25,7 @@
 
 /// The side to move, represented by their piece's color.
 pub mod side;
+/// Piece types for distinguishing what type of a piece is on a square.
+pub mod piece_type;
+/// Piece types for distinguishing what type of a piece a pawn should promote to.
+pub mod promotion_piece_type;
