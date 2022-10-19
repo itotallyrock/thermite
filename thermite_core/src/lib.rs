@@ -36,3 +36,5 @@ pub mod promotion_piece_type;
 pub mod bitboard;
 /// A single tile on an 8x8 chess board.
 pub mod square;
+/// The castle abilities for a game of a chess, containing the rights information for both sides.
+pub mod castles;
