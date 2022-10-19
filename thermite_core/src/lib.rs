@@ -1,4 +1,8 @@
 
+// const features
+#![feature(const_mut_refs, const_trait_impl, const_fmt_arguments_new, const_ops, const_convert, const_result_drop, const_option, const_try, const_fn_floating_point_arithmetic, const_for, const_intoiterator_identity, const_option_ext, const_slice_index, const_char_convert, const_bool_to_option, const_num_from_num)]
+// other features
+#![feature(is_sorted)]
 #![cfg_attr(test, feature(test))]
 
 #![warn(missing_docs)]
@@ -18,3 +22,6 @@
 //! - `CastleRights` - The availability for a side to castle, keeps track of rook or king movement, and should also help move generation keep track of attacked squares
 //! - `Board` - The position: piece-arrangement, or where each piece is placed on the board, and side to move along with a myriad of featured gated metadata, for move-generation, evaluation, searching, and more.
 //! - `Score` - With `#[cfg(feature = "score")]` an evaluation of a [`Board`](crate::board::Board)
+
+/// The side to move, represented by their piece's color.
+pub mod side;
