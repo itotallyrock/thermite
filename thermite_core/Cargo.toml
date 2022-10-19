@@ -19,5 +19,8 @@ repetitions = []
 zobrist = []
 move_generation = []
 nnue_accumulator = []
+score = []
+material_eval = ["score"]
+piece_square_eval = ["score"]
 
 [dependencies]
