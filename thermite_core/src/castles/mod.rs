@@ -88,6 +88,25 @@ impl CastleRights {
         Self::All,
     ];
 
+    /// Get the rights for a specific side
+    ///
+    /// ```
+    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::side::Side;
+    /// use thermite_core::square::Square;
+    ///
+    /// assert_eq!(CastleRights::All.rook_square(Side::White, true), Square::H1);
+    /// assert_eq!(CastleRights::All.rook_square(Side::Black, true), Square::H8);
+    /// assert_eq!(CastleRights::All.rook_square(Side::White, false), Square::A1);
+    /// assert_eq!(CastleRights::All.rook_square(Side::Black, false), Square::A8);
+    /// ```
+    pub const fn for_side(side: Side) -> Self {
+        match side {
+            Side::White => Self::WhiteBoth,
+            Side::Black => Self::BlackBoth,
+        }
+    }
+
     /// If the castle rights specify the ability for a side to castle in a given direction.
     ///
     /// ```
@@ -126,6 +145,21 @@ impl CastleRights {
         };
 
         truthy_mask & *self as u8 != 0u8
+    }
+
+    /// Remove a mask of rights from a set of castle rights
+    ///
+    /// ```
+    /// use thermite_core::castles::CastleRights;
+    /// assert_eq!(CastleRights::All.filter(CastleRights::All), CastleRights::None);
+    /// assert_eq!(CastleRights::All.filter(CastleRights::None), CastleRights::All);
+    /// assert_eq!(CastleRights::None.filter(CastleRights::None), CastleRights::None);
+    /// assert_eq!(CastleRights::None.filter(CastleRights::All), CastleRights::None);
+    /// assert_eq!(CastleRights::BothKings.filter(CastleRights::WhiteKing), CastleRights::BlackKing);
+    /// assert_eq!(CastleRights::WhiteBoth.filter(CastleRights::WhiteKing), CastleRights::WhiteQueen);
+    /// ```
+    pub const fn filter(&self, other: Self) -> Self {
+        *self & !other
     }
 
     /// Attempt to parse a UCI string into a [`CastleRight`](crate::castles::CastleRights).
@@ -188,6 +222,31 @@ impl const BitOr for CastleRights {
     }
 }
 
+impl const Not for CastleRights {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Self::None => Self::All,
+            Self::WhiteKing => Self::WhiteQueenBlackBoth,
+            Self::WhiteQueen => Self::WhiteKingBlackBoth,
+            Self::WhiteBoth => Self::BlackBoth,
+            Self::BlackKing => Self::WhiteBothBlackQueen,
+            Self::BothKings => Self::BothQueens,
+            Self::WhiteQueenBlackKing => Self::WhiteKingBlackQueen,
+            Self::WhiteBothBlackKing => Self::BlackQueen,
+            Self::BlackQueen => Self::WhiteBothBlackKing,
+            Self::WhiteKingBlackQueen => Self::WhiteQueenBlackKing,
+            Self::BothQueens => Self::BothKings,
+            Self::WhiteBothBlackQueen => Self::BlackKing,
+            Self::BlackBoth => Self::WhiteBoth,
+            Self::WhiteKingBlackBoth => Self::WhiteQueen,
+            Self::WhiteQueenBlackBoth => Self::WhiteKing,
+            Self::All => Self::None,
+        }
+    }
+}
+
 /// Invalid flag input value for the `u8` provided to `CastleRights::try_from`.
 /// Wasn't a valid combination of the 4 castle abilities or none.
 #[derive(Copy, Clone, Debug, Eq)]
@@ -235,6 +294,16 @@ mod test {
         assert_eq!(CastleRights::None | CastleRights::BlackBoth, CastleRights::BlackBoth);
         assert_eq!(CastleRights::None | CastleRights::All, CastleRights::All);
         assert_eq!(CastleRights::None | CastleRights::None, CastleRights::None);
+    }
+
+    #[test_case(CastleRights::All, CastleRights::None)]
+    #[test_case(CastleRights::WhiteBoth, CastleRights::BlackBoth)]
+    #[test_case(CastleRights::BothKings, CastleRights::BothQueens)]
+    #[test_case(CastleRights::WhiteBothBlackQueen, CastleRights::BlackKing)]
+    #[test_case(CastleRights::WhiteKingBlackQueen, CastleRights::WhiteQueenBlackKing)]
+    fn castles_not_works(input: CastleRights, expected: CastleRights) {
+        assert_eq!(input.not(), expected);
+        assert_eq!(expected.not(), input);
     }
 
     #[test_case(CastleRights::None, 0b0000)]
