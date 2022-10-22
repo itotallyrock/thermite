@@ -1,4 +1,3 @@
-
 /// The number of players in a game
 pub const NUM_SIDES: usize = 2;
 

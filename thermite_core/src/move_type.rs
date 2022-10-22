@@ -40,7 +40,7 @@ pub enum MoveType {
     /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotionPieceType`]
     Promotion {
         /// The piece to promote the pawn to
-        promotion: PromotionPieceType
+        promotion: PromotionPieceType,
     },
     /// Capture on the last rank for promoting a pawn
     PromotingCapture {

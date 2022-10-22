@@ -1,6 +1,6 @@
-use std::ops::{BitAnd, BitOr};
 use crate::side::Side;
-use crate::square::IllegalSquare;
+use crate::square::Square;
+use std::ops::{BitAnd, BitOr, Not};
 
 /// How many castle moves there are total.
 /// 4 for white king side, white queen side, black king side, black queen side.
@@ -57,12 +57,7 @@ impl CastleRights {
     /// assert_eq!(CastleRights::CASTLES[2], CastleRights::BlackKing);
     /// assert_eq!(CastleRights::CASTLES[3], CastleRights::BlackQueen);
     /// ```
-    pub const CASTLES: [Self; NUM_CASTLES] = [
-        Self::WhiteKing,
-        Self::WhiteQueen,
-        Self::BlackKing,
-        Self::BlackQueen,
-    ];
+    pub const CASTLES: [Self; NUM_CASTLES] = [Self::WhiteKing, Self::WhiteQueen, Self::BlackKing, Self::BlackQueen];
 
     /// Array of all possible castle combinations in their bit-flag order
     ///
@@ -204,14 +199,11 @@ impl const PartialEq for IllegalCastleRights {
     }
 }
 
-
 impl const TryFrom<u8> for CastleRights {
     type Error = IllegalCastleRights;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
-        Self::ALL_CASTLES.get(value as usize)
-            .copied()
-            .ok_or(IllegalCastleRights)
+        Self::ALL_CASTLES.get(value as usize).copied().ok_or(IllegalCastleRights)
     }
 }
 

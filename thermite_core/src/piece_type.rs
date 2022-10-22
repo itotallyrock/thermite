@@ -1,4 +1,3 @@
-
 /// The number of piece types in standard chess
 pub const NUM_PIECE_TYPES: usize = 6;
 
@@ -27,14 +26,7 @@ pub enum PieceType {
 
 impl PieceType {
     /// Array of all six pieces (Pawn, Knight, Bishop, Rook, Queen, King)
-    pub const PIECES: [Self; NUM_PIECE_TYPES] = [
-        Self::Pawn,
-        Self::Knight,
-        Self::Bishop,
-        Self::Rook,
-        Self::Queen,
-        Self::King,
-    ];
+    pub const PIECES: [Self; NUM_PIECE_TYPES] = [Self::Pawn, Self::Knight, Self::Bishop, Self::Rook, Self::Queen, Self::King];
 
     /// Get the UCI standard character representation for a piece in lowercase.
     /// - `Self::Pawn` - `'p'`
@@ -104,7 +96,6 @@ mod test {
         assert_eq!(PieceType::PIECES[NUM_PIECE_TYPES - 1], PieceType::King);
         assert!(PieceType::PIECES.is_sorted());
     }
-
 
     #[test_case(PieceType::Pawn, 'p')]
     #[test_case(PieceType::Knight, 'n')]

@@ -1,7 +1,7 @@
+use crate::square::{Square, NUM_FILES, NUM_RANKS};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, BitXorAssign};
-use crate::square::{NUM_FILES, NUM_RANKS, Square};
 
 /// The raw bitboard value type
 type BitboardInner = u64;

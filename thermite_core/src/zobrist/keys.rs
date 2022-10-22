@@ -1,7 +1,7 @@
 use crate::castles::NUM_CASTLES;
-use crate::piece_type::{NUM_PIECE_TYPES, PieceType};
-use crate::side::{NUM_SIDES, Side};
-use crate::square::{NUM_FILES, NUM_SQUARES, Square};
+use crate::piece_type::{PieceType, NUM_PIECE_TYPES};
+use crate::side::{Side, NUM_SIDES};
+use crate::square::{Square, NUM_FILES, NUM_SQUARES};
 use crate::zobrist::ZobristInner;
 
 /// The base key for an empty position
@@ -140,6 +140,7 @@ const PIECE_SQUARES: [[[ZobristInner; NUM_SQUARES]; NUM_PIECE_TYPES]; NUM_SIDES]
 ];
 
 /// Hash value of one of the 16 possible en-passant squares A3-H3, A6-H6
+#[rustfmt::skip]
 const EN_PASSANT_KEYS: [ZobristInner; NUM_FILES * 2] = [
     0xCC5E_EF11_3797_E347, 0xAA90_BC6F_508F_C0AE, 0x735D_A197_A644_D75E, 0x3774_4D11_E638_E6DA, 0x0197_A767_F276_8F84, 0x2051_D4EE_0123_676B, 0x2B9A_D8C0_0CFF_B700, 0x9C54_065D_4D23_E231,
     0x3D93_FE65_2786_B4DF, 0x946E_EEB8_1F3B_174D, 0x4C2E_C39C_EE8B_9A0A, 0x276F_22C3_BA40_D7E9, 0x2529_97C6_9EB7_4C9C, 0xEC92_6AE5_50EE_73E0, 0x3CE2_A3E8_8BC5_6598, 0xB6CF_5D2A_80FB_EBD7,
@@ -187,11 +188,12 @@ pub const fn castle_lookup(side: Side, king_side: bool) -> ZobristInner {
 
 #[cfg(test)]
 mod test {
-    use std::collections::BTreeMap;
     use super::*;
+    use std::collections::BTreeMap;
 
     #[test]
     fn en_passant_lookup_is_one_to_one() {
+        #[rustfmt::skip]
         const EN_PASSANT_SQUARES: &[Square] = &[
             Square::A3, Square::B3, Square::C3, Square::D3, Square::E3, Square::F3, Square::G3, Square::H3,
             Square::A6, Square::B6, Square::C6, Square::D6, Square::E6, Square::F6, Square::G6, Square::H6,
@@ -203,28 +205,14 @@ mod test {
 
     #[test]
     fn castle_lookup_is_one_to_one() {
-        const CASTLES: &[(Side, bool)] = &[
-            (Side::White, false),
-            (Side::White, true),
-            (Side::Black, false),
-            (Side::Black, true),
-        ];
-        let mapped = CASTLES.iter()
-            .copied().map(|(castle_side, castle_direction)| ((castle_side as usize, castle_direction), castle_lookup(castle_side, castle_direction)))
-            .collect::<BTreeMap<_, _>>();
+        const CASTLES: &[(Side, bool)] = &[(Side::White, false), (Side::White, true), (Side::Black, false), (Side::Black, true)];
+        let mapped = CASTLES.iter().copied().map(|(castle_side, castle_direction)| ((castle_side as usize, castle_direction), castle_lookup(castle_side, castle_direction))).collect::<BTreeMap<_, _>>();
         assert_eq!(CASTLES.len(), mapped.len());
         assert!(CASTLES.iter().all(|&(side, direction)| mapped.contains_key(&(side as usize, direction))));
     }
 
     fn get_all_keys() -> Vec<ZobristInner> {
-        PIECE_SQUARES.iter()
-            .flatten()
-            .flatten()
-            .chain(&CASTLE_KEYS)
-            .chain(&EN_PASSANT_KEYS)
-            .chain(&[EMPTY_ZOBRIST_KEY, SIDE_KEY])
-            .copied()
-            .collect()
+        PIECE_SQUARES.iter().flatten().flatten().chain(&CASTLE_KEYS).chain(&EN_PASSANT_KEYS).chain(&[EMPTY_ZOBRIST_KEY, SIDE_KEY]).copied().collect()
     }
 
     /// Test that a small (3) subset all keys are completely [linearly independent](https://www.chessprogramming.org/Zobrist_Hashing#Linear_Independence).

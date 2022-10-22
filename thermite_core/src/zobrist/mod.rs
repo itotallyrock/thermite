@@ -1,10 +1,10 @@
-use std::fmt::{Debug, Formatter};
-use std::hash::Hasher;
-use keys::EMPTY_ZOBRIST_KEY;
 use crate::piece_type::PieceType;
 use crate::side::Side;
 use crate::square::Square;
 use crate::zobrist::keys::{castle_lookup, en_passant_lookup, piece_square_lookup, SIDE_KEY};
+use keys::EMPTY_ZOBRIST_KEY;
+use std::fmt::{Debug, Formatter};
+use std::hash::Hasher;
 
 mod keys;
 
@@ -51,7 +51,6 @@ impl ZobristHasher {
 }
 
 impl Hasher for ZobristHasher {
-
     /// Get the pre-computed hash value
     fn finish(&self) -> u64 {
         self.0
@@ -76,8 +75,6 @@ impl ZobristHasher {
 
 impl Debug for ZobristHasher {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple(stringify!(ZobristHasher))
-            .field(&format!("{:#X}", self.0))
-            .finish()
+        f.debug_tuple(stringify!(ZobristHasher)).field(&format!("{:#X}", self.0)).finish()
     }
 }

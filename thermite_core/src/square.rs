@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use crate::bitboard::Bitboard;
+use std::fmt::{Display, Formatter};
 
 /// A single tile on a chess board
 #[rustfmt::skip]
@@ -269,6 +269,14 @@ impl const PartialEq for Square {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct IllegalSquare;
 
+impl const TryFrom<u8> for Square {
+    type Error = IllegalSquare;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::SQUARES.get(value as usize).copied().ok_or(IllegalSquare)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -362,13 +370,12 @@ mod test {
     }
 }
 
-
 #[cfg(test)]
 mod bench {
     extern crate test;
 
-    use test::{Bencher, black_box};
     use crate::square::Square;
+    use test::{black_box, Bencher};
 
     #[bench]
     fn parse_bench(bencher: &mut Bencher) {
