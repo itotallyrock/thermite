@@ -52,8 +52,8 @@ impl Castles {
         #[cfg(feature = "chess_960")] white_king_square: Square,
         #[cfg(feature = "chess_960")] black_king_square: Square,
         #[cfg(feature = "chess_960")] white_queen_rook_square: Square,
-        #[cfg(feature = "chess_960")] white_king_rook_square: Square,
         #[cfg(feature = "chess_960")] black_queen_rook_square: Square,
+        #[cfg(feature = "chess_960")] white_king_rook_square: Square,
         #[cfg(feature = "chess_960")] black_king_rook_square: Square,
     ) -> Self {
         Self {

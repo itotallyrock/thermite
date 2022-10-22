@@ -27,6 +27,7 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::cargo)]
 #![warn(clippy::style)]
+#![allow(clippy::module_name_repetitions)]
 
 //! Thermite chess essential types.
 //! - `Piece` - A piece on the board: King, Queen, Rook, Bishop, Knight, Pawn

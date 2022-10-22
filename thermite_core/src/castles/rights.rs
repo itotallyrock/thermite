@@ -261,7 +261,7 @@ impl const TryFrom<u8> for CastleRights {
 
 #[cfg(test)]
 mod test {
-    use crate::castles::CastleRights;
+    use crate::castles::{CastleRights, NUM_CASTLES};
     use std::ops::Not;
     use test_case::test_case;
 
