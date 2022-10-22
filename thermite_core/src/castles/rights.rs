@@ -1,6 +1,6 @@
-use std::ops::{BitAnd, BitOr, Not};
 use crate::castles::NUM_CASTLES;
 use crate::side::Side;
+use std::ops::{BitAnd, BitOr, Not};
 
 /// Keeps track of available castle abilities (king-side or queen-side castle) for both sides.
 #[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialOrd)]
@@ -89,12 +89,9 @@ impl CastleRights {
     /// ```
     /// use thermite_core::castles::CastleRights;
     /// use thermite_core::side::Side;
-    /// use thermite_core::square::Square;
     ///
-    /// assert_eq!(CastleRights::All.rook_square(Side::White, true), Square::H1);
-    /// assert_eq!(CastleRights::All.rook_square(Side::Black, true), Square::H8);
-    /// assert_eq!(CastleRights::All.rook_square(Side::White, false), Square::A1);
-    /// assert_eq!(CastleRights::All.rook_square(Side::Black, false), Square::A8);
+    /// assert_eq!(CastleRights::for_side(Side::White), CastleRights::WhiteBoth);
+    /// assert_eq!(CastleRights::for_side(Side::Black), CastleRights::BlackBoth);
     /// ```
     pub const fn for_side(side: Side) -> Self {
         match side {
@@ -264,7 +261,8 @@ impl const TryFrom<u8> for CastleRights {
 
 #[cfg(test)]
 mod test {
-    use crate::castles::*;
+    use crate::castles::CastleRights;
+    use std::ops::Not;
     use test_case::test_case;
 
     #[test]
