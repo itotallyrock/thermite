@@ -1,6 +1,6 @@
 use crate::castles::NUM_CASTLES;
 use crate::piece_type::{PieceType, NUM_PIECE_TYPES};
-use crate::side::{Side, NUM_SIDES};
+use crate::player::{Player, NUM_SIDES};
 use crate::square::{Square, NUM_FILES, NUM_SQUARES};
 use crate::zobrist::ZobristInner;
 
@@ -159,7 +159,7 @@ const CASTLE_KEYS: [ZobristInner; NUM_CASTLES] = [
 ];
 
 /// Lookup the hash value for a piece placed on a specific square
-pub const fn piece_square_lookup(square: Square, piece: PieceType, side: Side) -> ZobristInner {
+pub const fn piece_square_lookup(square: Square, piece: PieceType, side: Player) -> ZobristInner {
     PIECE_SQUARES[side as usize][piece as usize][square as usize]
 }
 
@@ -177,12 +177,12 @@ pub const fn en_passant_lookup(square: Square) -> ZobristInner {
 }
 
 /// Lookup the hash value for a single castle ability
-pub const fn castle_lookup(side: Side, king_side: bool) -> ZobristInner {
+pub const fn castle_lookup(side: Player, king_side: bool) -> ZobristInner {
     match (side, king_side) {
-        (Side::White, true) => CASTLE_KEYS[0],
-        (Side::White, false) => CASTLE_KEYS[1],
-        (Side::Black, true) => CASTLE_KEYS[2],
-        (Side::Black, false) => CASTLE_KEYS[3],
+        (Player::White, true) => CASTLE_KEYS[0],
+        (Player::White, false) => CASTLE_KEYS[1],
+        (Player::Black, true) => CASTLE_KEYS[2],
+        (Player::Black, false) => CASTLE_KEYS[3],
     }
 }
 
@@ -205,7 +205,7 @@ mod test {
 
     #[test]
     fn castle_lookup_is_one_to_one() {
-        const CASTLES: &[(Side, bool)] = &[(Side::White, false), (Side::White, true), (Side::Black, false), (Side::Black, true)];
+        const CASTLES: &[(Player, bool)] = &[(Player::White, false), (Player::White, true), (Player::Black, false), (Player::Black, true)];
         let mapped = CASTLES.iter().copied().map(|(castle_side, castle_direction)| ((castle_side as usize, castle_direction), castle_lookup(castle_side, castle_direction))).collect::<BTreeMap<_, _>>();
         assert_eq!(CASTLES.len(), mapped.len());
         assert!(CASTLES.iter().all(|&(side, direction)| mapped.contains_key(&(side as usize, direction))));

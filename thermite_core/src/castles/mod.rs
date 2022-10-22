@@ -1,6 +1,8 @@
 mod rights;
 
-use crate::side::Side;
+use crate::player::Player;
+#[cfg(feature = "chess_960")]
+use crate::player::ByPlayer;
 use crate::square::Square;
 pub use rights::{CastleRights, IllegalCastleRights};
 
@@ -15,17 +17,11 @@ pub struct Castles {
     rights: CastleRights,
 
     #[cfg(feature = "chess_960")]
-    white_king_square: Square,
+    king_square: ByPlayer<Square>,
     #[cfg(feature = "chess_960")]
-    black_king_square: Square,
+    queen_rook_square: ByPlayer<Square>,
     #[cfg(feature = "chess_960")]
-    white_queen_rook_square: Square,
-    #[cfg(feature = "chess_960")]
-    white_king_rook_square: Square,
-    #[cfg(feature = "chess_960")]
-    black_queen_rook_square: Square,
-    #[cfg(feature = "chess_960")]
-    black_king_rook_square: Square,
+    king_rook_square: ByPlayer<Square>,
 
     // #[cfg(feature = "move_generation")]
     // TODO: Store board masks of squares that cannot be attacked for each side's castles
@@ -58,12 +54,12 @@ impl Castles {
     ) -> Self {
         Self {
             rights,
-            white_king_square,
-            black_king_square,
-            white_queen_rook_square,
-            white_king_rook_square,
-            black_queen_rook_square,
-            black_king_rook_square,
+            #[cfg(feature = "chess_960")]
+            king_square: ByPlayer::new_with(white_king_square, black_king_square),
+            #[cfg(feature = "chess_960")]
+            queen_rook_square: ByPlayer::new_with(white_queen_rook_square, black_queen_rook_square),
+            #[cfg(feature = "chess_960")]
+            king_rook_square: ByPlayer::new_with(white_king_rook_square, black_king_rook_square),
         }
     }
 
@@ -71,36 +67,32 @@ impl Castles {
     /// Does not take into account rights, simply returns the expected square.
     /// ```
     #[must_use]
-    pub const fn rook_square(&self, side: Side, king_side: bool) -> Square {
+    pub const fn rook_square(&self, side: Player, king_side: bool) -> Square {
         #[cfg(not(feature = "chess_960"))]
         match (side, king_side) {
-            (Side::White, true) => Square::H1,
-            (Side::White, false) => Square::A1,
-            (Side::Black, true) => Square::H8,
-            (Side::Black, false) => Square::A8,
+            (Player::White, true) => Square::H1,
+            (Player::White, false) => Square::A1,
+            (Player::Black, true) => Square::H8,
+            (Player::Black, false) => Square::A8,
         }
         #[cfg(feature = "chess_960")]
-        match (side, king_side) {
-            (Side::White, true) => self.white_king_rook_square,
-            (Side::White, false) => self.white_queen_rook_square,
-            (Side::Black, true) => self.black_king_rook_square,
-            (Side::Black, false) => self.black_queen_rook_square,
+        if king_side {
+            *self.king_rook_square.get_side(side)
+        } else {
+            *self.queen_rook_square.get_side(side)
         }
     }
 
     /// Get the starting square the king must be on to castle for a given side.
     /// Does not take into account rights, simply returns the expected square.
     #[must_use]
-    pub const fn king_square(&self, side: Side) -> Square {
+    pub const fn king_square(&self, side: Player) -> Square {
         #[cfg(not(feature = "chess_960"))]
         match side {
-            Side::White => Square::E1,
-            Side::Black => Square::E8,
+            Player::White => Square::E1,
+            Player::Black => Square::E8,
         }
         #[cfg(feature = "chess_960")]
-        match side {
-            Side::White => self.white_king_square,
-            Side::Black => self.black_king_square,
-        }
+        *self.king_square.get_side(side)
     }
 }

@@ -1,10 +1,14 @@
+mod by_player;
+
+pub use by_player::ByPlayer;
+
 /// The number of players in a game
 pub const NUM_SIDES: usize = 2;
 
 /// The color of the pieces for the side (or player) moving.
 #[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd)]
 #[repr(u8)]
-pub enum Side {
+pub enum Player {
     /// The player controlling the white pieces.
     /// Typically the first side to move in a standard game.
     White,
@@ -13,17 +17,17 @@ pub enum Side {
     Black,
 }
 
-impl Side {
+impl Player {
     /// Array of all sides
     pub const SIDES: [Self; NUM_SIDES] = [Self::White, Self::Black];
 
     /// Switch the side to the next player to move.
     ///
     /// ```rust
-    /// use thermite_core::side::Side;
+    /// use thermite_core::player::Player;
     ///
-    /// assert_eq!(Side::White.switch(), Side::Black);
-    /// assert_eq!(Side::Black.switch(), Side::White);
+    /// assert_eq!(Player::White.switch(), Player::Black);
+    /// assert_eq!(Player::Black.switch(), Player::White);
     /// ```
     #[must_use]
     pub const fn switch(self) -> Self {
@@ -34,7 +38,7 @@ impl Side {
     }
 }
 
-impl const PartialEq for Side {
+impl const PartialEq for Player {
     fn eq(&self, other: &Self) -> bool {
         (*self) as u8 == (*other) as u8
     }
@@ -42,18 +46,18 @@ impl const PartialEq for Side {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use crate::player::Player;
     use test_case::test_case;
 
-    #[test_case(Side::White, Side::Black)]
-    #[test_case(Side::Black, Side::White)]
-    fn switch_works(side: Side, expected: Side) {
+    #[test_case(Player::White, Player::Black)]
+    #[test_case(Player::Black, Player::White)]
+    fn switch_works(side: Player, expected: Player) {
         assert_eq!(side.switch(), expected);
     }
 
-    #[test_case(Side::White)]
-    #[test_case(Side::Black)]
-    fn switch_is_symmetric(input: Side) {
+    #[test_case(Player::White)]
+    #[test_case(Player::Black)]
+    fn switch_is_symmetric(input: Player) {
         assert_eq!(input.switch().switch(), input);
     }
 }

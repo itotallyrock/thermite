@@ -1,5 +1,5 @@
 use crate::castles::NUM_CASTLES;
-use crate::side::Side;
+use crate::player::Player;
 use std::ops::{BitAnd, BitOr, Not};
 
 /// Keeps track of available castle abilities (king-side or queen-side castle) for both sides.
@@ -88,15 +88,15 @@ impl CastleRights {
     ///
     /// ```
     /// use thermite_core::castles::CastleRights;
-    /// use thermite_core::side::Side;
+    /// use thermite_core::player::Player;
     ///
-    /// assert_eq!(CastleRights::for_side(Side::White), CastleRights::WhiteBoth);
-    /// assert_eq!(CastleRights::for_side(Side::Black), CastleRights::BlackBoth);
+    /// assert_eq!(CastleRights::for_side(Player::White), CastleRights::WhiteBoth);
+    /// assert_eq!(CastleRights::for_side(Player::Black), CastleRights::BlackBoth);
     /// ```
-    pub const fn for_side(side: Side) -> Self {
+    pub const fn for_side(side: Player) -> Self {
         match side {
-            Side::White => Self::WhiteBoth,
-            Side::Black => Self::BlackBoth,
+            Player::White => Self::WhiteBoth,
+            Player::Black => Self::BlackBoth,
         }
     }
 
@@ -104,37 +104,37 @@ impl CastleRights {
     ///
     /// ```
     /// use thermite_core::castles::CastleRights;
-    /// use thermite_core::side::Side;
+    /// use thermite_core::player::Player;
     /// // Test if white can king-side castle
-    /// assert_eq!(CastleRights::WhiteKing.can_castle(Side::White, true), true);
+    /// assert_eq!(CastleRights::WhiteKing.can_castle(Player::White, true), true);
     /// // Test if black can queen-side castle
-    /// assert_eq!(CastleRights::BlackQueen.can_castle(Side::Black, false), true);
+    /// assert_eq!(CastleRights::BlackQueen.can_castle(Player::Black, false), true);
     /// ```
     ///
     /// Combination `CastleRights` such as `None` or `All` are supported as well.
     /// ```
     /// use thermite_core::castles::CastleRights;
-    /// use thermite_core::side::Side;
+    /// use thermite_core::player::Player;
     ///
     /// // CastleRights::None is always false
-    /// assert_eq!(CastleRights::None.can_castle(Side::White, true), false);
-    /// assert_eq!(CastleRights::None.can_castle(Side::White, false), false);
-    /// assert_eq!(CastleRights::None.can_castle(Side::Black, true), false);
-    /// assert_eq!(CastleRights::None.can_castle(Side::Black, false), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::White, true), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::White, false), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::Black, true), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::Black, false), false);
     ///
     /// // CastleRights::All is always true
-    /// assert_eq!(CastleRights::All.can_castle(Side::White, true), true);
-    /// assert_eq!(CastleRights::All.can_castle(Side::White, false), true);
-    /// assert_eq!(CastleRights::All.can_castle(Side::Black, true), true);
-    /// assert_eq!(CastleRights::All.can_castle(Side::Black, false), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::White, true), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::White, false), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::Black, true), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::Black, false), true);
     /// ```
     #[must_use]
-    pub const fn can_castle(&self, side: Side, king_side: bool) -> bool {
+    pub const fn can_castle(&self, side: Player, king_side: bool) -> bool {
         let truthy_mask = match (side, king_side) {
-            (Side::White, true) => Self::WhiteKing as u8,
-            (Side::White, false) => Self::WhiteQueen as u8,
-            (Side::Black, true) => Self::BlackKing as u8,
-            (Side::Black, false) => Self::BlackQueen as u8,
+            (Player::White, true) => Self::WhiteKing as u8,
+            (Player::White, false) => Self::WhiteQueen as u8,
+            (Player::Black, true) => Self::BlackKing as u8,
+            (Player::Black, false) => Self::BlackQueen as u8,
         };
 
         truthy_mask & *self as u8 != 0u8

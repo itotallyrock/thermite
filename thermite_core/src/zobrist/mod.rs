@@ -1,5 +1,5 @@
 use crate::piece_type::PieceType;
-use crate::side::Side;
+use crate::player::Player;
 use crate::square::Square;
 use crate::zobrist::keys::{castle_lookup, en_passant_lookup, piece_square_lookup, SIDE_KEY};
 use keys::EMPTY_ZOBRIST_KEY;
@@ -30,7 +30,7 @@ impl ZobristHasher {
 
     /// Toggle the placement of a piece on a given square for a given side.
     /// Adds the piece placement to the hash; otherwise, removes the piece if it is already included.
-    pub const fn toggle_piece_square(&mut self, square: Square, piece: PieceType, side: Side) {
+    pub const fn toggle_piece_square(&mut self, square: Square, piece: PieceType, side: Player) {
         self.toggle(piece_square_lookup(square, piece, side));
     }
 
@@ -45,7 +45,7 @@ impl ZobristHasher {
     }
 
     /// Toggle the castle rights for a side to castle in one direction
-    pub const fn toggle_castle_ability(&mut self, side: Side, king_side: bool) {
+    pub const fn toggle_castle_ability(&mut self, side: Player, king_side: bool) {
         self.toggle(castle_lookup(side, king_side));
     }
 }
