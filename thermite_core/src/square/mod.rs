@@ -1,3 +1,6 @@
+mod by_square;
+pub use by_square::BySquare;
+
 use crate::bitboard::Bitboard;
 use std::fmt::{Display, Formatter};
 
