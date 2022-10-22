@@ -52,10 +52,10 @@ pub mod chess_move;
 pub mod move_type;
 /// Piece types for distinguishing what type of a piece is on a square.
 pub mod piece_type;
-/// Piece types for distinguishing what type of a piece a pawn should promote to.
-pub mod promotion_piece_type;
 /// A player in the game, or one side of the board, represented by their piece's color.
 pub mod player;
+/// Piece types for distinguishing what type of a piece a pawn should promote to.
+pub mod promotion_piece_type;
 /// A single tile on an 8x8 chess board.
 pub mod square;
 /// Zobrist hashing for matching board transpositions, or positions with the same piece arrangement and game state (side to move, en-passant, castle rights).

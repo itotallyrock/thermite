@@ -3,7 +3,7 @@ mod by_player;
 pub use by_player::ByPlayer;
 
 /// The number of players in a game
-pub const NUM_SIDES: usize = 2;
+pub const NUM_PLAYERS: usize = 2;
 
 /// The color of the pieces for the side (or player) moving.
 #[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd)]
@@ -19,7 +19,7 @@ pub enum Player {
 
 impl Player {
     /// Array of all sides
-    pub const SIDES: [Self; NUM_SIDES] = [Self::White, Self::Black];
+    pub const PLAYERS: [Self; NUM_PLAYERS] = [Self::White, Self::Black];
 
     /// Switch the side to the next player to move.
     ///

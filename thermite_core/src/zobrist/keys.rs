@@ -1,6 +1,6 @@
 use crate::castles::NUM_CASTLES;
 use crate::piece_type::{PieceType, NUM_PIECE_TYPES};
-use crate::player::{Player, NUM_SIDES};
+use crate::player::{Player, NUM_PLAYERS};
 use crate::square::{Square, NUM_FILES, NUM_SQUARES};
 use crate::zobrist::ZobristInner;
 
@@ -12,7 +12,7 @@ pub const SIDE_KEY: ZobristInner = 0xA92C_CEB8_91EA_45C2;
 
 /// Hash value for all piece square possibilities (including some illegal positions like pawns on last rank)
 #[rustfmt::skip]
-const PIECE_SQUARES: [[[ZobristInner; NUM_SQUARES]; NUM_PIECE_TYPES]; NUM_SIDES] = [
+const PIECE_SQUARES: [[[ZobristInner; NUM_SQUARES]; NUM_PIECE_TYPES]; NUM_PLAYERS] = [
     [
         [
             0xBCBD_2C2F_7DAB_FCBE, 0x8756_17FC_113F_9090, 0x314A_7DFE_25D7_39E3, 0x47F5_6D36_49FE_FA55, 0x2276_E9C2_6AD3_4276, 0x776F_E868_69DA_CEAD, 0x4CDA_34E6_051B_A0AC, 0x2580_0E89_C066_3865,

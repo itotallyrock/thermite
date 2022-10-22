@@ -1,9 +1,9 @@
-use crate::player::{Player, NUM_SIDES};
+use crate::player::{Player, NUM_PLAYERS};
 
 /// A container data-structure that holds an instance of `T` for each player (one for white, one for black)
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct ByPlayer<T> {
-    items: [T; NUM_SIDES],
+    items: [T; NUM_PLAYERS],
 }
 
 impl<T> ByPlayer<T> {
@@ -24,12 +24,12 @@ impl<T> ByPlayer<T> {
 impl<T: Copy> ByPlayer<T> {
     /// Create a `ByPlayer` where both players have the same value
     pub const fn new(item: T) -> Self {
-        Self { items: [item; NUM_SIDES] }
+        Self { items: [item; NUM_PLAYERS] }
     }
 }
 
-impl<T> From<[T; NUM_SIDES]> for ByPlayer<T> {
-    fn from(value: [T; NUM_SIDES]) -> Self {
+impl<T> From<[T; NUM_PLAYERS]> for ByPlayer<T> {
+    fn from(value: [T; NUM_PLAYERS]) -> Self {
         Self { items: value }
     }
 }
