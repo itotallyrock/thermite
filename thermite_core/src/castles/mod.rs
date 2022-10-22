@@ -23,7 +23,6 @@ pub struct Castles {
     #[cfg(feature = "chess_960")]
     king_rook_square: ByPlayer<Square>,
 
-    // #[cfg(feature = "move_generation")]
     // TODO: Store board masks of squares that cannot be attacked for each side's castles
 }
 
