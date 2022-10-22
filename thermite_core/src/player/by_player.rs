@@ -28,8 +28,16 @@ impl<T: Copy> ByPlayer<T> {
     }
 }
 
-impl<T> From<[T; NUM_PLAYERS]> for ByPlayer<T> {
+impl<T> const From<[T; NUM_PLAYERS]> for ByPlayer<T> {
     fn from(value: [T; NUM_PLAYERS]) -> Self {
         Self { items: value }
+    }
+}
+
+#[cfg(test)]
+impl<T> ByPlayer<T> {
+    /// Get the underlying container
+    pub fn into_inner(self) -> [T; NUM_PLAYERS] {
+        self.items
     }
 }

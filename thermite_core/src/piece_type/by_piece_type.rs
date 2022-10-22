@@ -28,8 +28,16 @@ impl<T: Copy> ByPieceType<T> {
     }
 }
 
-impl<T> From<[T; NUM_PIECE_TYPES]> for ByPieceType<T> {
+impl<T> const From<[T; NUM_PIECE_TYPES]> for ByPieceType<T> {
     fn from(value: [T; NUM_PIECE_TYPES]) -> Self {
         Self { items: value }
+    }
+}
+
+#[cfg(test)]
+impl<T> ByPieceType<T> {
+    /// Get the underlying container
+    pub fn into_inner(self) -> [T; NUM_PIECE_TYPES] {
+        self.items
     }
 }

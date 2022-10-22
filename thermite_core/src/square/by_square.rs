@@ -24,8 +24,16 @@ impl<T: Copy> BySquare<T> {
     }
 }
 
-impl<T> From<[T; NUM_SQUARES]> for BySquare<T> {
+impl<T> const From<[T; NUM_SQUARES]> for BySquare<T> {
     fn from(value: [T; NUM_SQUARES]) -> Self {
         Self { items: value }
+    }
+}
+
+#[cfg(test)]
+impl<T> BySquare<T> {
+    /// Get the underlying container
+    pub fn into_inner(self) -> [T; NUM_SQUARES] {
+        self.items
     }
 }
