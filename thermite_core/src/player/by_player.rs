@@ -27,3 +27,9 @@ impl<T: Copy> ByPlayer<T> {
         Self { items: [item; NUM_SIDES] }
     }
 }
+
+impl<T> From<[T; NUM_SIDES]> for ByPlayer<T> {
+    fn from(value: [T; NUM_SIDES]) -> Self {
+        Self { items: value }
+    }
+}

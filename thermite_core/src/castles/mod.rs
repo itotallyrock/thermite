@@ -1,8 +1,8 @@
 mod rights;
 
-use crate::player::Player;
 #[cfg(feature = "chess_960")]
 use crate::player::ByPlayer;
+use crate::player::Player;
 use crate::square::Square;
 pub use rights::{CastleRights, IllegalCastleRights};
 
@@ -22,7 +22,6 @@ pub struct Castles {
     queen_rook_square: ByPlayer<Square>,
     #[cfg(feature = "chess_960")]
     king_rook_square: ByPlayer<Square>,
-
     // TODO: Store board masks of squares that cannot be attacked for each side's castles
 }
 
