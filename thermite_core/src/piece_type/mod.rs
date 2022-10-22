@@ -1,3 +1,7 @@
+mod by_piece_type;
+
+pub use by_piece_type::ByPieceType;
+
 /// The number of piece types in standard chess
 pub const NUM_PIECE_TYPES: usize = 6;
 
