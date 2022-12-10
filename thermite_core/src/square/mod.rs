@@ -97,6 +97,38 @@ impl Square {
         (self as usize) % NUM_FILES
     }
 
+    /// Try to add an offset to a square
+    ///
+    /// ```
+    /// use thermite_core::square::Square;
+    ///
+    /// assert_eq!(Square::A1.checked_add(8), Some(Square::A2));
+    /// assert_eq!(Square::A1.checked_add(1), Some(Square::B1));
+    /// assert_eq!(Square::B1.checked_add(6), Some(Square::H1));
+    /// assert_eq!(Square::A8.checked_add(7), Some(Square::H8));
+    /// assert_eq!(Square::H8.checked_add(1), None);
+    #[must_use]
+    pub const fn checked_add(self, rhs: u8) -> Option<Self> {
+        Self::try_from((self as u8).saturating_add(rhs)).ok()
+    }
+
+    /// Try to subtract an offset from a square
+    ///
+    /// ```
+    ///
+    /// use thermite_core::square::Square;
+    /// assert_eq!(Square::A1.checked_sub(0), Some(Square::A1));
+    /// assert_eq!(Square::A1.checked_sub(1), None);
+    /// assert_eq!(Square::H1.checked_sub(7), Some(Square::A1));
+    /// assert_eq!(Square::A8.checked_sub(8), Some(Square::A7));
+    /// assert_eq!(Square::H8.checked_sub(63), Some(Square::A1));
+    /// assert_eq!(Square::G2.checked_sub(2), Some(Square::E2));
+    /// ```
+    #[must_use]
+    pub const fn checked_sub(self, rhs: u8) -> Option<Self> {
+        Self::try_from((self as u8).wrapping_sub(rhs)).ok()
+    }
+
     /// 2 character, case-insensitive, file-rank string parse into a `Square`
     ///
     /// ```
