@@ -63,7 +63,6 @@ impl Square {
     /// assert_eq!(Square::H1.to_mask(), Bitboard::from(0b10000000));
     /// assert_eq!(Square::H8.to_mask(), Bitboard::from(0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000));
     /// ```
-    #[must_use]
     pub const fn to_mask(self) -> Bitboard {
         Bitboard::from(1u64 << (self as u32))
     }
