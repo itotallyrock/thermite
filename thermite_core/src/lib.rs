@@ -13,7 +13,6 @@
     const_intoiterator_identity,
     const_option_ext,
     const_slice_index,
-    const_char_convert,
     const_bool_to_option,
     const_num_from_num
 )]
@@ -27,7 +26,7 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::cargo)]
 #![warn(clippy::style)]
-#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::module_name_repetitions, clippy::debug_assert_with_mut_call)]
 
 //! Thermite chess essential types.
 //! - `Piece` - A piece on the board: King, Queen, Rook, Bishop, Knight, Pawn
