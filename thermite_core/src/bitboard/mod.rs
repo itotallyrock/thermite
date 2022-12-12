@@ -1,13 +1,18 @@
+mod shift;
+mod direction;
+mod attacks;
+
 use crate::square::{Square, NUM_FILES, NUM_RANKS};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
-use std::ops::{BitAnd, BitOr, BitOrAssign, BitXor, BitXorAssign};
+use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
 
 /// The raw bitboard value type
 type BitboardInner = u64;
 
 /// Board mask with single bits representing squares on a 64 tile board
 #[derive(Copy, Clone, Default, Eq)]
+#[must_use]
 pub struct Bitboard(pub(crate) BitboardInner);
 
 impl Bitboard {
@@ -46,6 +51,14 @@ impl const PartialOrd for Bitboard {
     }
 }
 
+impl const Not for Bitboard {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        Self(self.0.not())
+    }
+}
+
 /// A bitboard to square iterator container that will emit active squares from the mask (set bits).
 #[derive(Clone, Debug)]
 #[must_use]
@@ -76,7 +89,6 @@ impl Iterator for MaskSquareIterator {
 
 impl const From<BitboardInner> for Bitboard {
     /// Convert a raw inner bitboard to a an actual [Bitboard]
-    #[must_use]
     fn from(inner: BitboardInner) -> Self {
         Self(inner)
     }
@@ -97,6 +109,12 @@ impl const BitAnd for Bitboard {
 
     fn bitand(self, rhs: Self) -> Self::Output {
         Self(self.0 & rhs.0)
+    }
+}
+
+impl const BitAndAssign for Bitboard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        *self = *self & rhs;
     }
 }
 
