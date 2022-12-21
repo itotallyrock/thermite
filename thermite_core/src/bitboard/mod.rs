@@ -2,10 +2,11 @@ mod shift;
 mod direction;
 mod attacks;
 
-use crate::square::{Square, NUM_FILES, NUM_RANKS};
+use crate::square::{Square, NUM_FILES, NUM_RANKS, BySquare, NUM_SQUARES};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
+use crate::piece_type::PieceType;
 
 /// The raw bitboard value type
 type BitboardInner = u64;
@@ -14,6 +15,42 @@ type BitboardInner = u64;
 #[derive(Copy, Clone, Eq)]
 #[must_use]
 pub struct Bitboard(pub(crate) BitboardInner);
+
+const fn line_generator<const BETWEEN: bool>() -> BySquare<BySquare<Bitboard>> {
+    let mut items: BySquare<BySquare<Bitboard>> = BySquare::default();
+    let mut a_square_offset = 0;
+    while (a_square_offset as usize) < NUM_SQUARES {
+        let a_square = Square::try_from(a_square_offset).ok().unwrap();
+        let mut b_square_offset = 0;
+        while (b_square_offset as usize) < NUM_SQUARES {
+            const SLIDING_PIECES: [PieceType; 2] = [PieceType::Rook, PieceType::Bishop];
+            let b_square = Square::try_from(b_square_offset).ok().unwrap();
+            let b_mask = b_square.to_mask();
+            let mut piece_index = 0;
+            while piece_index < SLIDING_PIECES.len() {
+                let piece = SLIDING_PIECES[piece_index];
+                let a_attacks = Bitboard::attacks_mask(piece, a_square);
+                // If there is a connectable line through the two squares
+                if a_attacks & b_mask != Bitboard::EMPTY {
+                    *items.mut_square(a_square).mut_square(b_square) = if BETWEEN {
+                        Bitboard::occluded_attacks_mask(piece, a_square, b_mask) & Bitboard::occluded_attacks_mask(piece, b_square, a_square.to_mask())
+                    } else {
+                        (a_attacks & Bitboard::attacks_mask(piece, b_square)) | b_mask | a_square.to_mask()
+                    };
+                }
+                piece_index += 1;
+            }
+            if BETWEEN {
+                *items.mut_square(a_square).mut_square(b_square) |= b_mask;
+            }
+
+            b_square_offset += 1;
+        }
+        a_square_offset += 1;
+    }
+
+    items
+}
 
 impl Bitboard {
     /// An empty bitboard
@@ -28,6 +65,25 @@ impl Bitboard {
     /// Mask of each file, starting at the A file to the H file
     #[rustfmt::skip]
     pub const FILES: [Self; NUM_FILES] = [Self(0x8080_8080_8080_8080), Self(0x4040_4040_4040_4040), Self(0x2020_2020_2020_2020), Self(0x1010_1010_1010_1010), Self(0x0808_0808_0808_0808), Self(0x0404_0404_0404_0404), Self(0x0202_0202_0202_0202), Self(0x0101_0101_0101_0101)];
+
+    const LINE_THROUGH: BySquare<BySquare<Self>> = line_generator::<false>();
+    const LINE_BETWEEN: BySquare<BySquare<Self>> = line_generator::<true>();
+
+    /// Get the board mask of the line through two squares, if any, the line extends from edge to edge.
+    pub const fn line_through(a: Square, b: Square) -> Self {
+        *Self::LINE_THROUGH.get_square(a).get_square(b)
+    }
+
+    /// Get the board mask of the line between two squares, if any, not including the start squares.
+    pub const fn line_between(start: Square, end: Square) -> Self {
+        *Self::LINE_BETWEEN.get_square(start).get_square(end)
+    }
+
+    /// If three squares share a common rank, file, or diagonal
+    #[must_use]
+    pub const fn is_aligned(a: Square, b: Square, c: Square) -> bool {
+        Self::line_through(a, b) & c.to_mask() != Self::EMPTY
+    }
 
     /// If a bit is set, return that [`Square`](Square) and unset the bit
     #[must_use]
@@ -165,92 +221,92 @@ impl const BitXorAssign for Bitboard {
 mod test {
     use super::*;
     use crate::square::Square::*;
+    use test_case::test_case;
 
-    #[test]
-    fn is_aligned_works() {
-        assert!(Bitboard::is_aligned(A2, A4, A6));
-        assert!(Bitboard::is_aligned(A2, A4, A8));
-        assert!(!Bitboard::is_aligned(B2, A4, A8));
-        assert!(!Bitboard::is_aligned(A2, B4, A8));
-        assert!(!Bitboard::is_aligned(A2, A4, B8));
-        assert!(!Bitboard::is_aligned(A2, B4, B8));
-        assert!(Bitboard::is_aligned(B2, B4, B8));
-        assert!(Bitboard::is_aligned(H1, A1, C1));
-        assert!(!Bitboard::is_aligned(H1, A1, C2));
-        assert!(Bitboard::is_aligned(H8, A1, D4));
-        assert!(!Bitboard::is_aligned(H8, A1, D5));
-        assert!(!Bitboard::is_aligned(H8, A2, D4));
-        assert!(!Bitboard::is_aligned(H7, A1, D4));
+    #[test_case(A2, A4, A6, true)]
+    #[test_case(A2, A4, A8, true)]
+    #[test_case(B2, A4, A8, false)]
+    #[test_case(A2, B4, A8, false)]
+    #[test_case(A2, A4, B8, false)]
+    #[test_case(A2, B4, B8, false)]
+    #[test_case(B2, B4, B8, true)]
+    #[test_case(H1, A1, C1, true)]
+    #[test_case(H1, A1, C2, false)]
+    #[test_case(H8, A1, D4, true)]
+    fn is_aligned_works(a: Square, b: Square, c: Square, expected: bool) {
+        assert_eq!(Bitboard::is_aligned(a, b, c), expected);
     }
 
-    #[test]
-    fn line_between_works() {
-        // A1-H8 diagonal
-        assert_eq!(Bitboard::line_between(A1, H8), Bitboard(0x40201008040200));
-        assert_eq!(Bitboard::line_between(A1, G7), Bitboard(0x201008040200));
-        assert_eq!(Bitboard::line_between(A1, F6), Bitboard(0x1008040200));
-        assert_eq!(Bitboard::line_between(A1, E5), Bitboard(0x8040200));
-        assert_eq!(Bitboard::line_between(B2, E5), Bitboard(0x8040000));
-        assert_eq!(Bitboard::line_between(B2, D4), Bitboard(0x40000));
-        assert_eq!(Bitboard::line_between(B3, D4), Bitboard(0x0));
-        // G2-G6 vertical
-        assert_eq!(Bitboard::line_between(G2, G6), Bitboard(0x4040400000));
-        assert_eq!(Bitboard::line_between(G3, G6), Bitboard(0x4040000000));
-        assert_eq!(Bitboard::line_between(G4, G6), Bitboard(0x4000000000));
-        assert_eq!(Bitboard::line_between(G4, G5), Bitboard(0x0));
-        // F5-A5 horizontal
-        assert_eq!(Bitboard::line_between(F5, A5), Bitboard(0x1e00000000));
-        assert_eq!(Bitboard::line_between(E5, A5), Bitboard(0xe00000000));
-        assert_eq!(Bitboard::line_between(D5, A5), Bitboard(0x600000000));
-        assert_eq!(Bitboard::line_between(D5, B5), Bitboard(0x400000000));
-        assert_eq!(Bitboard::line_between(D5, C5), Bitboard(0x0));
-        // Non aligned between
-        assert_eq!(Bitboard::line_between(A5, B7), Bitboard(0x0));
-        assert_eq!(Bitboard::line_between(H1, C8), Bitboard(0x0));
-        assert_eq!(Bitboard::line_between(E4, C1), Bitboard(0x0));
-        assert_eq!(Bitboard::line_between(E4, D1), Bitboard(0x0));
-        assert_eq!(Bitboard::line_between(E4, F1), Bitboard(0x0));
-        assert_eq!(Bitboard::line_between(E4, G1), Bitboard(0x0));
+    #[test_case(C4, F7, Bitboard(0x4081000000000))]
+    #[test_case(E6, F8, Bitboard(0x400000000000000))]
+    // A1-H8 diagonal
+    #[test_case(A1, H8, Bitboard(0x40201008040200))]
+    #[test_case(A1, G7, Bitboard(0x201008040200))]
+    #[test_case(A1, F6, Bitboard(0x1008040200))]
+    #[test_case(A1, E5, Bitboard(0x8040200))]
+    #[test_case(B2, E5, Bitboard(0x8040000))]
+    #[test_case(B2, D4, Bitboard(0x40000))]
+    #[test_case(B3, D4, Bitboard(0x0))]
+    // G2-G6 vertical
+    #[test_case(G2, G6, Bitboard(0x4040400000))]
+    #[test_case(G3, G6, Bitboard(0x4040000000))]
+    #[test_case(G4, G6, Bitboard(0x4000000000))]
+    #[test_case(G4, G5, Bitboard(0x0))]
+    // F5-A5 horizontal
+    #[test_case(F5, A5, Bitboard(0x1e00000000))]
+    #[test_case(E5, A5, Bitboard(0xe00000000))]
+    #[test_case(D5, A5, Bitboard(0x600000000))]
+    #[test_case(D5, B5, Bitboard(0x400000000))]
+    #[test_case(D5, C5, Bitboard(0x0))]
+    // Non aligned between
+    #[test_case(A5, B7, Bitboard(0x0))]
+    #[test_case(H1, C8, Bitboard(0x0))]
+    #[test_case(E4, C1, Bitboard(0x0))]
+    #[test_case(E4, D1, Bitboard(0x0))]
+    #[test_case(E4, F1, Bitboard(0x0))]
+    #[test_case(E4, G1, Bitboard(0x0))]
+    fn line_between_works(a: Square, b: Square, expected: Bitboard) {
+        assert_eq!(Bitboard::line_between(a, b), expected);
     }
 
-    #[test]
-    fn line_through_works() {
-        // Non aligned
-        assert_eq!(Bitboard::line_through(A1, B5), Bitboard(0x0));
-        assert_eq!(Bitboard::line_through(A1, B4), Bitboard(0x0));
-        assert_eq!(Bitboard::line_through(A1, C4), Bitboard(0x0));
-        // Diagonal A1-H8
-        assert_eq!(Bitboard::line_through(A1, D4), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(B2, D4), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(C3, D4), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(D4, C3), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(D4, E5), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(D4, H8), Bitboard(0x8040201008040201));
-        assert_eq!(Bitboard::line_through(A1, H8), Bitboard(0x8040201008040201));
-        // Diagonal A8-H1
-        assert_eq!(Bitboard::line_through(A8, D5), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(B7, D5), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(C6, D5), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(D5, C6), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(D5, E4), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(D5, H1), Bitboard(0x102040810204080));
-        assert_eq!(Bitboard::line_through(A8, H1), Bitboard(0x102040810204080));
-        // Non-major diagonal D8-H4
-        assert_eq!(Bitboard::line_through(E7, G5), Bitboard(0x810204080000000));
-        assert_eq!(Bitboard::line_through(G5, E7), Bitboard(0x810204080000000));
-        assert_eq!(Bitboard::line_through(G5, H4), Bitboard(0x810204080000000));
-        assert_eq!(Bitboard::line_through(D8, H4), Bitboard(0x810204080000000));
-        // Vertical G1-G4
-        assert_eq!(Bitboard::line_through(G1, G4), Bitboard(0x4040404040404040));
-        assert_eq!(Bitboard::line_through(G1, G3), Bitboard(0x4040404040404040));
-        assert_eq!(Bitboard::line_through(G1, G2), Bitboard(0x4040404040404040));
-        assert_eq!(Bitboard::line_through(G4, G1), Bitboard(0x4040404040404040));
-        // Horizontal A5-F5
-        assert_eq!(Bitboard::line_through(A5, F5), Bitboard(0xff00000000));
-        assert_eq!(Bitboard::line_through(A5, E5), Bitboard(0xff00000000));
-        assert_eq!(Bitboard::line_through(A5, D5), Bitboard(0xff00000000));
-        assert_eq!(Bitboard::line_through(A5, C5), Bitboard(0xff00000000));
-        assert_eq!(Bitboard::line_through(B5, C5), Bitboard(0xff00000000));
-        assert_eq!(Bitboard::line_through(C5, F5), Bitboard(0xff00000000));
+    // Non aligned
+    #[test_case(A1, B5, Bitboard(0x0))]
+    #[test_case(A1, B4, Bitboard(0x0))]
+    #[test_case(A1, C4, Bitboard(0x0))]
+    // Diagonal A1-H8
+    #[test_case(A1, D4, Bitboard(0x8040201008040201))]
+    #[test_case(B2, D4, Bitboard(0x8040201008040201))]
+    #[test_case(C3, D4, Bitboard(0x8040201008040201))]
+    #[test_case(D4, C3, Bitboard(0x8040201008040201))]
+    #[test_case(D4, E5, Bitboard(0x8040201008040201))]
+    #[test_case(D4, H8, Bitboard(0x8040201008040201))]
+    #[test_case(A1, H8, Bitboard(0x8040201008040201))]
+    // Diagonal A8-H1
+    #[test_case(A8, D5, Bitboard(0x102040810204080))]
+    #[test_case(B7, D5, Bitboard(0x102040810204080))]
+    #[test_case(C6, D5, Bitboard(0x102040810204080))]
+    #[test_case(D5, C6, Bitboard(0x102040810204080))]
+    #[test_case(D5, E4, Bitboard(0x102040810204080))]
+    #[test_case(D5, H1, Bitboard(0x102040810204080))]
+    #[test_case(A8, H1, Bitboard(0x102040810204080))]
+    // Non-major diagonal D8-H4
+    #[test_case(E7, G5, Bitboard(0x810204080000000))]
+    #[test_case(G5, E7, Bitboard(0x810204080000000))]
+    #[test_case(G5, H4, Bitboard(0x810204080000000))]
+    #[test_case(D8, H4, Bitboard(0x810204080000000))]
+    // Vertical G1-G4
+    #[test_case(G1, G4, Bitboard(0x4040404040404040))]
+    #[test_case(G1, G3, Bitboard(0x4040404040404040))]
+    #[test_case(G1, G2, Bitboard(0x4040404040404040))]
+    #[test_case(G4, G1, Bitboard(0x4040404040404040))]
+    // Horizontal A5-F5
+    #[test_case(A5, F5, Bitboard(0xff00000000))]
+    #[test_case(A5, E5, Bitboard(0xff00000000))]
+    #[test_case(A5, D5, Bitboard(0xff00000000))]
+    #[test_case(A5, C5, Bitboard(0xff00000000))]
+    #[test_case(B5, C5, Bitboard(0xff00000000))]
+    #[test_case(C5, F5, Bitboard(0xff00000000))]
+    fn line_through_works(a: Square, b: Square, expected: Bitboard) {
+        assert_eq!(Bitboard::line_through(a, b), expected);
     }
 }
