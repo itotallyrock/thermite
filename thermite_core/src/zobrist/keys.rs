@@ -210,32 +210,4 @@ mod test {
         assert_eq!(CASTLES.len(), mapped.len());
         assert!(CASTLES.iter().all(|&(side, direction)| mapped.contains_key(&(side as usize, direction))));
     }
-
-    fn get_all_keys() -> Vec<ZobristInner> {
-        PIECE_SQUARES
-            .into_inner()
-            .into_iter()
-            .flat_map(ByPieceType::into_inner)
-            .into_iter()
-            .flat_map(BySquare::into_inner)
-            .chain(CASTLE_KEYS)
-            .chain(EN_PASSANT_KEYS)
-            .chain([EMPTY_ZOBRIST_KEY, SIDE_KEY])
-            .collect()
-    }
-
-    /// Test that a small (3) subset all keys are completely [linearly independent](https://www.chessprogramming.org/Zobrist_Hashing#Linear_Independence).
-    #[test]
-    #[ignore = "very slow to run"]
-    fn three_way_permutations_are_linearly_independent() {
-        let all_keys = get_all_keys();
-        for (i, &a) in all_keys.iter().enumerate() {
-            for (j, &b) in all_keys.iter().enumerate().filter(|&(j, _)| i != j) {
-                assert_ne!(a ^ b, 0);
-                for (_, &c) in all_keys.iter().enumerate().filter(|&(k, _)| i != k && j != k) {
-                    assert_ne!(a ^ b ^ c, 0);
-                }
-            }
-        }
-    }
 }

@@ -1,7 +1,7 @@
 use crate::player::{Player, NUM_PLAYERS};
 
 /// A container data-structure that holds an instance of `T` for each player (one for white, one for black)
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 pub struct ByPlayer<T> {
     items: [T; NUM_PLAYERS],
 }
@@ -28,16 +28,23 @@ impl<T: Copy> ByPlayer<T> {
     }
 }
 
+impl<T: ~const PartialEq> const PartialEq for ByPlayer<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.items[0] == other.items[0] && self.items[1] == other.items[1]
+    }
+}
+
+impl<T: ~const Default + Copy> const Default for ByPlayer<T> {
+    fn default() -> Self {
+        Self {
+            items: [T::default(); NUM_PLAYERS],
+        }
+    }
+}
+
 impl<T> const From<[T; NUM_PLAYERS]> for ByPlayer<T> {
     fn from(value: [T; NUM_PLAYERS]) -> Self {
         Self { items: value }
     }
 }
 
-#[cfg(test)]
-impl<T> ByPlayer<T> {
-    /// Get the underlying container
-    pub fn into_inner(self) -> [T; NUM_PLAYERS] {
-        self.items
-    }
-}

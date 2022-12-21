@@ -30,6 +30,14 @@ impl<T> const From<[T; NUM_SQUARES]> for BySquare<T> {
     }
 }
 
+impl<T: ~const Default + Copy> const Default for BySquare<T> {
+    fn default() -> Self {
+        Self {
+            items: [T::default(); NUM_SQUARES],
+        }
+    }
+}
+
 #[cfg(test)]
 impl<T> BySquare<T> {
     /// Get the underlying container

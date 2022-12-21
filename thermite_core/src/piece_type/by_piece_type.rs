@@ -34,6 +34,14 @@ impl<T> const From<[T; NUM_PIECE_TYPES]> for ByPieceType<T> {
     }
 }
 
+impl<T: ~const Default + Copy> const Default for ByPieceType<T> {
+    fn default() -> Self {
+        Self {
+            items: [T::default(); NUM_PIECE_TYPES],
+        }
+    }
+}
+
 #[cfg(test)]
 impl<T> ByPieceType<T> {
     /// Get the underlying container
