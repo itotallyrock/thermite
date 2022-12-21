@@ -14,11 +14,15 @@
     const_option_ext,
     const_slice_index,
     const_bool_to_option,
-    const_num_from_num
+    const_num_from_num,
+    const_refs_to_cell,
+    const_eval_limit,
+    generic_const_exprs,
 )]
 // other features
 #![feature(is_sorted)]
 #![cfg_attr(test, feature(test))]
+#![const_eval_limit = "0"]
 #![warn(missing_docs)]
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
