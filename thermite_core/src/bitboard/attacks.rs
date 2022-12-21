@@ -1,8 +1,169 @@
-use crate::bitboard::Bitboard;
+use crate::bitboard::{Bitboard, BitboardInner};
 use crate::bitboard::direction::Direction;
-use crate::player::Player;
+use crate::piece_type::{ByPieceType, PieceType};
+use crate::player::{ByPlayer, Player};
+use crate::square::{BySquare, NUM_FILES, NUM_RANKS, NUM_SQUARES, Square};
+
+/// Maximum number of variations of individual blockers for a rook
+const ROOK_OCCUPANCY_LIMIT: u8 = 14;
+/// Maximum number of variations of blockers for a bishop
+const BISHOP_OCCUPANCY_LIMIT: u8 = 13;
+
+#[derive(Copy, Clone, Debug)]
+struct MagicLookup<const OCCUPANCY_LIMIT: u32> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+    occupancy_mask: Bitboard,
+    attacks: [Bitboard; 1 << OCCUPANCY_LIMIT],
+}
+
+impl<const OCCUPANCY_LIMIT: u32> const Default for MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+    fn default() -> Self {
+        Self {
+            occupancy_mask: Bitboard::default(),
+            attacks: [Bitboard::default(); 1 << OCCUPANCY_LIMIT],
+        }
+    }
+}
+
+/// Bit deposit, take an index and use that value to essentially count in binary to fill a give occupancy mask
+/// Index is generally valid for `0..(1 << N)` (or `2 ^ N`) where `N = occupancy_mask.count_ones()`
+const fn board_mask_from_index(index: usize, occupancy_mask: Bitboard) -> Bitboard {
+    let mut mask = occupancy_mask.0;
+    let mut res = 0;
+    let mut bb = Bitboard::A1.0;
+    loop {
+        if mask == 0 {
+            break;
+        }
+        if (index as BitboardInner & bb) != 0 {
+            res |= mask & mask.wrapping_neg();
+        }
+        mask &= mask - 1;
+        bb = bb.wrapping_add(bb);
+    }
+
+    Bitboard(res)
+}
+
+/// Bit extract, pull bits from a set of occupied squares masked by an occupancy (or mask of relevant squares that when occupied will block a sliding piece)
+const fn index_from_board_mask(occupied_mask: Bitboard, occupancy_mask: Bitboard) -> usize {
+    let mut mask = occupancy_mask.0;
+    let mut res = 0;
+    let mut bb = Bitboard::A1.0;
+    loop {
+        if mask == 0 {
+            break;
+        }
+        if occupied_mask.0 & mask & (mask.wrapping_neg()) != 0 {
+            res |= bb;
+        }
+        mask &= mask - 1;
+        bb = bb.wrapping_add(bb);
+    }
+
+    #[allow(clippy::cast_possible_truncation)]
+    { res as usize }
+}
+
+impl<const OCCUPANCY_LIMIT: u32> MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+    const fn get_for(&self, occupied: Bitboard) -> Bitboard {
+        self.attacks[index_from_board_mask(occupied, self.occupancy_mask)]
+    }
+}
+
+const fn create_sliding_attacks_occluded_masks<const OCCUPANCY_LIMIT: u32, const CARDINAL: bool>() -> [MagicLookup<OCCUPANCY_LIMIT>; NUM_SQUARES] where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+    const NOT_EDGES: Bitboard = !(Bitboard::RANKS[0] | Bitboard::RANKS[NUM_RANKS - 1] | Bitboard::FILES[0] | Bitboard::FILES[NUM_FILES - 1]);
+    let mut attacks_by_square = [MagicLookup::<{ OCCUPANCY_LIMIT }>::default(); NUM_SQUARES];
+
+    let mut square_index = 0;
+    while square_index < NUM_SQUARES {
+        #[allow(clippy::cast_possible_truncation)]
+        let piece_square = Square::try_from(square_index as u8).ok().unwrap();
+        let piece_mask = piece_square.to_mask();
+        let occupancy_mask = if CARDINAL { piece_mask.cardinal_sliding_attacks(piece_mask) } else { piece_mask.ordinal_sliding_attacks(piece_mask) } & NOT_EDGES;
+        attacks_by_square[square_index].occupancy_mask = occupancy_mask;
+        let mut blocker_index = 0;
+        while blocker_index < (1 << OCCUPANCY_LIMIT) {
+            let blocker_mask = board_mask_from_index(blocker_index, occupancy_mask);
+            let attacks = if CARDINAL { piece_mask.cardinal_sliding_attacks(blocker_mask) } else { piece_mask.ordinal_sliding_attacks(blocker_mask) };
+
+            attacks_by_square[square_index].attacks[blocker_index] = attacks;
+
+            blocker_index += 1;
+        }
+        square_index += 1;
+    }
+
+    attacks_by_square
+}
 
 impl Bitboard {
+    const PSEUDO_ATTACKS: ByPieceType<BySquare<Self>> = {
+        let mut items: ByPieceType<BySquare<Self>> = ByPieceType::default();
+
+        let mut square_offset = 0;
+        while (square_offset as usize) < NUM_SQUARES {
+            let square = Square::try_from(square_offset).ok().unwrap();
+            let square_mask = square.to_mask();
+            *items.mut_piece(PieceType::King).mut_square(square) = square_mask.king_attacks();
+            *items.mut_piece(PieceType::Knight).mut_square(square) = square_mask.knight_attacks();
+            let cardinal_attacks = square_mask.cardinal_sliding_attacks(Self::EMPTY);
+            let ordinal_attacks = square_mask.ordinal_sliding_attacks(Self::EMPTY);
+            *items.mut_piece(PieceType::Rook).mut_square(square) = cardinal_attacks;
+            *items.mut_piece(PieceType::Bishop).mut_square(square) = ordinal_attacks;
+            *items.mut_piece(PieceType::Queen).mut_square(square) = cardinal_attacks | ordinal_attacks;
+
+            square_offset += 1;
+        }
+
+        items
+    };
+
+    const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ BISHOP_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ BISHOP_OCCUPANCY_LIMIT as u32 }, true>());
+
+    const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ ROOK_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ ROOK_OCCUPANCY_LIMIT as u32 }, false>());
+
+    const PAWN_ATTACKS: ByPlayer<BySquare<Self>> = {
+        let mut items: ByPlayer<BySquare<Self>> = ByPlayer::default();
+        let mut square_offset = 0;
+        while (square_offset as usize) < NUM_SQUARES {
+            let square = Square::try_from(square_offset).ok().unwrap();
+            let square_mask = square.to_mask();
+            *items.mut_side(Player::White).mut_square(square) = square_mask.pawn_attacks(Player::White);
+            *items.mut_side(Player::Black).mut_square(square) = square_mask.pawn_attacks(Player::Black);
+            square_offset += 1;
+        }
+
+        items
+    };
+
+    /// Lookup for pawn attack masks
+    pub const fn pawn_attacks_mask(square: Square, side: Player) -> Self {
+        *Self::PAWN_ATTACKS.get_side(side).get_square(square)
+    }
+
+    /// Lookup for non-pawn un-occluded attack masks
+    ///
+    /// # Panics
+    /// Does not support `piece: PieceType::Pawn`, use [`Bitboard::pawn_attacks_mask`](Self::pawn_attacks_mask)
+    pub const fn attacks_mask(piece: PieceType, square: Square) -> Self {
+        assert!(piece != PieceType::Pawn, "use pawn_attacks");
+        *Self::PSEUDO_ATTACKS.get_piece(piece).get_square(square)
+    }
+
+    /// Lookup for non-pawn occluded attack masks
+    ///
+    /// # Panics
+    /// Does not support `piece: PieceType::Pawn`, use [`Bitboard::pawn_attacks_mask`](Self::pawn_attacks_mask)
+    pub const fn occluded_attacks_mask(piece: PieceType, square: Square, occupied: Self) -> Self {
+        match piece {
+            PieceType::Pawn => panic!("use pawn_attacks_mask"),
+            PieceType::Knight | PieceType::King => Self::attacks_mask(piece, square),
+            PieceType::Bishop => Self::BISHOP_OCCLUDED_ATTACKS.get_square(square).get_for(occupied),
+            PieceType::Rook => Self::ROOK_OCCLUDED_ATTACKS.get_square(square).get_for(occupied),
+            PieceType::Queen => Self::occluded_attacks_mask(PieceType::Rook, square, occupied) | Self::occluded_attacks_mask(PieceType::Bishop, square, occupied),
+        }
+    }
+
     /// Calculate the knight attacks mask for a given mask of knight attacker(s)
     pub const fn knight_attacks(self) -> Self {
         let l1 = Self(self.0 >> 1) & Self(0x7F7F_7F7F_7F7F_7F7F);
