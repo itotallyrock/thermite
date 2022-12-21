@@ -11,7 +11,7 @@ use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, N
 type BitboardInner = u64;
 
 /// Board mask with single bits representing squares on a 64 tile board
-#[derive(Copy, Clone, Default, Eq)]
+#[derive(Copy, Clone, Eq)]
 #[must_use]
 pub struct Bitboard(pub(crate) BitboardInner);
 
@@ -28,6 +28,19 @@ impl Bitboard {
     /// Mask of each file, starting at the A file to the H file
     #[rustfmt::skip]
     pub const FILES: [Self; NUM_FILES] = [Self(0x8080_8080_8080_8080), Self(0x4040_4040_4040_4040), Self(0x2020_2020_2020_2020), Self(0x1010_1010_1010_1010), Self(0x0808_0808_0808_0808), Self(0x0404_0404_0404_0404), Self(0x0202_0202_0202_0202), Self(0x0101_0101_0101_0101)];
+
+    /// If a bit is set, return that [`Square`](Square) and unset the bit
+    #[must_use]
+    pub const fn pop_square(&mut self) -> Option<Square> {
+        #[allow(clippy::cast_possible_truncation)]
+        Square::try_from(self.0.trailing_zeros() as u8).ok()
+    }
+}
+
+impl const Default for Bitboard {
+    fn default() -> Self {
+        Self::EMPTY
+    }
 }
 
 impl const PartialEq for Bitboard {
@@ -62,14 +75,14 @@ impl const Not for Bitboard {
 /// A bitboard to square iterator container that will emit active squares from the mask (set bits).
 #[derive(Clone, Debug)]
 #[must_use]
-pub struct MaskSquareIterator(BitboardInner);
+pub struct MaskSquareIterator(Bitboard);
 
-impl IntoIterator for Bitboard {
+impl const IntoIterator for Bitboard {
     type Item = Square;
     type IntoIter = MaskSquareIterator;
 
     fn into_iter(self) -> Self::IntoIter {
-        MaskSquareIterator(self.0)
+        MaskSquareIterator(self)
     }
 }
 
@@ -77,13 +90,7 @@ impl Iterator for MaskSquareIterator {
     type Item = Square;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // Pop least significant bit
-        #[allow(clippy::cast_possible_truncation)]
-        let next_square = Square::try_from(self.0.trailing_zeros() as u8).ok()?;
-        // Remove least significant bit
-        self.0 ^= next_square.to_mask().0;
-
-        Some(next_square)
+        self.0.pop_square()
     }
 }
 
@@ -143,5 +150,99 @@ impl const BitXor for Bitboard {
 impl const BitXorAssign for Bitboard {
     fn bitxor_assign(&mut self, rhs: Self) {
         *self = *self ^ rhs;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::square::Square::*;
+
+    #[test]
+    fn is_aligned_works() {
+        assert!(Bitboard::is_aligned(A2, A4, A6));
+        assert!(Bitboard::is_aligned(A2, A4, A8));
+        assert!(!Bitboard::is_aligned(B2, A4, A8));
+        assert!(!Bitboard::is_aligned(A2, B4, A8));
+        assert!(!Bitboard::is_aligned(A2, A4, B8));
+        assert!(!Bitboard::is_aligned(A2, B4, B8));
+        assert!(Bitboard::is_aligned(B2, B4, B8));
+        assert!(Bitboard::is_aligned(H1, A1, C1));
+        assert!(!Bitboard::is_aligned(H1, A1, C2));
+        assert!(Bitboard::is_aligned(H8, A1, D4));
+        assert!(!Bitboard::is_aligned(H8, A1, D5));
+        assert!(!Bitboard::is_aligned(H8, A2, D4));
+        assert!(!Bitboard::is_aligned(H7, A1, D4));
+    }
+
+    #[test]
+    fn line_between_works() {
+        // A1-H8 diagonal
+        assert_eq!(Bitboard::line_between(A1, H8), Bitboard(0x40201008040200));
+        assert_eq!(Bitboard::line_between(A1, G7), Bitboard(0x201008040200));
+        assert_eq!(Bitboard::line_between(A1, F6), Bitboard(0x1008040200));
+        assert_eq!(Bitboard::line_between(A1, E5), Bitboard(0x8040200));
+        assert_eq!(Bitboard::line_between(B2, E5), Bitboard(0x8040000));
+        assert_eq!(Bitboard::line_between(B2, D4), Bitboard(0x40000));
+        assert_eq!(Bitboard::line_between(B3, D4), Bitboard(0x0));
+        // G2-G6 vertical
+        assert_eq!(Bitboard::line_between(G2, G6), Bitboard(0x4040400000));
+        assert_eq!(Bitboard::line_between(G3, G6), Bitboard(0x4040000000));
+        assert_eq!(Bitboard::line_between(G4, G6), Bitboard(0x4000000000));
+        assert_eq!(Bitboard::line_between(G4, G5), Bitboard(0x0));
+        // F5-A5 horizontal
+        assert_eq!(Bitboard::line_between(F5, A5), Bitboard(0x1e00000000));
+        assert_eq!(Bitboard::line_between(E5, A5), Bitboard(0xe00000000));
+        assert_eq!(Bitboard::line_between(D5, A5), Bitboard(0x600000000));
+        assert_eq!(Bitboard::line_between(D5, B5), Bitboard(0x400000000));
+        assert_eq!(Bitboard::line_between(D5, C5), Bitboard(0x0));
+        // Non aligned between
+        assert_eq!(Bitboard::line_between(A5, B7), Bitboard(0x0));
+        assert_eq!(Bitboard::line_between(H1, C8), Bitboard(0x0));
+        assert_eq!(Bitboard::line_between(E4, C1), Bitboard(0x0));
+        assert_eq!(Bitboard::line_between(E4, D1), Bitboard(0x0));
+        assert_eq!(Bitboard::line_between(E4, F1), Bitboard(0x0));
+        assert_eq!(Bitboard::line_between(E4, G1), Bitboard(0x0));
+    }
+
+    #[test]
+    fn line_through_works() {
+        // Non aligned
+        assert_eq!(Bitboard::line_through(A1, B5), Bitboard(0x0));
+        assert_eq!(Bitboard::line_through(A1, B4), Bitboard(0x0));
+        assert_eq!(Bitboard::line_through(A1, C4), Bitboard(0x0));
+        // Diagonal A1-H8
+        assert_eq!(Bitboard::line_through(A1, D4), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(B2, D4), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(C3, D4), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(D4, C3), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(D4, E5), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(D4, H8), Bitboard(0x8040201008040201));
+        assert_eq!(Bitboard::line_through(A1, H8), Bitboard(0x8040201008040201));
+        // Diagonal A8-H1
+        assert_eq!(Bitboard::line_through(A8, D5), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(B7, D5), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(C6, D5), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(D5, C6), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(D5, E4), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(D5, H1), Bitboard(0x102040810204080));
+        assert_eq!(Bitboard::line_through(A8, H1), Bitboard(0x102040810204080));
+        // Non-major diagonal D8-H4
+        assert_eq!(Bitboard::line_through(E7, G5), Bitboard(0x810204080000000));
+        assert_eq!(Bitboard::line_through(G5, E7), Bitboard(0x810204080000000));
+        assert_eq!(Bitboard::line_through(G5, H4), Bitboard(0x810204080000000));
+        assert_eq!(Bitboard::line_through(D8, H4), Bitboard(0x810204080000000));
+        // Vertical G1-G4
+        assert_eq!(Bitboard::line_through(G1, G4), Bitboard(0x4040404040404040));
+        assert_eq!(Bitboard::line_through(G1, G3), Bitboard(0x4040404040404040));
+        assert_eq!(Bitboard::line_through(G1, G2), Bitboard(0x4040404040404040));
+        assert_eq!(Bitboard::line_through(G4, G1), Bitboard(0x4040404040404040));
+        // Horizontal A5-F5
+        assert_eq!(Bitboard::line_through(A5, F5), Bitboard(0xff00000000));
+        assert_eq!(Bitboard::line_through(A5, E5), Bitboard(0xff00000000));
+        assert_eq!(Bitboard::line_through(A5, D5), Bitboard(0xff00000000));
+        assert_eq!(Bitboard::line_through(A5, C5), Bitboard(0xff00000000));
+        assert_eq!(Bitboard::line_through(B5, C5), Bitboard(0xff00000000));
+        assert_eq!(Bitboard::line_through(C5, F5), Bitboard(0xff00000000));
     }
 }
