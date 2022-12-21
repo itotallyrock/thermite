@@ -92,7 +92,15 @@ impl Iterator for MaskSquareIterator {
     fn next(&mut self) -> Option<Self::Item> {
         self.0.pop_square()
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let squares = self.0.0.count_ones() as usize;
+
+        (squares, Some(squares))
+    }
 }
+
+impl ExactSizeIterator for MaskSquareIterator {}
 
 impl const From<BitboardInner> for Bitboard {
     /// Convert a raw inner bitboard to a an actual [Bitboard]
