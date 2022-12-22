@@ -5,9 +5,9 @@ use crate::player::{ByPlayer, Player};
 use crate::square::{BySquare, NUM_FILES, NUM_RANKS, NUM_SQUARES, Square};
 
 /// Maximum number of variations of individual blockers for a rook
-const ROOK_OCCUPANCY_LIMIT: u8 = 14;
+const ROOK_OCCUPANCY_LIMIT: u8 = 12;
 /// Maximum number of variations of blockers for a bishop
-const BISHOP_OCCUPANCY_LIMIT: u8 = 13;
+const BISHOP_OCCUPANCY_LIMIT: u8 = 9;
 
 #[derive(Copy, Clone, Debug)]
 struct MagicLookup<const OCCUPANCY_LIMIT: u32> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
@@ -83,7 +83,7 @@ const fn create_sliding_attacks_occluded_masks<const OCCUPANCY_LIMIT: u32, const
         attacks_by_square[square_index].occupancy_mask = occupancy_mask;
         let mut blocker_index = 0;
         while blocker_index < (1 << OCCUPANCY_LIMIT) {
-            let blocker_mask = board_mask_from_index(blocker_index, occupancy_mask);
+            let blocker_mask = board_mask_from_index(blocker_index, occupancy_mask) | piece_mask;
             let attacks = if CARDINAL { piece_mask.cardinal_sliding_attacks(blocker_mask) } else { piece_mask.ordinal_sliding_attacks(blocker_mask) };
 
             attacks_by_square[square_index].attacks[blocker_index] = attacks;
@@ -118,9 +118,9 @@ impl Bitboard {
         items
     };
 
-    const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ BISHOP_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ BISHOP_OCCUPANCY_LIMIT as u32 }, true>());
+    const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ BISHOP_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ BISHOP_OCCUPANCY_LIMIT as u32 }, false>());
 
-    const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ ROOK_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ ROOK_OCCUPANCY_LIMIT as u32 }, false>());
+    const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ ROOK_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ ROOK_OCCUPANCY_LIMIT as u32 }, true>());
 
     const PAWN_ATTACKS: ByPlayer<BySquare<Self>> = {
         let mut items: ByPlayer<BySquare<Self>> = ByPlayer::default();
@@ -330,6 +330,8 @@ mod test {
         assert_eq!(Bitboard::sliding_attacks(sliders, occupied, Direction::SouthEast), expected);
     }
 
+    #[test_case(Bitboard(0x1), Bitboard(0x1), Bitboard(0x0101_0101_0101_01FE))]
+    #[test_case(Bitboard(0x80), Bitboard(0x80), Bitboard(0x8080_8080_8080_807F))]
     #[test_case(Bitboard(0x2000_0000_0000), Bitboard(0x2000_0000_0000), Bitboard(0x2020_DF20_2020_2020))]
     #[test_case(Bitboard(0x2000_0004_0000), Bitboard(0x2000_0004_0000), Bitboard(0x2424_DF24_24FB_2424))]
     #[test_case(Bitboard(0x2002_0400_0000), Bitboard(0x0022_200a_1400_0400), Bitboard(0x0426_DF2D_3B26_2622))]
@@ -369,11 +371,11 @@ mod test {
     #[test_case(Bitboard(0x20000), Player::Black, Bitboard(0x100))]
     #[test_case(Bitboard(0x0100_0000), Player::Black, Bitboard::EMPTY)]
     #[test_case(Bitboard(0xFF00), Player::White, Bitboard(0x007F_0000))]
+    #[test_case(Bitboard(0x00FF_0000_0000_0000), Player::Black, Bitboard(0x7F00_0000_0000))]
     fn pawn_west_attacks_works(pawns: Bitboard, side: Player, expected: Bitboard) {
         assert_eq!(Bitboard::pawn_west_attacks(pawns, side), expected);
     }
 
-    #[test_case(Bitboard(0x00FF_0000_0000_0000), Player::Black, Bitboard(0x7F00_0000_0000))]
     #[test_case(Bitboard::EMPTY, Player::White, Bitboard::EMPTY)]
     #[test_case(Bitboard::EMPTY, Player::Black, Bitboard::EMPTY)]
     #[test_case(Bitboard(0x0010_0000), Player::White, Bitboard(0x2000_0000))]
@@ -406,5 +408,16 @@ mod test {
     #[test_case(Bitboard(0x2010_0440_0000), Player::Black, Bitboard(0x0020_1004_4000))]
     fn pawn_pushes_works(pawns: Bitboard, side: Player, expected: Bitboard) {
         assert_eq!(Bitboard::pawn_push(pawns, side), expected);
+    }
+
+    #[test_case(PieceType::Bishop, Square::A1, Bitboard(0x8040_2010_0804_0200))]
+    #[test_case(PieceType::Bishop, Square::H8, Bitboard(0x0040_2010_0804_0201))]
+    #[test_case(PieceType::Rook, Square::A8, Bitboard(0xFE01_0101_0101_0101))]
+    #[test_case(PieceType::Rook, Square::H8, Bitboard(0x7F80_8080_8080_8080))]
+    #[test_case(PieceType::Rook, Square::A1, Bitboard(0x0101_0101_0101_01FE))]
+    #[test_case(PieceType::Queen, Square::A1, Bitboard(0x8141_2111_0905_03FE))]
+    #[test_case(PieceType::Queen, Square::H1, Bitboard(0x8182_8488_90A0_C07F))]
+    fn attacks_mask_works(piece: PieceType, square: Square, expected: Bitboard) {
+        assert_eq!(Bitboard::attacks_mask(piece, square), expected);
     }
 }
