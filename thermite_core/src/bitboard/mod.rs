@@ -1,12 +1,13 @@
-mod shift;
-mod direction;
-mod attacks;
-
-use crate::square::{Square, NUM_FILES, NUM_RANKS, BySquare, NUM_SQUARES};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
+
 use crate::piece_type::PieceType;
+use crate::square::{BySquare, NUM_FILES, NUM_RANKS, NUM_SQUARES, Square};
+
+mod shift;
+mod direction;
+mod attacks;
 
 /// The raw bitboard value type
 type BitboardInner = u64;
@@ -231,9 +232,11 @@ impl const BitXorAssign for Bitboard {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-    use crate::square::Square::*;
     use test_case::test_case;
+
+    use crate::square::Square::*;
+
+    use super::*;
 
     #[test_case(A2, A4, A6, true)]
     #[test_case(A2, A4, A8, true)]
@@ -249,34 +252,34 @@ mod test {
         assert_eq!(Bitboard::is_aligned(a, b, c), expected);
     }
 
-    #[test_case(C4, F7, Bitboard(0x4081000000000))]
-    #[test_case(E6, F8, Bitboard(0x400000000000000))]
+    #[test_case(C4, F7, Bitboard(0x0020_1008_0000_0000))]
+    #[test_case(E6, F8, Bitboard(0x2000_0000_0000_0000))]
     // A1-H8 diagonal
-    #[test_case(A1, H8, Bitboard(0x40201008040200))]
-    #[test_case(A1, G7, Bitboard(0x201008040200))]
-    #[test_case(A1, F6, Bitboard(0x1008040200))]
-    #[test_case(A1, E5, Bitboard(0x8040200))]
-    #[test_case(B2, E5, Bitboard(0x8040000))]
-    #[test_case(B2, D4, Bitboard(0x40000))]
-    #[test_case(B3, D4, Bitboard(0x0))]
+    #[test_case(A1, H8, Bitboard(0x8040_2010_0804_0200))]
+    #[test_case(A1, G7, Bitboard(0x0040_2010_0804_0200))]
+    #[test_case(A1, F6, Bitboard(0x2010_0804_0200))]
+    #[test_case(A1, E5, Bitboard(0x0010_0804_0200))]
+    #[test_case(B2, E5, Bitboard(0x0010_0804_0000))]
+    #[test_case(B2, D4, Bitboard(0x0804_0000))]
+    #[test_case(B3, D4, Bitboard(0x0800_0000))]
     // G2-G6 vertical
-    #[test_case(G2, G6, Bitboard(0x4040400000))]
-    #[test_case(G3, G6, Bitboard(0x4040000000))]
-    #[test_case(G4, G6, Bitboard(0x4000000000))]
-    #[test_case(G4, G5, Bitboard(0x0))]
+    #[test_case(G2, G6, Bitboard(0x4040_4040_0000))]
+    #[test_case(G3, G6, Bitboard(0x4040_4000_0000))]
+    #[test_case(G4, G6, Bitboard(0x4040_0000_0000))]
+    #[test_case(G4, G5, Bitboard(0x0040_0000_0000))]
     // F5-A5 horizontal
-    #[test_case(F5, A5, Bitboard(0x1e00000000))]
-    #[test_case(E5, A5, Bitboard(0xe00000000))]
-    #[test_case(D5, A5, Bitboard(0x600000000))]
-    #[test_case(D5, B5, Bitboard(0x400000000))]
-    #[test_case(D5, C5, Bitboard(0x0))]
+    #[test_case(F5, A5, Bitboard(0x001F_0000_0000))]
+    #[test_case(E5, A5, Bitboard(0x000F_0000_0000))]
+    #[test_case(D5, A5, Bitboard(0x0007_0000_0000))]
+    #[test_case(D5, B5, Bitboard(0x0006_0000_0000))]
+    #[test_case(D5, C5, Bitboard(0x0004_0000_0000))]
     // Non aligned between
-    #[test_case(A5, B7, Bitboard(0x0))]
-    #[test_case(H1, C8, Bitboard(0x0))]
-    #[test_case(E4, C1, Bitboard(0x0))]
-    #[test_case(E4, D1, Bitboard(0x0))]
-    #[test_case(E4, F1, Bitboard(0x0))]
-    #[test_case(E4, G1, Bitboard(0x0))]
+    #[test_case(A5, B7, B7.to_mask())]
+    #[test_case(H1, C8, C8.to_mask())]
+    #[test_case(E4, C1, C1.to_mask())]
+    #[test_case(E4, D1, D1.to_mask())]
+    #[test_case(E4, F1, F1.to_mask())]
+    #[test_case(E4, G1, G1.to_mask())]
     fn line_between_works(a: Square, b: Square, expected: Bitboard) {
         assert_eq!(Bitboard::line_between(a, b), expected);
     }
@@ -286,38 +289,38 @@ mod test {
     #[test_case(A1, B4, Bitboard(0x0))]
     #[test_case(A1, C4, Bitboard(0x0))]
     // Diagonal A1-H8
-    #[test_case(A1, D4, Bitboard(0x8040201008040201))]
-    #[test_case(B2, D4, Bitboard(0x8040201008040201))]
-    #[test_case(C3, D4, Bitboard(0x8040201008040201))]
-    #[test_case(D4, C3, Bitboard(0x8040201008040201))]
-    #[test_case(D4, E5, Bitboard(0x8040201008040201))]
-    #[test_case(D4, H8, Bitboard(0x8040201008040201))]
-    #[test_case(A1, H8, Bitboard(0x8040201008040201))]
+    #[test_case(A1, D4, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(B2, D4, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(C3, D4, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(D4, C3, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(D4, E5, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(D4, H8, Bitboard(0x8040_2010_0804_0201))]
+    #[test_case(A1, H8, Bitboard(0x8040_2010_0804_0201))]
     // Diagonal A8-H1
-    #[test_case(A8, D5, Bitboard(0x102040810204080))]
-    #[test_case(B7, D5, Bitboard(0x102040810204080))]
-    #[test_case(C6, D5, Bitboard(0x102040810204080))]
-    #[test_case(D5, C6, Bitboard(0x102040810204080))]
-    #[test_case(D5, E4, Bitboard(0x102040810204080))]
-    #[test_case(D5, H1, Bitboard(0x102040810204080))]
-    #[test_case(A8, H1, Bitboard(0x102040810204080))]
+    #[test_case(A8, D5, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(B7, D5, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(C6, D5, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(D5, C6, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(D5, E4, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(D5, H1, Bitboard(0x0102_0408_1020_4080))]
+    #[test_case(A8, H1, Bitboard(0x0102_0408_1020_4080))]
     // Non-major diagonal D8-H4
-    #[test_case(E7, G5, Bitboard(0x810204080000000))]
-    #[test_case(G5, E7, Bitboard(0x810204080000000))]
-    #[test_case(G5, H4, Bitboard(0x810204080000000))]
-    #[test_case(D8, H4, Bitboard(0x810204080000000))]
+    #[test_case(E7, G5, Bitboard(0x0810_2040_8000_0000))]
+    #[test_case(G5, E7, Bitboard(0x0810_2040_8000_0000))]
+    #[test_case(G5, H4, Bitboard(0x0810_2040_8000_0000))]
+    #[test_case(D8, H4, Bitboard(0x0810_2040_8000_0000))]
     // Vertical G1-G4
-    #[test_case(G1, G4, Bitboard(0x4040404040404040))]
-    #[test_case(G1, G3, Bitboard(0x4040404040404040))]
-    #[test_case(G1, G2, Bitboard(0x4040404040404040))]
-    #[test_case(G4, G1, Bitboard(0x4040404040404040))]
+    #[test_case(G1, G4, Bitboard(0x4040_4040_4040_4040))]
+    #[test_case(G1, G3, Bitboard(0x4040_4040_4040_4040))]
+    #[test_case(G1, G2, Bitboard(0x4040_4040_4040_4040))]
+    #[test_case(G4, G1, Bitboard(0x4040_4040_4040_4040))]
     // Horizontal A5-F5
-    #[test_case(A5, F5, Bitboard(0xff00000000))]
-    #[test_case(A5, E5, Bitboard(0xff00000000))]
-    #[test_case(A5, D5, Bitboard(0xff00000000))]
-    #[test_case(A5, C5, Bitboard(0xff00000000))]
-    #[test_case(B5, C5, Bitboard(0xff00000000))]
-    #[test_case(C5, F5, Bitboard(0xff00000000))]
+    #[test_case(A5, F5, Bitboard(0x00FF_0000_0000))]
+    #[test_case(A5, E5, Bitboard(0x00FF_0000_0000))]
+    #[test_case(A5, D5, Bitboard(0x00FF_0000_0000))]
+    #[test_case(A5, C5, Bitboard(0x00FF_0000_0000))]
+    #[test_case(B5, C5, Bitboard(0x00FF_0000_0000))]
+    #[test_case(C5, F5, Bitboard(0x00FF_0000_0000))]
     fn line_through_works(a: Square, b: Square, expected: Bitboard) {
         assert_eq!(Bitboard::line_through(a, b), expected);
     }
