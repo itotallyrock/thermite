@@ -88,8 +88,13 @@ impl Bitboard {
     /// If a bit is set, return that [`Square`](Square) and unset the bit
     #[must_use]
     pub const fn pop_square(&mut self) -> Option<Square> {
+        let square_offset = self.0.trailing_zeros();
         #[allow(clippy::cast_possible_truncation)]
-        Square::try_from(self.0.trailing_zeros() as u8).ok()
+         let square = Square::try_from(square_offset as u8).ok()?;
+        // Remove bit
+        self.0 ^= Self::A1.0 << square_offset;
+
+        Some(square)
     }
 }
 
