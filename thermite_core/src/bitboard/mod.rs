@@ -19,12 +19,12 @@ pub struct Bitboard(pub(crate) BitboardInner);
 const fn line_generator<const BETWEEN: bool>() -> BySquare<BySquare<Bitboard>> {
     let mut items: BySquare<BySquare<Bitboard>> = BySquare::default();
     let mut a_square_offset = 0;
-    while (a_square_offset as usize) < NUM_SQUARES {
-        let a_square = Square::try_from(a_square_offset).ok().unwrap();
+    while a_square_offset < NUM_SQUARES {
+        let a_square = Square::SQUARES[a_square_offset];
         let mut b_square_offset = 0;
-        while (b_square_offset as usize) < NUM_SQUARES {
+        while b_square_offset < NUM_SQUARES {
             const SLIDING_PIECES: [PieceType; 2] = [PieceType::Rook, PieceType::Bishop];
-            let b_square = Square::try_from(b_square_offset).ok().unwrap();
+            let b_square = Square::SQUARES[b_square_offset];
             let b_mask = b_square.to_mask();
             let mut piece_index = 0;
             while piece_index < SLIDING_PIECES.len() {
