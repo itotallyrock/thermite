@@ -96,6 +96,13 @@ impl Bitboard {
 
         Some(square)
     }
+
+    /// How many set [`Square`](squares) the mask contains
+    #[must_use]
+    pub const fn num_squares(&self) -> u8 {
+        #[allow(clippy::cast_possible_truncation)]
+        { self.0.count_ones() as u8 }
+    }
 }
 
 impl const Default for Bitboard {
