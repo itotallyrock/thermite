@@ -9,7 +9,7 @@ use std::hash::Hasher;
 mod keys;
 
 /// The raw hash value for a chess position
-type ZobristInner = u64;
+pub type ZobristInner = u64;
 
 /// Positional hasher based on board features.
 /// The same position arrived at through different sets of moves will still have the same Zobrist hash.
@@ -50,7 +50,7 @@ impl ZobristHasher {
     }
 }
 
-impl Hasher for ZobristHasher {
+impl const Hasher for ZobristHasher {
     /// Get the pre-computed hash value
     fn finish(&self) -> u64 {
         self.0
