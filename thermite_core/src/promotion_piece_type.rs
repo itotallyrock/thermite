@@ -1,16 +1,24 @@
 use crate::piece_type::PieceType;
 
+/// How many types of pieces that a pawn can promote into
+pub const NUM_PROMOTION_PIECE_TYPES: usize = 4;
+
 /// Types of pieces that can be promoted to by a pawn reaching the opposite player's back rank
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum PromotionPieceType {
-    /// Promote to a [`Queen`](crate::piece_type::PieceType::Queen)
+    /// Promote to a [`Queen`](PieceType::Queen)
     Queen,
-    /// Promote to a [`Rook`](crate::piece_type::PieceType::Rook)
+    /// Promote to a [`Rook`](PieceType::Rook)
     Rook,
-    /// Promote to a [`Bishop`](crate::piece_type::PieceType::Bishop)
+    /// Promote to a [`Bishop`](PieceType::Bishop)
     Bishop,
-    /// Promote to a [`Knight`](crate::piece_type::PieceType::Knight)
+    /// Promote to a [`Knight`](PieceType::Knight)
     Knight,
+}
+
+impl PromotionPieceType {
+    /// Array of all possible promotions
+    pub const ALL: [Self; NUM_PROMOTION_PIECE_TYPES] = [Self::Queen, Self::Knight, Self::Rook, Self::Bishop];
 }
 
 /// Attempting to create a promotion for invalid piece
@@ -46,6 +54,11 @@ impl const From<PromotionPieceType> for PieceType {
 mod test {
     use super::*;
     use test_case::test_case;
+
+    #[test]
+    fn all_ordering_remains_consistent() {
+        assert_eq!(&PromotionPieceType::ALL, &[PromotionPieceType::Queen, PromotionPieceType::Knight, PromotionPieceType::Rook, PromotionPieceType::Bishop]);
+    }
 
     #[test_case(PromotionPieceType::Queen, PieceType::Queen)]
     #[test_case(PromotionPieceType::Rook, PieceType::Rook)]
