@@ -101,8 +101,8 @@ impl Bitboard {
         let mut items: ByPieceType<BySquare<Self>> = ByPieceType::default();
 
         let mut square_offset = 0;
-        while (square_offset as usize) < NUM_SQUARES {
-            let square = Square::try_from(square_offset).ok().unwrap();
+        while square_offset < NUM_SQUARES {
+            let square = Square::SQUARES[square_offset];
             let square_mask = square.to_mask();
             *items.mut_piece(PieceType::King).mut_square(square) = square_mask.king_attacks();
             *items.mut_piece(PieceType::Knight).mut_square(square) = square_mask.knight_attacks();
@@ -125,8 +125,8 @@ impl Bitboard {
     const PAWN_ATTACKS: ByPlayer<BySquare<Self>> = {
         let mut items: ByPlayer<BySquare<Self>> = ByPlayer::default();
         let mut square_offset = 0;
-        while (square_offset as usize) < NUM_SQUARES {
-            let square = Square::try_from(square_offset).ok().unwrap();
+        while square_offset < NUM_SQUARES {
+            let square = Square::SQUARES[square_offset];
             let square_mask = square.to_mask();
             *items.mut_side(Player::White).mut_square(square) = square_mask.pawn_attacks(Player::White);
             *items.mut_side(Player::Black).mut_square(square) = square_mask.pawn_attacks(Player::Black);
@@ -184,7 +184,8 @@ impl Bitboard {
         attacks | self.shift(Direction::North) | self.shift(Direction::South)
     }
 
-    const fn pawn_west_attacks(self, side: Player) -> Self {
+    /// Calculate the pawn west attacks mask for a given mask of pawn attacker(s)
+    pub const fn pawn_west_attacks(self, side: Player) -> Self {
         let west_attack_direction = match side {
             Player::White => Direction::NorthWest,
             Player::Black => Direction::SouthWest,
@@ -193,7 +194,8 @@ impl Bitboard {
         self.shift(west_attack_direction)
     }
 
-    const fn pawn_east_attacks(self, side: Player) -> Self {
+    /// Calculate the pawn east attacks mask for a given mask of pawn attacker(s)
+    pub const fn pawn_east_attacks(self, side: Player) -> Self {
         let west_attack_direction = match side {
             Player::White => Direction::NorthEast,
             Player::Black => Direction::SouthEast,
@@ -231,10 +233,11 @@ impl Bitboard {
     }
 
     const fn occluded_fill(mut self, occupied: Self, direction: Direction) -> Self {
+        let mut empty = !occupied;
         let mut flood = Self::EMPTY;
         if self != Self::EMPTY {
             let direction_shift = direction as i32;
-            let empty = !occupied & Self::get_sliding_mask(direction);
+            empty &= Self::get_sliding_mask(direction);
             loop {
                 flood |= self;
                 self = self.shift_raw(direction_shift) & empty;
