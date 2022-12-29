@@ -18,7 +18,7 @@ impl Display for ChessMove {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let &Self { from, to, move_type } = self;
         match move_type {
-            MoveType::Quiet { .. } | MoveType::DoublePawnPush { .. } | MoveType::Capture { .. } | MoveType::EnPassantCapture { .. } | MoveType::KingSideCastle { .. } | MoveType::QueenSideCastle { .. } => {
+            MoveType::Quiet { .. } | MoveType::DoublePawnPush { .. } | MoveType::Capture { .. } | MoveType::EnPassantCapture { .. } | MoveType::Castle { .. } => {
                 write!(f, "{from}{to}")
             },
             MoveType::PromotingCapture { promotion, .. } | MoveType::Promotion { promotion } => {
