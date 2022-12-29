@@ -317,6 +317,37 @@ mod test {
     use test_case::test_case;
 
     #[test_case(Square::A1, 0)]
+    #[test_case(Square::H8, 63)]
+    #[test_case(Square::A8, 56)]
+    #[test_case(Square::A7, 48)]
+    #[test_case(Square::E5, 36)]
+    #[test_case(Square::H1, 7)]
+    fn offset_works(square: Square, offset: u8) {
+        assert_eq!(square as u8, offset);
+    }
+
+    #[test_case(Square::A1)]
+    #[test_case(Square::A4)]
+    #[test_case(Square::A8)]
+    #[test_case(Square::B8)]
+    #[test_case(Square::B2)]
+    #[test_case(Square::C5)]
+    #[test_case(Square::C7)]
+    #[test_case(Square::D3)]
+    #[test_case(Square::D1)]
+    #[test_case(Square::E8)]
+    #[test_case(Square::E2)]
+    #[test_case(Square::F7)]
+    #[test_case(Square::F4)]
+    #[test_case(Square::G6)]
+    #[test_case(Square::G2)]
+    #[test_case(Square::H3)]
+    #[test_case(Square::H8)]
+    fn try_from_is_commutative(square: Square) {
+        assert_eq!(Square::try_from(square as u8).ok().unwrap(), square);
+    }
+
+    #[test_case(Square::A1, 0)]
     #[test_case(Square::A4, 0)]
     #[test_case(Square::A8, 0)]
     #[test_case(Square::B8, 1)]
