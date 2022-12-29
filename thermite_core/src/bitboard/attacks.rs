@@ -1,100 +1,179 @@
-use crate::bitboard::{Bitboard, BitboardInner};
+use crate::bitboard::{Bitboard};
 use crate::bitboard::direction::Direction;
 use crate::piece_type::{ByPieceType, PieceType};
 use crate::player::{ByPlayer, Player};
-use crate::square::{BySquare, NUM_FILES, NUM_RANKS, NUM_SQUARES, Square};
+use crate::square::{BySquare, NUM_SQUARES, Square};
 
-/// Maximum number of variations of individual blockers for a rook
-const ROOK_OCCUPANCY_LIMIT: u8 = 12;
-/// Maximum number of variations of blockers for a bishop
-const BISHOP_OCCUPANCY_LIMIT: u8 = 9;
+mod magics {
+    use crate::bitboard::{Bitboard, BitboardInner};
+    use crate::square::{BySquare, NUM_SQUARES, Square};
 
-#[derive(Copy, Clone, Debug)]
-struct MagicLookup<const OCCUPANCY_LIMIT: u32> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
-    occupancy_mask: Bitboard,
-    attacks: [Bitboard; 1 << OCCUPANCY_LIMIT],
-}
 
-impl<const OCCUPANCY_LIMIT: u32> const Default for MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
-    fn default() -> Self {
-        Self {
-            occupancy_mask: Bitboard::default(),
-            attacks: [Bitboard::default(); 1 << OCCUPANCY_LIMIT],
-        }
-    }
-}
-
-/// Bit deposit, take an index and use that value to essentially count in binary to fill a give occupancy mask
-/// Index is generally valid for `0..(1 << N)` (or `2 ^ N`) where `N = occupancy_mask.count_ones()`
-const fn board_mask_from_index(index: usize, occupancy_mask: Bitboard) -> Bitboard {
-    let mut mask = occupancy_mask.0;
-    let mut res = 0;
-    let mut bb = Bitboard::A1.0;
-    loop {
-        if mask == 0 {
-            break;
-        }
-        if (index as BitboardInner & bb) != 0 {
-            res |= mask & mask.wrapping_neg();
-        }
-        mask &= mask - 1;
-        bb = bb.wrapping_add(bb);
+    /// Find the occluded bishop attack mask in the lookup table for a given origin square and occupied mask
+    pub const fn lookup_bishop_occluded_attacks(square: Square, occupied: Bitboard) -> Bitboard {
+        BISHOP_OCCLUDED_ATTACKS.get_square(square).get_for(occupied)
     }
 
-    Bitboard(res)
-}
-
-/// Bit extract, pull bits from a set of occupied squares masked by an occupancy (or mask of relevant squares that when occupied will block a sliding piece)
-const fn index_from_board_mask(occupied_mask: Bitboard, occupancy_mask: Bitboard) -> usize {
-    let mut mask = occupancy_mask.0;
-    let mut res = 0;
-    let mut bb = Bitboard::A1.0;
-    loop {
-        if mask == 0 {
-            break;
-        }
-        if occupied_mask.0 & mask & (mask.wrapping_neg()) != 0 {
-            res |= bb;
-        }
-        mask &= mask - 1;
-        bb = bb.wrapping_add(bb);
+    /// Find the occluded rook attack mask in the lookup table for a given origin square and occupied mask
+    pub const fn lookup_rook_occluded_attacks(square: Square, occupied: Bitboard) -> Bitboard {
+        ROOK_OCCLUDED_ATTACKS.get_square(square).get_for(occupied)
     }
 
-    #[allow(clippy::cast_possible_truncation)]
-    { res as usize }
-}
+    const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<BISHOP_OCCUPANCY_LIMIT>> = create_sliding_lookup::<BISHOP_OCCUPANCY_LIMIT, false>();
+    const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<ROOK_OCCUPANCY_LIMIT>> = create_sliding_lookup::<ROOK_OCCUPANCY_LIMIT, true>();
 
-impl<const OCCUPANCY_LIMIT: u32> MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
-    const fn get_for(&self, occupied: Bitboard) -> Bitboard {
-        self.attacks[index_from_board_mask(occupied, self.occupancy_mask)]
+    /// Maximum number of variations of individual blockers for a rook
+    const ROOK_OCCUPANCY_LIMIT: u32 = 12;
+    /// Maximum number of variations of blockers for a bishop
+    const BISHOP_OCCUPANCY_LIMIT: u32 = 9;
+
+    #[rustfmt::skip]
+    const ROOK_BLOCKER_COUNTS: BySquare<u8> = BySquare::from([
+        12, 11, 11, 11, 11, 11, 11, 12,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        12, 11, 11, 11, 11, 11, 11, 12,
+    ]);
+
+    #[rustfmt::skip]
+    const BISHOP_BLOCKER_COUNTS: BySquare<u8> = BySquare::from([
+        6, 5, 5, 5, 5, 5, 5, 6,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        5, 5, 7, 7, 7, 7, 5, 5,
+        5, 5, 7, 9, 9, 7, 5, 5,
+        5, 5, 7, 9, 9, 7, 5, 5,
+        5, 5, 7, 7, 7, 7, 5, 5,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        6, 5, 5, 5, 5, 5, 5, 6,
+    ]);
+
+    #[rustfmt::skip]
+    #[allow(clippy::unreadable_literal)]
+    const BISHOP_OCCUPANCY_MASK: BySquare<Bitboard> = BySquare::from([
+        Bitboard(0x40201008040200), Bitboard(0x402010080400),   Bitboard(0x4020100A00),     Bitboard(0x40221400),       Bitboard(0x2442800),        Bitboard(0x204085000),      Bitboard(0x20408102000),    Bitboard(0x2040810204000),
+        Bitboard(0x20100804020000), Bitboard(0x40201008040000), Bitboard(0x4020100A0000),   Bitboard(0x4022140000),     Bitboard(0x244280000),      Bitboard(0x20408500000),    Bitboard(0x2040810200000),  Bitboard(0x4081020400000),
+        Bitboard(0x10080402000200), Bitboard(0x20100804000400), Bitboard(0x4020100A000A00), Bitboard(0x402214001400),   Bitboard(0x24428002800),    Bitboard(0x2040850005000),  Bitboard(0x4081020002000),  Bitboard(0x8102040004000),
+        Bitboard(0x8040200020400),  Bitboard(0x10080400040800), Bitboard(0x20100A000A1000), Bitboard(0x40221400142200), Bitboard(0x2442800284400),  Bitboard(0x4085000500800),  Bitboard(0x8102000201000),  Bitboard(0x10204000402000),
+        Bitboard(0x4020002040800),  Bitboard(0x8040004081000),  Bitboard(0x100A000A102000), Bitboard(0x22140014224000), Bitboard(0x44280028440200), Bitboard(0x8500050080400),  Bitboard(0x10200020100800), Bitboard(0x20400040201000),
+        Bitboard(0x2000204081000),  Bitboard(0x4000408102000),  Bitboard(0xA000A10204000),  Bitboard(0x14001422400000), Bitboard(0x28002844020000), Bitboard(0x50005008040200), Bitboard(0x20002010080400), Bitboard(0x40004020100800),
+        Bitboard(0x20408102000),    Bitboard(0x40810204000),    Bitboard(0xA1020400000),    Bitboard(0x142240000000),   Bitboard(0x284402000000),   Bitboard(0x500804020000),   Bitboard(0x201008040200),   Bitboard(0x402010080400),
+        Bitboard(0x2040810204000),  Bitboard(0x4081020400000),  Bitboard(0xA102040000000),  Bitboard(0x14224000000000), Bitboard(0x28440200000000), Bitboard(0x50080402000000), Bitboard(0x20100804020000), Bitboard(0x40201008040200),
+    ]);
+
+    #[rustfmt::skip]
+    #[allow(clippy::unreadable_literal)]
+    const ROOK_OCCUPANCY_MASK: BySquare<Bitboard> = BySquare::from([
+        Bitboard(0x101010101017E),    Bitboard(0x202020202027C),    Bitboard(0x404040404047A),    Bitboard(0x8080808080876),    Bitboard(0x1010101010106E),   Bitboard(0x2020202020205E),   Bitboard(0x4040404040403E),   Bitboard(0x8080808080807E),
+        Bitboard(0x1010101017E00),    Bitboard(0x2020202027C00),    Bitboard(0x4040404047A00),    Bitboard(0x8080808087600),    Bitboard(0x10101010106E00),   Bitboard(0x20202020205E00),   Bitboard(0x40404040403E00),   Bitboard(0x80808080807E00),
+        Bitboard(0x10101017E0100),    Bitboard(0x20202027C0200),    Bitboard(0x40404047A0400),    Bitboard(0x8080808760800),    Bitboard(0x101010106E1000),   Bitboard(0x202020205E2000),   Bitboard(0x404040403E4000),   Bitboard(0x808080807E8000),
+        Bitboard(0x101017E010100),    Bitboard(0x202027C020200),    Bitboard(0x404047A040400),    Bitboard(0x8080876080800),    Bitboard(0x1010106E101000),   Bitboard(0x2020205E202000),   Bitboard(0x4040403E404000),   Bitboard(0x8080807E808000),
+        Bitboard(0x1017E01010100),    Bitboard(0x2027C02020200),    Bitboard(0x4047A04040400),    Bitboard(0x8087608080800),    Bitboard(0x10106E10101000),   Bitboard(0x20205E20202000),   Bitboard(0x40403E40404000),   Bitboard(0x80807E80808000),
+        Bitboard(0x17E0101010100),    Bitboard(0x27C0202020200),    Bitboard(0x47A0404040400),    Bitboard(0x8760808080800),    Bitboard(0x106E1010101000),   Bitboard(0x205E2020202000),   Bitboard(0x403E4040404000),   Bitboard(0x807E8080808000),
+        Bitboard(0x7E010101010100),   Bitboard(0x7C020202020200),   Bitboard(0x7A040404040400),   Bitboard(0x76080808080800),   Bitboard(0x6E101010101000),   Bitboard(0x5E202020202000),   Bitboard(0x3E404040404000),   Bitboard(0x7E808080808000),
+        Bitboard(0x7E01010101010100), Bitboard(0x7C02020202020200), Bitboard(0x7A04040404040400), Bitboard(0x7608080808080800), Bitboard(0x6E10101010101000), Bitboard(0x5E20202020202000), Bitboard(0x3E40404040404000), Bitboard(0x7E80808080808000),
+    ]);
+
+    #[derive(Copy, Clone, Debug)]
+    struct MagicLookup<const OCCUPANCY_LIMIT: u32> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+        occupancy_mask: Bitboard,
+        attacks: [Bitboard; 1 << OCCUPANCY_LIMIT],
     }
-}
 
-const fn create_sliding_attacks_occluded_masks<const OCCUPANCY_LIMIT: u32, const CARDINAL: bool>() -> [MagicLookup<OCCUPANCY_LIMIT>; NUM_SQUARES] where [(); 1 << OCCUPANCY_LIMIT]: Sized {
-    const NOT_EDGES: Bitboard = !(Bitboard::RANKS[0] | Bitboard::RANKS[NUM_RANKS - 1] | Bitboard::FILES[0] | Bitboard::FILES[NUM_FILES - 1]);
-    let mut attacks_by_square = [MagicLookup::<{ OCCUPANCY_LIMIT }>::default(); NUM_SQUARES];
+    impl<const OCCUPANCY_LIMIT: u32> const Default for MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+        fn default() -> Self {
+            Self {
+                occupancy_mask: Bitboard::default(),
+                attacks: [Bitboard::default(); 1 << OCCUPANCY_LIMIT],
+            }
+        }
+    }
 
-    let mut square_index = 0;
-    while square_index < NUM_SQUARES {
+    /// Bit deposit, take an index and use that value to essentially count in binary to fill a give occupancy mask
+    /// Index is generally valid for `0..(1 << N)` (or `2 ^ N`) where `N = occupancy_mask.count_ones()`
+    const fn board_mask_from_index(index: usize, occupancy_mask: Bitboard) -> Bitboard {
+        let mut mask = occupancy_mask.0;
+        let mut res = 0;
+        let mut bb = Bitboard::A1.0;
+        loop {
+            if mask == 0 {
+                break;
+            }
+            if (index as BitboardInner & bb) != 0 {
+                res |= mask & mask.wrapping_neg();
+            }
+            mask &= mask - 1;
+            bb = bb.wrapping_add(bb);
+        }
+
+        Bitboard(res)
+    }
+
+    /// Bit extract, pull bits from a set of occupied squares masked by an occupancy (or mask of relevant squares that when occupied will block a sliding piece)
+    const fn index_from_board_mask(occupied_mask: Bitboard, occupancy_mask: Bitboard) -> usize {
+        let mut mask = occupancy_mask.0;
+        let mut res = 0;
+        let mut bb = Bitboard::A1.0;
+        loop {
+            if mask == 0 {
+                break;
+            }
+            if occupied_mask.0 & mask & (mask.wrapping_neg()) != 0 {
+                res |= bb;
+            }
+            mask &= mask - 1;
+            bb = bb.wrapping_add(bb);
+        }
+
         #[allow(clippy::cast_possible_truncation)]
-        let piece_square = Square::try_from(square_index as u8).ok().unwrap();
-        let piece_mask = piece_square.to_mask();
-        let occupancy_mask = if CARDINAL { piece_mask.cardinal_sliding_attacks(piece_mask) } else { piece_mask.ordinal_sliding_attacks(piece_mask) } & NOT_EDGES;
-        attacks_by_square[square_index].occupancy_mask = occupancy_mask;
-        let mut blocker_index = 0;
-        while blocker_index < (1 << OCCUPANCY_LIMIT) {
-            let blocker_mask = board_mask_from_index(blocker_index, occupancy_mask) | piece_mask;
-            let attacks = if CARDINAL { piece_mask.cardinal_sliding_attacks(blocker_mask) } else { piece_mask.ordinal_sliding_attacks(blocker_mask) };
-
-            attacks_by_square[square_index].attacks[blocker_index] = attacks;
-
-            blocker_index += 1;
-        }
-        square_index += 1;
+        { res as usize }
     }
 
-    attacks_by_square
-}
+    impl<const OCCUPANCY_LIMIT: u32> MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+        const fn get_for(&self, occupied: Bitboard) -> Bitboard {
+            self.attacks[index_from_board_mask(occupied, self.occupancy_mask)]
+        }
+    }
+
+    const fn get_max_blockers<const IS_CARDINAL: bool>(piece_square: Square) -> u8 {
+        let directional_blocker_count_table = if IS_CARDINAL { ROOK_BLOCKER_COUNTS } else { BISHOP_BLOCKER_COUNTS };
+
+        *directional_blocker_count_table.get_square(piece_square)
+    }
+
+    const fn get_occupancy_mask<const IS_CARDINAL: bool>(piece_square: Square) -> Bitboard {
+        let directional_occupancy_table = if IS_CARDINAL { ROOK_OCCUPANCY_MASK } else { BISHOP_OCCUPANCY_MASK };
+
+        *directional_occupancy_table.get_square(piece_square)
+    }
+
+    const fn create_sliding_lookup<const OCCUPANCY_LIMIT: u32, const IS_CARDINAL: bool>() -> BySquare<MagicLookup<OCCUPANCY_LIMIT>> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+        let mut attacks_by_square: BySquare<MagicLookup<OCCUPANCY_LIMIT>> = BySquare::default();
+
+        let mut square_index = 0;
+        while square_index < NUM_SQUARES {
+            #[allow(clippy::cast_possible_truncation)]
+            let piece_square = Square::SQUARES[square_index];
+            let piece_mask = piece_square.to_mask();
+            let occupancy_mask = get_occupancy_mask::<IS_CARDINAL>(piece_square);
+            attacks_by_square.mut_square(piece_square).occupancy_mask = occupancy_mask;
+            let mut blocker_index = 0;
+            while blocker_index < (1 << get_max_blockers::<IS_CARDINAL>(piece_square) as u32) {
+                let blocker_mask = board_mask_from_index(blocker_index, occupancy_mask) | piece_mask;
+                let attacks = if IS_CARDINAL { piece_mask.cardinal_sliding_attacks(blocker_mask) } else { piece_mask.ordinal_sliding_attacks(blocker_mask) };
+
+                attacks_by_square.mut_square(piece_square).attacks[blocker_index] = attacks;
+
+                blocker_index += 1;
+            }
+            square_index += 1;
+        }
+
+        attacks_by_square
+    }
 
 impl Bitboard {
     const PSEUDO_ATTACKS: ByPieceType<BySquare<Self>> = {
@@ -117,10 +196,6 @@ impl Bitboard {
 
         items
     };
-
-    const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ BISHOP_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ BISHOP_OCCUPANCY_LIMIT as u32 }, false>());
-
-    const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<{ ROOK_OCCUPANCY_LIMIT as u32 }>> = BySquare::from(create_sliding_attacks_occluded_masks::<{ ROOK_OCCUPANCY_LIMIT as u32 }, true>());
 
     const PAWN_ATTACKS: ByPlayer<BySquare<Self>> = {
         let mut items: ByPlayer<BySquare<Self>> = ByPlayer::default();
@@ -158,8 +233,8 @@ impl Bitboard {
         match piece {
             PieceType::Pawn => panic!("use pawn_attacks_mask"),
             PieceType::Knight | PieceType::King => Self::attacks_mask(piece, square),
-            PieceType::Bishop => Self::BISHOP_OCCLUDED_ATTACKS.get_square(square).get_for(occupied),
-            PieceType::Rook => Self::ROOK_OCCLUDED_ATTACKS.get_square(square).get_for(occupied),
+            PieceType::Bishop => magics::lookup_bishop_occluded_attacks(square, occupied),
+            PieceType::Rook => magics::lookup_rook_occluded_attacks(square, occupied),
             PieceType::Queen => Self::occluded_attacks_mask(PieceType::Rook, square, occupied) | Self::occluded_attacks_mask(PieceType::Bishop, square, occupied),
         }
     }
