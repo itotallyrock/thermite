@@ -1,4 +1,4 @@
-use crate::castles::NUM_CASTLES;
+use crate::castles::{CastleDirection, NUM_CASTLES};
 use crate::player::Player;
 use std::ops::{BitAnd, BitOr, Not};
 
@@ -103,38 +103,38 @@ impl CastleRights {
     /// If the castle rights specify the ability for a side to castle in a given direction.
     ///
     /// ```
-    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::castles::{CastleDirection, CastleRights};
     /// use thermite_core::player::Player;
     /// // Test if white can king-side castle
-    /// assert_eq!(CastleRights::WhiteKing.can_castle(Player::White, true), true);
+    /// assert_eq!(CastleRights::WhiteKing.can_castle(Player::White, CastleDirection::KingSide), true);
     /// // Test if black can queen-side castle
-    /// assert_eq!(CastleRights::BlackQueen.can_castle(Player::Black, false), true);
+    /// assert_eq!(CastleRights::BlackQueen.can_castle(Player::Black, CastleDirection::QueenSide), true);
     /// ```
     ///
     /// Combination `CastleRights` such as `None` or `All` are supported as well.
     /// ```
-    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::castles::{CastleDirection, CastleRights};
     /// use thermite_core::player::Player;
     ///
     /// // CastleRights::None is always false
-    /// assert_eq!(CastleRights::None.can_castle(Player::White, true), false);
-    /// assert_eq!(CastleRights::None.can_castle(Player::White, false), false);
-    /// assert_eq!(CastleRights::None.can_castle(Player::Black, true), false);
-    /// assert_eq!(CastleRights::None.can_castle(Player::Black, false), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::White, CastleDirection::KingSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::White, CastleDirection::QueenSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::Black, CastleDirection::KingSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(Player::Black, CastleDirection::QueenSide), false);
     ///
     /// // CastleRights::All is always true
-    /// assert_eq!(CastleRights::All.can_castle(Player::White, true), true);
-    /// assert_eq!(CastleRights::All.can_castle(Player::White, false), true);
-    /// assert_eq!(CastleRights::All.can_castle(Player::Black, true), true);
-    /// assert_eq!(CastleRights::All.can_castle(Player::Black, false), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::White, CastleDirection::KingSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::White, CastleDirection::QueenSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::Black, CastleDirection::KingSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(Player::Black, CastleDirection::QueenSide), true);
     /// ```
     #[must_use]
-    pub const fn can_castle(&self, side: Player, king_side: bool) -> bool {
-        let truthy_mask = match (side, king_side) {
-            (Player::White, true) => Self::WhiteKing as u8,
-            (Player::White, false) => Self::WhiteQueen as u8,
-            (Player::Black, true) => Self::BlackKing as u8,
-            (Player::Black, false) => Self::BlackQueen as u8,
+    pub const fn can_castle(&self, side: Player, direction: CastleDirection) -> bool {
+        let truthy_mask = match (side, direction) {
+            (Player::White, CastleDirection::KingSide) => Self::WhiteKing as u8,
+            (Player::White, CastleDirection::QueenSide) => Self::WhiteQueen as u8,
+            (Player::Black, CastleDirection::KingSide) => Self::BlackKing as u8,
+            (Player::Black, CastleDirection::QueenSide) => Self::BlackQueen as u8,
         };
 
         truthy_mask & *self as u8 != 0u8

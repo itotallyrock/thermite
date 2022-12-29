@@ -1,3 +1,4 @@
+use crate::castles::CastleDirection;
 use crate::piece_type::PieceType;
 use crate::promotion_piece_type::PromotionPieceType;
 use crate::square::Square;
@@ -27,15 +28,10 @@ pub enum MoveType {
         /// The square of the pawn that double-jumped
         captured_pawn_square: Square,
     },
-    /// Castle towards the king-side, moving the rook between the H file and the F file and the king between E file and G file
-    KingSideCastle {
-        /// The square the rook is moving from
-        rook_from_square: Square,
-    },
-    /// Castle towards the queen-side, moving the rook between the A file and the D file and the king between E file and C file
-    QueenSideCastle {
-        /// The square the rook is moving from
-        rook_from_square: Square,
+    /// Castle, or swap the rook and king shifting the king towards the center if both have not been moved yet
+    Castle {
+        /// The direction the king is castling towards
+        castle_direction: CastleDirection,
     },
     /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotionPieceType`]
     Promotion {
