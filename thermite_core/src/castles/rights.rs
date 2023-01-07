@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use crate::castles::{CastleDirection, NUM_CASTLES};
 use crate::player::Player;
 use std::ops::{BitAnd, BitOr, Not};
@@ -236,6 +237,29 @@ impl const Not for CastleRights {
             Self::WhiteKingBlackBoth => Self::WhiteQueen,
             Self::WhiteQueenBlackBoth => Self::WhiteKing,
             Self::All => Self::None,
+        }
+    }
+}
+
+impl Display for CastleRights {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "-"),
+            Self::WhiteKing => write!(f, "K"),
+            Self::WhiteQueen => write!(f, "Q"),
+            Self::WhiteBoth => write!(f, "KQ"),
+            Self::BlackKing => write!(f, "k"),
+            Self::BothKings => write!(f, "Kk"),
+            Self::WhiteQueenBlackKing => write!(f, "Qk"),
+            Self::WhiteBothBlackKing => write!(f, "KQk"),
+            Self::BlackQueen => write!(f, "q"),
+            Self::WhiteKingBlackQueen => write!(f, "Kq"),
+            Self::BothQueens => write!(f, "Qq"),
+            Self::WhiteBothBlackQueen => write!(f, "KQq"),
+            Self::BlackBoth => write!(f, "kq"),
+            Self::WhiteKingBlackBoth => write!(f, "Kkq"),
+            Self::WhiteQueenBlackBoth => write!(f, "Qkq"),
+            Self::All => write!(f, "KQkq"),
         }
     }
 }

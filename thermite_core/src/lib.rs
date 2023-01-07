@@ -20,30 +20,32 @@
     generic_const_exprs,
 )]
 // other features
-#![feature(is_sorted)]
+#![feature(is_sorted, let_chains)]
 #![cfg_attr(test, feature(test))]
 #![const_eval_limit = "0"]
-#![warn(missing_docs)]
+
+#![warn(missing_docs, clippy::pedantic, rustdoc::missing_doc_code_examples, clippy::nursery, clippy::cargo, clippy::style)]
 #![deny(clippy::all)]
-#![warn(clippy::pedantic)]
-#![warn(rustdoc::missing_doc_code_examples)]
-#![warn(clippy::nursery)]
-#![warn(clippy::cargo)]
-#![warn(clippy::style)]
 #![allow(clippy::module_name_repetitions, clippy::debug_assert_with_mut_call)]
 
 //! Thermite chess essential types.
-//! - `Piece` - A piece on the board: King, Queen, Rook, Bishop, Knight, Pawn
-//! - `Side` - A player in the game, represented by the color of their pieces
-//! - `Square` - A single tile on a board, used for move notation
-//! - `Bitboard` - A mask of the board where each square can be either a `1` or a `0`
-//! - `ChessMove` - A from & to square for a piece and metadata necessary for making the move (eg. promotions)
-//! - `CastleRights` - The availability for a side to castle, keeps track of rook or king movement, and should also help move generation keep track of attacked squares
-//! - `Board` - The position: piece-arrangement, or where each piece is placed on the board, and side to move along with a myriad of featured gated metadata, for move-generation, evaluation, searching, and more.
-//! - `Score` - With `#[cfg(feature = "score")]` an evaluation of a [`Board`](crate::board::Board)
+//! - [`Piece`](piece::Piece) - A piece on the board: King, Queen, Rook, Bishop, Knight, Pawn
+//! - [`Player`](player::Player) - A player in the game, represented by the color of their pieces
+//! - [`Square`](square::Square) - A single tile on a board, used for move notation
+//! - [`Bitboard`](bitboard::Bitboard) - A mask of the board where each square can be either a `1` or a `0`
+//! - [`ChessMove`](chess_move::ChessMove) - A from & to square for a piece and metadata necessary for making the move (eg. promotions)
+//! - [`Castles`](castles::Castles) - The availability (or rights) for a side to castle [`CastleRights`](castles::CastleRights), keeps track of rook or king movement, and should also help move generation keep track of attacked squares
+//! - [`Board`](board::Board) - The position: piece-arrangement, or where each piece is placed on the board, and side to move along with a myriad of featured gated metadata, for move-generation, evaluation, searching, and more.
+//! - [`PawnApproximationEvaluation`](score::PawnApproximationEvaluation) - With `#[cfg(feature = "score")]` an evaluation of a [`Board`](crate::board::Board)
 
 /// A single player's chess move
 pub type PlyCount = u16;
+/// How many half moves a player can make before a pawn must be pushed or a piece be captured in order to avoid a draw
+pub const STANDARD_MOVE_CLOCK: PlyCount = 50;
+
+/// A counter for the sum of the number of a piece on a board
+#[cfg(feature = "material_eval")]
+pub type PieceCount = u8;
 
 /// Board mask based on a unsigned 64-bit integer, with each bit representing a single square on an 8x8 chess board.
 pub mod bitboard;

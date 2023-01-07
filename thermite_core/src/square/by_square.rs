@@ -1,4 +1,4 @@
-use crate::square::{Square, NUM_SQUARES};
+use crate::square::{NUM_SQUARES, Square};
 
 /// A container data-structure that holds an instance of `T` for each square
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -35,13 +35,5 @@ impl<T: ~const Default + Copy> const Default for BySquare<T> {
         Self {
             items: [T::default(); NUM_SQUARES],
         }
-    }
-}
-
-#[cfg(test)]
-impl<T> BySquare<T> {
-    /// Get the underlying container
-    pub fn into_inner(self) -> [T; NUM_SQUARES] {
-        self.items
     }
 }

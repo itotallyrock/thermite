@@ -1,9 +1,10 @@
 pub use rights::{CastleRights, IllegalCastleRights};
 
 use crate::bitboard::Bitboard;
-use crate::castles::by_castle_direction::ByCastleDirection;
+pub use crate::castles::by_castle_direction::ByCastleDirection;
 pub use crate::castles::direction::CastleDirection;
 use crate::castles::squares::{STANDARD_KING_FROM_SQUARES, STANDARD_KING_TO_SQUARES, STANDARD_ROOK_FROM_SQUARES, STANDARD_ROOK_TO_SQUARES};
+#[cfg(feature = "chess_960")]
 use crate::player::ByPlayer;
 use crate::player::Player;
 use crate::square::Square;
@@ -23,10 +24,6 @@ pub const NUM_CASTLES: usize = 4;
 pub struct Castles {
     rights: CastleRights,
     #[cfg(feature = "chess_960")]
-    clear_paths: ByCastleDirection<ByPlayer<Bitboard>>,
-    #[cfg(feature = "chess_960")]
-    unattacked_paths: ByCastleDirection<ByPlayer<Bitboard>>,
-    #[cfg(feature = "chess_960")]
     king_starting_squares: ByPlayer<Square>,
     #[cfg(feature = "chess_960")]
     rook_starting_squares: ByCastleDirection<ByPlayer<Square>>,
@@ -40,32 +37,6 @@ const fn get_unoccupied_path(king_square: Square, rook_square: Square) -> Bitboa
 
 const fn get_unattacked_path(king_square: Square, king_to_square: Square) -> Bitboard {
     Bitboard::line_between(king_square, king_to_square)
-}
-
-#[cfg(feature = "chess_960")]
-macro_rules! create_path {
-    ($start_squares:ident, $end_squares:ident, $mapper:ident) => {{
-        ByCastleDirection::new_with(
-        ByPlayer::new_with(
-            $mapper(*$start_squares.get_side(Player::White), *$end_squares.get_direction(CastleDirection::KingSide).get_side(Player::White)),
-            $mapper(*$start_squares.get_side(Player::Black), *$end_squares.get_direction(CastleDirection::KingSide).get_side(Player::Black))
-        ),
-        ByPlayer::new_with(
-            $mapper(*$start_squares.get_side(Player::White), *$end_squares.get_direction(CastleDirection::KingSide).get_side(Player::White)),
-            $mapper(*$start_squares.get_side(Player::Black), *$end_squares.get_direction(CastleDirection::KingSide).get_side(Player::Black))
-        ),
-    )
-    }};
-}
-
-#[cfg(feature = "chess_960")]
-const fn create_castle_paths(king_squares: ByPlayer<Square>, rook_squares: ByCastleDirection<ByPlayer<Square>>) -> ByCastleDirection<ByPlayer<Bitboard>> {
-    create_path!(king_squares, rook_squares, get_unoccupied_path)
-}
-
-#[cfg(feature = "chess_960")]
-const fn create_king_paths(king_from_squares: ByPlayer<Square>, king_to_squares: ByCastleDirection<ByPlayer<Square>>) -> ByCastleDirection<ByPlayer<Bitboard>> {
-    create_path!(king_from_squares, king_to_squares, get_unattacked_path)
 }
 
 impl const AsRef<CastleRights> for Castles {
@@ -96,8 +67,6 @@ impl Castles {
         const DEFAULT_CASTLES: Castles = Castles::default();
         let king_starting_squares = ByPlayer::new_with(white_king_square, black_king_square);
         let rook_starting_squares = ByCastleDirection::new_with(ByPlayer::new_with(white_king_rook_square, black_king_rook_square), ByPlayer::new_with(white_queen_rook_square, black_queen_rook_square));
-        let rook_paths = create_castle_paths(king_starting_squares, rook_starting_squares);
-        let king_paths = create_king_paths(king_starting_squares, STANDARD_KING_TO_SQUARES);
         // If a position doesnt have standard castle squares then assume chess_960 when constructing
         let is_chess_960 = DEFAULT_CASTLES.king_starting_squares != king_starting_squares
             || *DEFAULT_CASTLES.rook_starting_squares.get_direction(CastleDirection::KingSide) != *rook_starting_squares.get_direction(CastleDirection::KingSide)
@@ -105,8 +74,6 @@ impl Castles {
 
         Self {
             rights,
-            clear_paths: rook_paths,
-            unattacked_paths: king_paths,
             king_starting_squares,
             rook_starting_squares,
             is_chess_960,
@@ -163,18 +130,12 @@ impl Castles {
 
     /// The mask that must not contain any pieces in order to castle for a [player](Player) in a given [direction](CastleDirection)
     pub const fn get_unoccupied_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
-        #[cfg(not(feature = "chess_960"))]
-        { get_unoccupied_path(self.king_from_square(side), self.rook_from_square(side, direction)) }
-        #[cfg(feature = "chess_960")]
-        { *self.clear_paths.get_direction(direction).get_side(side) }
+        get_unoccupied_path(self.king_from_square(side), self.rook_from_square(side, direction))
     }
 
     /// The mask that must not be attacked for the king to pass through in order to castle for a [player](Player) in a given [direction](CastleDirection)
     pub const fn get_unattacked_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
-        #[cfg(not(feature = "chess_960"))]
-        { get_unattacked_path(self.king_from_square(side), self.king_to_square(side, direction)) }
-        #[cfg(feature = "chess_960")]
-        { *self.unattacked_paths.get_direction(direction).get_side(side) }
+        get_unattacked_path(self.king_from_square(side), self.king_to_square(side, direction))
     }
 }
 
@@ -183,8 +144,6 @@ impl const Default for Castles {
         #[cfg(feature = "chess_960")]
         let default = Self {
             rights: CastleRights::None,
-            clear_paths: create_castle_paths(STANDARD_KING_FROM_SQUARES, STANDARD_ROOK_FROM_SQUARES),
-            unattacked_paths: create_king_paths(STANDARD_KING_FROM_SQUARES, STANDARD_KING_TO_SQUARES),
             king_starting_squares: STANDARD_KING_FROM_SQUARES,
             rook_starting_squares: STANDARD_ROOK_FROM_SQUARES,
             is_chess_960: false,
@@ -200,15 +159,33 @@ impl const Default for Castles {
 
 #[cfg(test)]
 mod test {
+    use test_case::test_case;
+
     use super::*;
 
     #[test]
-    fn default_castle_squares_are_correct() {
-        assert_eq!(STANDARD_KING_SQUARES.get_side(Player::White), &Square::E1);
-        assert_eq!(STANDARD_KING_SQUARES.get_side(Player::Black), &Square::E8);
-        assert_eq!(STANDARD_KING_ROOK_SQUARES.get_side(Player::White), &Square::H1);
-        assert_eq!(STANDARD_KING_ROOK_SQUARES.get_side(Player::Black), &Square::H8);
-        assert_eq!(STANDARD_QUEEN_ROOK_SQUARES.get_side(Player::White), &Square::A1);
-        assert_eq!(STANDARD_QUEEN_ROOK_SQUARES.get_side(Player::Black), &Square::A8);
+    #[cfg(feature = "chess_960")]
+    fn castles_size_remains_consistent() {
+        assert_eq!(std::mem::size_of::<Castles>(), 8);
+    }
+
+    #[test]
+    #[cfg(not(feature = "chess_960"))]
+    fn castles_size_remains_consistent() {
+        assert_eq!(std::mem::size_of::<Castles>(), 1);
+    }
+
+    #[test]
+    fn default_rights_are_empty() {
+        assert_eq!(Castles::default().rights, CastleRights::None);
+    }
+
+    #[test_case(Player::White, CastleDirection::QueenSide, Bitboard(0xE); "white queen side")]
+    #[test_case(Player::White, CastleDirection::KingSide, Bitboard(0x60); "white king side")]
+    #[test_case(Player::Black, CastleDirection::QueenSide, Bitboard(0x0E00_0000_0000_0000); "black queen side")]
+    #[test_case(Player::Black, CastleDirection::KingSide, Bitboard(0x6000_0000_0000_0000); "black king side")]
+    fn get_unoccupied_path_works(side: Player, direction: CastleDirection, expected: Bitboard) {
+        let castles = Castles::default();
+        assert_eq!(get_unoccupied_path(castles.king_from_square(side), castles.rook_from_square(side, direction)), expected);
     }
 }

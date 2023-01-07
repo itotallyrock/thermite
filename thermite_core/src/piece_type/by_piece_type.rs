@@ -1,6 +1,6 @@
 use crate::piece_type::{PieceType, NUM_PIECE_TYPES};
 
-/// A container data-structure that holds an instance of `T` for each piece type (one for pawn, rook, bishop, knight, queen, king)
+/// A container data-structure that holds an instance of `T` for each piece type (one for [pawn](PieceType::Pawn), [rook](PieceType::Rook), [bishop](PieceType::Bishop), [knight](PieceType::Knight), [queen](PieceType::Queen), [king](PieceType::King))
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct ByPieceType<T> {
     items: [T; NUM_PIECE_TYPES],
@@ -39,13 +39,5 @@ impl<T: ~const Default + Copy> const Default for ByPieceType<T> {
         Self {
             items: [T::default(); NUM_PIECE_TYPES],
         }
-    }
-}
-
-#[cfg(test)]
-impl<T> ByPieceType<T> {
-    /// Get the underlying container
-    pub fn into_inner(self) -> [T; NUM_PIECE_TYPES] {
-        self.items
     }
 }

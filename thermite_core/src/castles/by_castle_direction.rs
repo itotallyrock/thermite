@@ -7,22 +7,22 @@ pub struct ByCastleDirection<T> {
 }
 
 impl<T> ByCastleDirection<T> {
-    /// Crate a new `ByCastleDirection` with pre-set values for all castle_direction types
+    /// Crate a new `ByCastleDirection` with pre-set values for all [castle direction types](CastleDirection)
     pub const fn new_with(king_side: T, queen_side: T) -> Self {
         Self { items: [king_side, queen_side] }
     }
-    /// Get the inner `T` for a given castle_direction type
+    /// Get the inner `T` for a given [castle direction type](CastleDirection)
     pub const fn get_direction(&self, castle_direction: CastleDirection) -> &T {
         &self.items[castle_direction as usize]
     }
-    /// Get a mutable references to the inner `T` for a given castle_direction type
+    /// Get a mutable references to the inner `T` for a given [castle direction type](CastleDirection)
     pub const fn mut_castle_direction(&mut self, castle_direction: CastleDirection) -> &mut T {
         &mut self.items[castle_direction as usize]
     }
 }
 
 impl<T: Copy> ByCastleDirection<T> {
-    /// Create a `ByCastleDirection` where all castle_directions have the same value
+    /// Create a `ByCastleDirection` where all [castle directions](CastleDirection) have the same value
     pub const fn new(item: T) -> Self {
         Self { items: [item; NUM_CASTLE_DIRECTIONS] }
     }
@@ -39,13 +39,5 @@ impl<T: ~const Default + Copy> const Default for ByCastleDirection<T> {
         Self {
             items: [T::default(); NUM_CASTLE_DIRECTIONS],
         }
-    }
-}
-
-#[cfg(test)]
-impl<T> ByCastleDirection<T> {
-    /// Get the underlying container
-    pub fn into_inner(self) -> [T; NUM_CASTLE_DIRECTIONS] {
-        self.items
     }
 }

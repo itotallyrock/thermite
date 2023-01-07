@@ -1,4 +1,4 @@
-use crate::bitboard::{Bitboard};
+use crate::bitboard::Bitboard;
 use crate::bitboard::direction::Direction;
 use crate::piece_type::{ByPieceType, PieceType};
 use crate::player::{ByPlayer, Player};
@@ -6,8 +6,8 @@ use crate::square::{BySquare, NUM_SQUARES, Square};
 
 mod magics {
     use crate::bitboard::{Bitboard, BitboardInner};
+    use crate::PieceCount;
     use crate::square::{BySquare, NUM_SQUARES, Square};
-
 
     /// Find the occluded bishop attack mask in the lookup table for a given origin square and occupied mask
     pub const fn lookup_bishop_occluded_attacks(square: Square, occupied: Bitboard) -> Bitboard {
@@ -19,7 +19,9 @@ mod magics {
         ROOK_OCCLUDED_ATTACKS.get_square(square).get_for(occupied)
     }
 
+    /// The lookup table for [bishop](crate::piece_type::PieceType::Bishop) occluded [`MagicLookup`] attack [masks](Bitboard)
     const BISHOP_OCCLUDED_ATTACKS: BySquare<MagicLookup<BISHOP_OCCUPANCY_LIMIT>> = create_sliding_lookup::<BISHOP_OCCUPANCY_LIMIT, false>();
+    /// The lookup table for [rook](crate::piece_type::PieceType::Rook) occluded [`MagicLookup`] attack [masks](Bitboard)
     const ROOK_OCCLUDED_ATTACKS: BySquare<MagicLookup<ROOK_OCCUPANCY_LIMIT>> = create_sliding_lookup::<ROOK_OCCUPANCY_LIMIT, true>();
 
     /// Maximum number of variations of individual blockers for a rook
@@ -27,8 +29,11 @@ mod magics {
     /// Maximum number of variations of blockers for a bishop
     const BISHOP_OCCUPANCY_LIMIT: u32 = 9;
 
+    /// Maximum number of blocker [square](Square)s (or the number of [piece](crate::piece_type::PieceType)s that can be along the cardinals) for a [rook](crate::piece_type::PieceType::Rook) on a given [square](Square)
+    ///
+    /// For example: on [A1](Square::A1) count all the squares on the vertical file from [A2](Square::A2)-[A7](Square::A7) (6) and the horizontal rank from [B1](Square::B1)-[G1](Square::G1) (6) which total to 12
     #[rustfmt::skip]
-    const ROOK_BLOCKER_COUNTS: BySquare<u8> = BySquare::from([
+    const ROOK_BLOCKER_COUNTS: BySquare<PieceCount> = BySquare::from([
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -39,8 +44,9 @@ mod magics {
         12, 11, 11, 11, 11, 11, 11, 12,
     ]);
 
+    /// Maximum number of blocker [square](Square)s (or the number of [piece](crate::piece_type::PieceType)s that can be along the diagonals) for a [bishop](crate::piece_type::PieceType::Bishop) on a given [square](Square)
     #[rustfmt::skip]
-    const BISHOP_BLOCKER_COUNTS: BySquare<u8> = BySquare::from([
+    const BISHOP_BLOCKER_COUNTS: BySquare<PieceCount> = BySquare::from([
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
         5, 5, 7, 7, 7, 7, 5, 5,
@@ -51,6 +57,7 @@ mod magics {
         6, 5, 5, 5, 5, 5, 5, 6,
     ]);
 
+    /// [Mask](Bitboard) of relevant squares that could block a [bishop](crate::piece_type::PieceType::Bishop) on a given [square](Square)
     #[rustfmt::skip]
     #[allow(clippy::unreadable_literal)]
     const BISHOP_OCCUPANCY_MASK: BySquare<Bitboard> = BySquare::from([
@@ -64,6 +71,7 @@ mod magics {
         Bitboard(0x2040810204000),  Bitboard(0x4081020400000),  Bitboard(0xA102040000000),  Bitboard(0x14224000000000), Bitboard(0x28440200000000), Bitboard(0x50080402000000), Bitboard(0x20100804020000), Bitboard(0x40201008040200),
     ]);
 
+    /// [Mask](Bitboard) of relevant squares that could block a [rook](crate::piece_type::PieceType::Rook) on a given [square](Square)
     #[rustfmt::skip]
     #[allow(clippy::unreadable_literal)]
     const ROOK_OCCUPANCY_MASK: BySquare<Bitboard> = BySquare::from([
@@ -77,6 +85,7 @@ mod magics {
         Bitboard(0x7E01010101010100), Bitboard(0x7C02020202020200), Bitboard(0x7A04040404040400), Bitboard(0x7608080808080800), Bitboard(0x6E10101010101000), Bitboard(0x5E20202020202000), Bitboard(0x3E40404040404000), Bitboard(0x7E80808080808000),
     ]);
 
+    /// A [`Bitboard`] lookup for a specific [`Square`] and board occupancy mask for sliding attack lookups
     #[derive(Copy, Clone, Debug)]
     struct MagicLookup<const OCCUPANCY_LIMIT: u32> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
         occupancy_mask: Bitboard,
@@ -133,23 +142,27 @@ mod magics {
     }
 
     impl<const OCCUPANCY_LIMIT: u32> MagicLookup<OCCUPANCY_LIMIT> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
+        /// Lookup the attacks [mask](Bitboard) for a given occupancy [mask](Bitboard)
         const fn get_for(&self, occupied: Bitboard) -> Bitboard {
             self.attacks[index_from_board_mask(occupied, self.occupancy_mask)]
         }
     }
 
-    const fn get_max_blockers<const IS_CARDINAL: bool>(piece_square: Square) -> u8 {
+    /// Get the maximum [number of blockers](PieceCount) for a piece on a [square](Square) that attacks in a given direction (ordinal or diagonal)
+    const fn get_max_blockers<const IS_CARDINAL: bool>(piece_square: Square) -> PieceCount {
         let directional_blocker_count_table = if IS_CARDINAL { ROOK_BLOCKER_COUNTS } else { BISHOP_BLOCKER_COUNTS };
 
         *directional_blocker_count_table.get_square(piece_square)
     }
 
+    /// Get the occupancy [mask](Bitboard) for a piece on a [square](Square) that attacks in a given direction (ordinal or diagonal)
     const fn get_occupancy_mask<const IS_CARDINAL: bool>(piece_square: Square) -> Bitboard {
         let directional_occupancy_table = if IS_CARDINAL { ROOK_OCCUPANCY_MASK } else { BISHOP_OCCUPANCY_MASK };
 
         *directional_occupancy_table.get_square(piece_square)
     }
 
+    /// Generate a [magic lookup](MagicLookup) given an occupancy mask capacity [for each square](BySquare) given a direction.
     const fn create_sliding_lookup<const OCCUPANCY_LIMIT: u32, const IS_CARDINAL: bool>() -> BySquare<MagicLookup<OCCUPANCY_LIMIT>> where [(); 1 << OCCUPANCY_LIMIT]: Sized {
         let mut attacks_by_square: BySquare<MagicLookup<OCCUPANCY_LIMIT>> = BySquare::default();
 
@@ -174,6 +187,52 @@ mod magics {
 
         attacks_by_square
     }
+
+    #[cfg(test)]
+    mod test {
+        use test_case::test_case;
+
+        use crate::square::{NUM_FILES, NUM_RANKS};
+
+        use super::*;
+
+        #[test_case(Square::A1, true, Bitboard(0x0001_0101_0101_017E))]
+        #[test_case(Square::A1, false, Bitboard(0x0040_2010_0804_0200))]
+        #[test_case(Square::C4, true, Bitboard(0x0004_0404_7a04_0400))]
+        #[test_case(Square::C4, false, Bitboard(0x0020_100A_000A_1000))]
+        #[test_case(Square::B4, true, Bitboard(0x0002_0202_7C02_0200))]
+        #[test_case(Square::B4, false, Bitboard(0x0010_0804_0004_0800))]
+        #[test_case(Square::H1, true, Bitboard(0x0080_8080_8080_807E))]
+        #[test_case(Square::H1, false, Bitboard(0x0002_0408_1020_4000))]
+        #[test_case(Square::C7, true, Bitboard(0x007A_0404_0404_0400))]
+        #[test_case(Square::C7, false, Bitboard(0x0A10_2040_0000))]
+        fn get_occupancy_mask_works(square: Square, cardinal: bool, expected: Bitboard) {
+            let occupancy_mask = if cardinal { get_occupancy_mask::<true>(square) } else { get_occupancy_mask::<false>(square) };
+            assert_eq!(occupancy_mask, expected);
+        }
+
+        #[test_case(&BISHOP_OCCUPANCY_MASK, &BISHOP_BLOCKER_COUNTS)]
+        #[test_case(&ROOK_OCCUPANCY_MASK, &ROOK_BLOCKER_COUNTS)]
+        fn board_mask_index_commutative_for_all_square_indices(occupancy_masks: &BySquare<Bitboard>, blocker_counts: &BySquare<PieceCount>) {
+            for square in Square::SQUARES {
+                let occupancy_mask: Bitboard = *occupancy_masks.get_square(square);
+                let max_blockers = 1 << *blocker_counts.get_square(square);
+                for index in 0..max_blockers {
+                    assert_eq!(index_from_board_mask(board_mask_from_index(index, occupancy_mask), occupancy_mask), index, "{square} ({occupancy_mask:#?}) index: {index}");
+                }
+            }
+        }
+
+        #[test]
+        fn bishop_occupancy_mask_contains_no_edges() {
+            const EDGES: Bitboard = Bitboard::RANKS[0] | Bitboard::RANKS[NUM_RANKS - 1] | Bitboard::FILES[0] | Bitboard::FILES[NUM_FILES - 1];
+            for square in Square::SQUARES {
+                let occupancy_mask = *BISHOP_OCCUPANCY_MASK.get_square(square);
+                assert_eq!(occupancy_mask & EDGES, Bitboard::EMPTY, "{square} ({occupancy_mask:#?}) contains edges");
+            }
+        }
+    }
+}
 
 impl Bitboard {
     const PSEUDO_ATTACKS: ByPieceType<BySquare<Self>> = {
@@ -348,8 +407,9 @@ impl Bitboard {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use test_case::test_case;
+
+    use super::*;
 
     #[test_case(Bitboard(0x0020_0000_0000), Bitboard(0x0020_0000_0000), Bitboard(0x2020_2020))]
     #[test_case(Bitboard(0x0400_2000_0000), Bitboard(0x0400_2000_0000), Bitboard(0x0004_0424_2424))]
@@ -495,6 +555,20 @@ mod test {
     #[test_case(PieceType::Rook, Square::A1, Bitboard(0x0101_0101_0101_01FE))]
     #[test_case(PieceType::Queen, Square::A1, Bitboard(0x8141_2111_0905_03FE))]
     #[test_case(PieceType::Queen, Square::H1, Bitboard(0x8182_8488_90A0_C07F))]
+    #[test_case(PieceType::Rook, Square::H1, Bitboard(0x8080_8080_8080_807F))]
+    #[test_case(PieceType::Rook, Square::F4, Bitboard(0x2020_2020_DF20_2020))]
+    #[test_case(PieceType::Bishop, Square::D6, Bitboard(0x2214_0014_2241_8000))]
+    #[test_case(PieceType::Knight, Square::E4, Bitboard(0x2844_0044_2800))]
+    #[test_case(PieceType::Knight, Square::F3, Bitboard(0x0050_8800_8850))]
+    #[test_case(PieceType::Knight, Square::C8, Bitboard(0x0011_0A00_0000_0000))]
+    #[test_case(PieceType::Knight, Square::E6, Bitboard(0x2844_0044_2800_0000))]
+    #[test_case(PieceType::King, Square::D3, Bitboard(0x1C14_1C00))]
+    #[test_case(PieceType::King, Square::H1, Bitboard(0xC040))]
+    #[test_case(PieceType::King, Square::D6, Bitboard(0x001C_141C_0000_0000))]
+    #[test_case(PieceType::King, Square::A5, Bitboard(0x0302_0300_0000))]
+    #[test_case(PieceType::Queen, Square::C4, Bitboard(0x4424_150E_FB0E_1524))]
+    #[test_case(PieceType::Queen, Square::H3, Bitboard(0x8488_90A0_C07F_C0A0))]
+    #[test_case(PieceType::Queen, Square::B5, Bitboard(0x120A_07FD_070A_1222))]
     fn attacks_mask_works(piece: PieceType, square: Square, expected: Bitboard) {
         assert_eq!(Bitboard::attacks_mask(piece, square), expected);
     }

@@ -1,5 +1,6 @@
 mod by_player;
 
+use std::fmt::{Display, Formatter, Write};
 pub use by_player::ByPlayer;
 
 /// The number of players in a game
@@ -34,6 +35,15 @@ impl Player {
         match self {
             Self::White => Self::Black,
             Self::Black => Self::White,
+        }
+    }
+}
+
+impl Display for Player {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::White => f.write_char('w'),
+            Self::Black => f.write_char('b'),
         }
     }
 }
