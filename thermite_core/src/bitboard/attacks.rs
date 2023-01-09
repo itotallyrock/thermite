@@ -572,4 +572,44 @@ mod test {
     fn attacks_mask_works(piece: PieceType, square: Square, expected: Bitboard) {
         assert_eq!(Bitboard::attacks_mask(piece, square), expected);
     }
+
+    #[test_case(PieceType::Rook, Square::A1, Bitboard::EMPTY, Bitboard(0x0101_0101_0101_01FE))]
+    #[test_case(PieceType::Rook, Square::H1, Bitboard::EMPTY, Bitboard(0x8080_8080_8080_807F))]
+    #[test_case(PieceType::Rook, Square::A1, Bitboard(0xFFFF), Bitboard(0x102); "startpos white queenside Rook")]
+    #[test_case(PieceType::Rook, Square::H1, Bitboard(0xFFFF), Bitboard(0x8040); "startpos white kingside Rook")]
+    #[test_case(PieceType::Bishop, Square::A1, Bitboard::EMPTY, Bitboard(0x8040_2010_0804_0200))]
+    #[test_case(PieceType::Rook, Square::B4, Bitboard(0x2200_3300_0802), Bitboard(0x0202_1D02_0202))]
+    #[test_case(PieceType::Bishop, Square::D4, Bitboard::FULL, Bitboard(0x0014_0014_0000); "1 Bishop, all blocking")]
+    #[test_case(PieceType::Bishop, Square::F6, Bitboard(0x2000_0000_0000), Bitboard(0x8850_0050_8804_0201); "1 Bishop, no blocking a")]
+    #[test_case(PieceType::Bishop, Square::H1, Bitboard(0x80), Bitboard(0x0102_0408_1020_4000); "1 Bishop, no blocking b")]
+    #[test_case(PieceType::Bishop, Square::C4, Bitboard(0x0020_0140_0402_4004), Bitboard(0x0020_110A_000A_1020); "1 attacker multiple blocking")]
+    #[test_case(PieceType::Bishop, Square::G6, Bitboard(0x4000_F800_0000), Bitboard(0x10A0_00A0_1000_0000))]
+    #[test_case(PieceType::Rook, Square::D4, Bitboard::FULL, Bitboard(0x0008_1408_0000); "1 Rook, all blocking")]
+    #[test_case(PieceType::Rook, Square::F6, Bitboard(0x2000_0000_0000), Bitboard(0x2020_DF20_2020_2020); "1 Rook, no blocking a")]
+    #[test_case(PieceType::Rook, Square::H1, Bitboard(0x80), Bitboard(0x8080_8080_8080_807F); "1 Rook, no blocking b")]
+    #[test_case(PieceType::Rook, Square::C4, Bitboard(0x0004_2500_1000), Bitboard(0x0004_3B04_0404); "1 attacker multiple blocking a")]
+    #[test_case(PieceType::Rook, Square::G6, Bitboard(0x4000_F800_0000), Bitboard(0x4040_BF40_4000_0000); "1 Rook, multiple blocking b")]
+    #[test_case(PieceType::Queen, Square::D4, Bitboard::FULL, Bitboard(0x001C_141C_0000); "1 Queen, all blocking")]
+    #[test_case(PieceType::Queen, Square::D4, Bitboard(0x2000_0000_0000), Bitboard(0x0809_2A1C_F71C_2A49); "1 Queen, no blocking a")]
+    #[test_case(PieceType::Queen, Square::H1, Bitboard(0x80), Bitboard(0x8182_8488_90A0_C07F); "1 Queen, no blocking b")]
+    #[test_case(PieceType::Queen, Square::F3, Bitboard(0x0038_0062_2000), Bitboard(0x00A8_705E_7088); "1 attacker multiple blocking c")]
+    #[test_case(PieceType::Queen, Square::G6, Bitboard(0x4000_F800_0000), Bitboard(0x50E0_BFE0_5000_0000); "1 Queen, multiple blocking b")]
+    fn occluded_attacks_mask_works(piece: PieceType, square: Square, occluded: Bitboard, expected: Bitboard) {
+        assert_eq!(Bitboard::occluded_attacks_mask(piece, square, occluded), expected);
+    }
+
+    #[test_case(Square::A1.to_mask(), Bitboard::EMPTY, Direction::NorthEast, Bitboard(0x8040_2010_0804_0200))]
+    #[test_case(Square::A1.to_mask(), Bitboard(0xffff), Direction::North, Bitboard(0x100))]
+    #[test_case(Square::H1.to_mask(), Bitboard(0xffff), Direction::North, Bitboard(0x8000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::North, Bitboard(0x1010_1010_0000_0000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::South, Bitboard(0x0010_1010))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::East, Bitboard(0xE000_0000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::West, Bitboard(0x0F00_0000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::NorthEast, Bitboard(0x0080_4020_0000_0000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthWest, Bitboard(0x80402))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::NorthWest, Bitboard(0x0102_0408_0000_0000))]
+    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthEast, Bitboard(0x0020_4080))]
+    fn sliding_attacks_works(mask: Bitboard, occluded: Bitboard, direction: Direction, expected: Bitboard) {
+        assert_eq!(Bitboard::sliding_attacks(mask, occluded, direction), expected);
+    }
 }
