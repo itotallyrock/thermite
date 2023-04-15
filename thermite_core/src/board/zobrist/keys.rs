@@ -2,7 +2,7 @@ use crate::castles::NUM_CASTLES;
 use crate::piece_type::{ByPieceType, PieceType};
 use crate::player::{ByPlayer, Player};
 use crate::square::{BySquare, Square, NUM_FILES};
-use crate::zobrist::ZobristInner;
+use crate::board::zobrist::ZobristInner;
 
 /// The base key for an empty position
 pub const EMPTY_ZOBRIST_KEY: ZobristInner = 0xF1DC_4349_4EA4_76CE;

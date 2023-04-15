@@ -1,7 +1,7 @@
 use crate::piece_type::PieceType;
 use crate::player::Player;
 use crate::square::Square;
-use crate::zobrist::keys::{castle_lookup, en_passant_lookup, piece_square_lookup, SIDE_KEY};
+use crate::board::zobrist::keys::{castle_lookup, en_passant_lookup, piece_square_lookup, SIDE_KEY};
 use keys::EMPTY_ZOBRIST_KEY;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hasher;
@@ -24,8 +24,14 @@ pub type ZobristInner = u64;
 pub struct ZobristHasher(ZobristInner);
 
 impl ZobristHasher {
+    /// The default base key for an empty featureless position
+    #[must_use]
+    pub const fn empty() -> Self {
+        Self(EMPTY_ZOBRIST_KEY)
+    }
+
     const fn toggle(&mut self, mask: ZobristInner) {
-        self.0 ^= mask;
+        self.write_u64(mask);
     }
 
     /// Toggle the placement of a piece on a given square for a given side.
@@ -62,14 +68,6 @@ impl const Hasher for ZobristHasher {
 
     fn write_u64(&mut self, i: u64) {
         self.0 ^= i;
-    }
-}
-
-impl ZobristHasher {
-    /// The default base key for an empty featureless position
-    #[must_use]
-    pub const fn empty() -> Self {
-        Self(EMPTY_ZOBRIST_KEY)
     }
 }
 
