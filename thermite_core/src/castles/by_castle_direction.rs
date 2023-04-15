@@ -1,7 +1,7 @@
 use crate::castles::direction::{CastleDirection, NUM_CASTLE_DIRECTIONS};
 
 /// A container data-structure that holds an instance of `T` for each [castle direction](CastleDirection) (one for `CastleDirection::KingSide   `, `CastleDirection::QueenSide  `)
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, Debug)]
 pub struct ByCastleDirection<T> {
     items: [T; NUM_CASTLE_DIRECTIONS],
 }
@@ -39,5 +39,12 @@ impl<T: ~const Default + Copy> const Default for ByCastleDirection<T> {
         Self {
             items: [T::default(); NUM_CASTLE_DIRECTIONS],
         }
+    }
+}
+
+impl<T: ~const PartialEq> const PartialEq for ByCastleDirection<T> {
+    fn eq(&self, other: &Self) -> bool {
+        debug_assert!(NUM_CASTLE_DIRECTIONS == 2);
+        self.items[0] == other.items[0] && self.items[1] == other.items[1]
     }
 }
