@@ -116,6 +116,14 @@ impl Castles {
         *king_squares.get_side(side)
     }
 
+    /// Compare the starting squares for the kings and rooks for both sides
+    #[cfg(feature = "chess_960")]
+    #[must_use]
+    pub const fn eq_starting_squares(&self, other: Self) -> bool {
+        self.king_starting_squares == other.king_starting_squares
+            && self.rook_starting_squares == other.rook_starting_squares
+    }
+
     /// The square the king will end on after castling for a given [player](Player) in a given [direction](CastleDirection)
     #[must_use]
     pub const fn king_to_square(&self, side: Player, direction: CastleDirection) -> Square {
@@ -136,6 +144,12 @@ impl Castles {
     /// The mask that must not be attacked for the king to pass through in order to castle for a [player](Player) in a given [direction](CastleDirection)
     pub const fn get_unattacked_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
         get_unattacked_path(self.king_from_square(side), self.king_to_square(side, direction))
+    }
+
+    /// Set the `is_chess_960` flag
+    #[cfg(feature = "chess_960")]
+    pub(crate) const fn set_chess_960(&mut self, is_chess_960: bool) {
+        self.is_chess_960 = is_chess_960;
     }
 }
 

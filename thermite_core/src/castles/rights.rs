@@ -156,7 +156,7 @@ impl CastleRights {
         *self & !other
     }
 
-    /// Attempt to parse a UCI string into a [`CastleRight`](crate::castles::CastleRights).
+    /// Attempt to parse a UCI string into a [`CastleRight`](CastleRights).
     ///
     /// ```
     /// use thermite_core::castles::{CastleRights, IllegalCastleRights};
@@ -285,9 +285,12 @@ impl const TryFrom<u8> for CastleRights {
 
 #[cfg(test)]
 mod test {
-    use crate::castles::{CastleRights, NUM_CASTLES};
+    extern crate test;
+    use crate::castles::{CastleDirection, CastleRights, NUM_CASTLES};
     use std::ops::Not;
     use test_case::test_case;
+    use test::{Bencher, black_box};
+    use crate::player::Player;
 
     #[test]
     fn option_castle_is_one_byte() {
@@ -348,5 +351,40 @@ mod test {
     fn num_set_bits_matches_num_castles() {
         assert_eq!((CastleRights::All as u8).count_ones(), NUM_CASTLES.try_into().unwrap());
         assert_eq!((CastleRights::None as u8).count_ones(), 0);
+    }
+
+    #[bench]
+    fn for_side_white(bencher: &mut Bencher) {
+        let side = black_box(Player::White);
+        bencher.iter(|| assert_eq!(CastleRights::for_side(side), black_box(CastleRights::WhiteBoth)));
+    }
+
+    #[bench]
+    fn for_side_black(bencher: &mut Bencher) {
+        let side = black_box(Player::Black);
+        bencher.iter(|| assert_eq!(CastleRights::for_side(side), black_box(CastleRights::BlackBoth)));
+    }
+
+    #[bench]
+    fn can_castle_all_white_king(bencher: &mut Bencher) {
+        let rights = black_box(CastleRights::All);
+        let side = black_box(Player::White);
+        let direction = black_box(CastleDirection::KingSide);
+        bencher.iter(|| assert_eq!(CastleRights::can_castle(&rights, side, direction), black_box(true)));
+    }
+
+    #[bench]
+    fn can_castle_none_black_queen(bencher: &mut Bencher) {
+        let rights = black_box(CastleRights::None);
+        let side = black_box(Player::Black);
+        let direction = black_box(CastleDirection::QueenSide);
+        bencher.iter(|| assert_eq!(CastleRights::can_castle(&rights, side, direction), black_box(false)));
+    }
+
+    #[bench]
+    fn filter_all_all(bencher: &mut Bencher) {
+        let start = black_box(CastleRights::All);
+        let mask = black_box(CastleRights::All);
+        bencher.iter(|| assert_eq!(CastleRights::filter(&start, mask), black_box(CastleRights::None)));
     }
 }
