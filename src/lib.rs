@@ -3,70 +3,21 @@
 use std::hash::Hasher;
 use arrayvec::ArrayVec;
 use nutype::nutype;
-use enum_map::{Enum, EnumMap};
+use enum_map::Enum;
 use derive_more::{AsMut, AsRef};
-use player_color::PlayerColor;
-use square::Square;
-use crate::castles::CastleRights;
+use raw_position::{RawPosition, RawPositionState};
 use crate::half_move_clock::HalfMoveClock;
-use crate::pieces::{NonKingPieceType, PieceType};
+use crate::pieces::PieceType;
 
 mod player_color;
 mod square;
 mod pieces;
 mod castles;
 mod half_move_clock;
+mod raw_position;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Hash)]
 pub struct BoardMask(u64);
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct RawPositionState {
-    checkers: BoardMask,
-    pinners_for: EnumMap<PlayerColor, BoardMask>,
-    blockers_for: EnumMap<PlayerColor, BoardMask>,
-    check_squares: EnumMap<PieceType, BoardMask>,
-    en_passant_square: Option<Square>,
-    castles: CastleRights,
-}
-
-impl Default for RawPositionState {
-    fn default() -> Self {
-        Self {
-            checkers: BoardMask::default(),
-            pinners_for: EnumMap::default(),
-            blockers_for: EnumMap::default(),
-            check_squares: EnumMap::default(),
-            en_passant_square: None,
-            castles: CastleRights::None,
-        }
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct RawPosition {
-    hash: ZobristHash,
-    player_to_move: PlayerColor,
-    squares: EnumMap<Square, Option<PieceType>>,
-    pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
-    side_masks: EnumMap<PlayerColor, BoardMask>,
-    king_squares: EnumMap<PlayerColor, Square>,
-    state: RawPositionState,
-}
-
-impl Default for RawPosition {
-    fn default() -> Self {
-        Self {
-            hash: Default::default(),
-            player_to_move: PlayerColor::White,
-            squares: Default::default(),
-            pieces_masks: Default::default(),
-            side_masks: Default::default(),
-            king_squares: EnumMap::from_array([Square::E1, Square::E8]),
-            state: Default::default(),
-        }
-    }
-}
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum IllegalPosition {
