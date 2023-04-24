@@ -9,7 +9,7 @@ default = ["std"]
 std = ["arrayvec/std"]
 
 [dependencies]
-nutype = "0.1.0"
+nutype = "0.2.0"
 derive_more = "0.99.17"
 enum-map = "2.5.0"
 subenum = "1.0.1"
