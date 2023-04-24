@@ -2,6 +2,11 @@
 name = "thermite_core"
 version = "0.1.0"
 edition = "2021"
+authors = ["Jeffrey Meyer <itotallyrock>"]
+repository = "https://github.com/itotallyrock/thermite"
+keywords = ["chess"]
+license-file = "./LICENSE.md"
+readme = "./README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
@@ -18,3 +23,9 @@ arrayvec = { version = "0.7.2", default-features = false }
 
 [dev-dependencies]
 test-case = "3.1.0"
+
+[profile.release]
+opt-level = 3
+lto = 'fat'
+codegen-units = 1
+debug = 2
