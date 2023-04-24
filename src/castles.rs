@@ -226,4 +226,44 @@ mod test {
     ) {
         assert_eq!(ROOK_TO_SQUARES[direction][player], expected);
     }
+
+
+    #[test]
+    fn castles_bitor_works() {
+        assert_eq!(CastleRights::WhiteQueen.or(CastleRights::WhiteKing), CastleRights::WhiteBoth);
+        assert_eq!(CastleRights::WhiteBoth.or(CastleRights::BlackBoth), CastleRights::All);
+        assert_eq!(CastleRights::None.or(CastleRights::BlackBoth), CastleRights::BlackBoth);
+        assert_eq!(CastleRights::None.or(CastleRights::All), CastleRights::All);
+        assert_eq!(CastleRights::None.or(CastleRights::None), CastleRights::None);
+    }
+
+    #[test_case(CastleRights::All, CastleRights::None)]
+    #[test_case(CastleRights::WhiteBoth, CastleRights::BlackBoth)]
+    #[test_case(CastleRights::BothKings, CastleRights::BothQueens)]
+    #[test_case(CastleRights::WhiteBothBlackQueen, CastleRights::BlackKing)]
+    #[test_case(CastleRights::WhiteKingBlackQueen, CastleRights::WhiteQueenBlackKing)]
+    fn castles_not_works(input: CastleRights, expected: CastleRights) {
+        assert_eq!(input.not().and(CastleRights::All), expected);
+        assert_eq!(expected.not().and(CastleRights::All), input);
+    }
+
+    #[test_case(CastleRights::None, 0b0000)]
+    #[test_case(CastleRights::WhiteKing, 0b0001)]
+    #[test_case(CastleRights::WhiteQueen, 0b0010)]
+    #[test_case(CastleRights::WhiteBoth, 0b0011)]
+    #[test_case(CastleRights::BlackKing, 0b0100)]
+    #[test_case(CastleRights::BothKings, 0b0101)]
+    #[test_case(CastleRights::WhiteQueenBlackKing, 0b0110)]
+    #[test_case(CastleRights::WhiteBothBlackKing, 0b0111)]
+    #[test_case(CastleRights::BlackQueen, 0b1000)]
+    #[test_case(CastleRights::WhiteKingBlackQueen, 0b1001)]
+    #[test_case(CastleRights::BothQueens, 0b1010)]
+    #[test_case(CastleRights::WhiteBothBlackQueen, 0b1011)]
+    #[test_case(CastleRights::BlackBoth, 0b1100)]
+    #[test_case(CastleRights::WhiteKingBlackBoth, 0b1101)]
+    #[test_case(CastleRights::WhiteQueenBlackBoth, 0b1110)]
+    #[test_case(CastleRights::All, 0b1111)]
+    fn castles_are_expected_u8(castle_rights: CastleRights, expected_repr: u8) {
+        assert_eq!(castle_rights.bits, expected_repr);
+    }
 }
