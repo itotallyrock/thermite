@@ -1,5 +1,5 @@
 use derive_more::{AsMut, AsRef};
-use crate::half_move_clock::Game;
+use crate::game::Game;
 
 #[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
 pub struct Searchable {

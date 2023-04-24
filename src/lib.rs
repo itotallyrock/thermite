@@ -11,6 +11,7 @@ mod zobrist;
 mod ply_count;
 mod legal_position;
 mod searchable;
+mod game;
 
 #[cfg(test)]
 mod test {
