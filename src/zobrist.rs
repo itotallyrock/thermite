@@ -1,5 +1,5 @@
-use nutype::nutype;
 use core::hash::Hasher;
+use nutype::nutype;
 
 #[nutype]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
