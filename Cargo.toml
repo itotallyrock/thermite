@@ -14,7 +14,7 @@ derive_more = "0.99.17"
 enum-map = "2.5.0"
 subenum = "1.0.1"
 bitmask-enum = "2.1.0"
-arrayvec = { version = "0.7.2", no-default-features = true }
+arrayvec = { version = "0.7.2", default-features = false }
 
 [dev-dependencies]
 test-case = "3.1.0"
