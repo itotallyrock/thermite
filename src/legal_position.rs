@@ -35,7 +35,7 @@ impl TryFrom<RawPosition> for LegalPosition {
         Ok(Self {
             position,
             state,
-            hash_history: Box::new(Default::default()),
+            hash_history: Box::default(),
         })
     }
 }

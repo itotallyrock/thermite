@@ -20,12 +20,3 @@ mod searchable;
 mod square;
 mod zobrist;
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        todo!()
-    }
-}
