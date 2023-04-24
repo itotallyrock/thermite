@@ -2,6 +2,7 @@ use crate::player_color::PlayerColor;
 use crate::square::Square;
 use bitmask_enum::bitmask;
 use enum_map::{Enum, EnumMap};
+use std::str::FromStr;
 
 /// The square that the king for a given side moves from when castling in a given direction
 pub const KING_FROM_SQUARES: EnumMap<PlayerColor, Square> =
@@ -71,6 +72,111 @@ pub enum CastleRights {
     WhiteQueenBlackBoth = Self::WhiteQueen.bits | Self::BlackBoth.bits,
     /// If both players can castle in all directions
     All = Self::WhiteBoth.bits | Self::BlackBoth.bits,
+}
+
+impl CastleRights {
+    /// Get the rights for a specific side
+    ///
+    /// ```
+    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::player_color::PlayerColor;
+    ///
+    /// assert_eq!(CastleRights::for_side(PlayerColor::White), CastleRights::WhiteBoth);
+    /// assert_eq!(CastleRights::for_side(PlayerColor::Black), CastleRights::BlackBoth);
+    /// ```
+    pub const fn for_side(side: PlayerColor) -> Self {
+        match side {
+            PlayerColor::White => Self::WhiteBoth,
+            PlayerColor::Black => Self::BlackBoth,
+        }
+    }
+
+    /// If the castle rights specify the ability for a side to castle in a given direction.
+    ///
+    /// ```
+    /// use thermite_core::castles::{CastleDirection, CastleRights};
+    /// use thermite_core::player_color::PlayerColor;
+    /// // Test if white can king-side castle
+    /// assert_eq!(CastleRights::WhiteKing.can_castle(PlayerColor::White, CastleDirection::KingSide), true);
+    /// // Test if black can queen-side castle
+    /// assert_eq!(CastleRights::BlackQueen.can_castle(PlayerColor::Black, CastleDirection::QueenSide), true);
+    /// ```
+    ///
+    /// Combination `CastleRights` such as `None` or `All` are supported as well.
+    /// ```
+    /// use thermite_core::castles::{CastleDirection, CastleRights};
+    /// use thermite_core::player_color::PlayerColor;
+    ///
+    /// // CastleRights::None is always false
+    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::White, CastleDirection::KingSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::White, CastleDirection::QueenSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::Black, CastleDirection::KingSide), false);
+    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::Black, CastleDirection::QueenSide), false);
+    ///
+    /// // CastleRights::All is always true
+    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::White, CastleDirection::KingSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::White, CastleDirection::QueenSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::Black, CastleDirection::KingSide), true);
+    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::Black, CastleDirection::QueenSide), true);
+    /// ```
+    #[must_use]
+    pub fn can_castle(&self, side: PlayerColor, direction: CastleDirection) -> bool {
+        let truthy_mask = match (side, direction) {
+            (PlayerColor::White, CastleDirection::KingSide) => Self::WhiteKing,
+            (PlayerColor::White, CastleDirection::QueenSide) => Self::WhiteQueen,
+            (PlayerColor::Black, CastleDirection::KingSide) => Self::BlackKing,
+            (PlayerColor::Black, CastleDirection::QueenSide) => Self::BlackQueen,
+        };
+
+        truthy_mask & *self != Self::None
+    }
+}
+
+/// Invalid string input value was provided to `CastleRights::parse`.
+/// Wasn't a valid combination of the 4 castle abilities or none.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct IllegalCastleRights;
+
+impl FromStr for CastleRights {
+    type Err = IllegalCastleRights;
+
+    /// Attempt to parse a UCI string into a [`CastleRight`](CastleRights).
+    ///
+    /// ```
+    /// use std::str::FromStr;
+    /// use thermite_core::castles::{CastleRights, IllegalCastleRights};
+    ///
+    /// assert_eq!(CastleRights::from_str("KQkq"), Ok(CastleRights::All));
+    /// assert_eq!(CastleRights::from_str("KQ"), Ok(CastleRights::WhiteBoth));
+    /// assert_eq!(CastleRights::from_str("q"), Ok(CastleRights::BlackQueen));
+    /// assert_eq!(CastleRights::from_str("-"), Ok(CastleRights::None));
+    /// assert_eq!(CastleRights::from_str("32"), Err(IllegalCastleRights));
+    /// ```
+    ///
+    /// # Errors
+    /// Will error if input is not a valid UCI castle right.
+    /// Must be a combination of `'K'`, `'Q'`, `'k'`, and `'q'` or `'-'`.
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        Ok(match input.as_bytes() {
+            b"-" => Self::None,
+            b"K" => Self::WhiteKing,
+            b"Q" => Self::WhiteQueen,
+            b"KQ" => Self::WhiteBoth,
+            b"k" => Self::BlackKing,
+            b"Kk" => Self::BothKings,
+            b"Qk" => Self::WhiteQueenBlackKing,
+            b"KQk" => Self::WhiteBothBlackKing,
+            b"q" => Self::BlackQueen,
+            b"Kq" => Self::WhiteKingBlackQueen,
+            b"Qq" => Self::BothQueens,
+            b"KQq" => Self::WhiteBothBlackQueen,
+            b"kq" => Self::BlackBoth,
+            b"Kkq" => Self::WhiteKingBlackBoth,
+            b"Qkq" => Self::WhiteQueenBlackBoth,
+            b"KQkq" => Self::All,
+            _ => return Err(IllegalCastleRights),
+        })
+    }
 }
 
 #[cfg(test)]
