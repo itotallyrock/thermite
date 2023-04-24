@@ -1,6 +1,5 @@
 use subenum::subenum;
 use enum_map::Enum;
-use crate::PieceType;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 

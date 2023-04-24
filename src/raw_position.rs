@@ -2,9 +2,9 @@ use enum_map::EnumMap;
 use crate::pieces::{NonKingPieceType, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
-use crate::ZobristHash;
 use crate::board_mask::BoardMask;
 use crate::castles::CastleRights;
+use crate::zobrist::ZobristHash;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct RawPositionState {
@@ -37,7 +37,7 @@ pub struct RawPosition {
     pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
     side_masks: EnumMap<PlayerColor, BoardMask>,
     king_squares: EnumMap<PlayerColor, Square>,
-    state: RawPositionState,
+    pub(crate) state: RawPositionState,
 }
 
 impl Default for RawPosition {
