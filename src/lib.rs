@@ -4,15 +4,12 @@ use std::hash::Hasher;
 use arrayvec::ArrayVec;
 use nutype::nutype;
 use enum_map::{Enum, EnumMap};
-use derive_more::{AsRef, AsMut};
+use derive_more::{AsMut, AsRef};
 use subenum::subenum;
 use bitmask_enum::bitmask;
+use player_color::PlayerColor;
 
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
-pub enum PlayerColor {
-    White,
-    Black,
-}
+mod player_color;
 
 #[rustfmt::skip]
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
