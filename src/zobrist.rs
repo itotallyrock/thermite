@@ -36,7 +36,7 @@ impl From<ZobristHash> for HistoryHash {
     fn from(value: ZobristHash) -> Self {
         // Intentional truncation for a smaller memory footprint with still enough bits to avoid a hash collision
         #[allow(clippy::cast_possible_truncation)]
-        Self::new(*value.as_ref() as u8)
+        Self::new(value.into_inner() as u8)
     }
 }
 
