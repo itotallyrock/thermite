@@ -1,13 +1,12 @@
 name: audit
 on:
-  on:
-    pull_request:
-    push:
-      paths:
-        - '**/Cargo.toml'
-        - '**/Cargo.lock'
-    schedule:
-      - cron: '7 7 * * *'
+  pull_request:
+  push:
+    paths:
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
+  schedule:
+    - cron: '7 7 * * *'
 # Spend CI time only on latest ref: https://github.com/jonhoo/rust-ci-conf/pull/5
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
