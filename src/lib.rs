@@ -1,11 +1,8 @@
 #![warn(missing_docs, clippy::pedantic, rustdoc::missing_doc_code_examples, clippy::nursery, clippy::cargo, clippy::style)]
 
-use arrayvec::ArrayVec;
 use derive_more::{AsMut, AsRef};
-use raw_position::{RawPosition, RawPositionState};
-use crate::half_move_clock::HalfMoveClock;
+use legal_position::LegalPosition;
 use crate::ply_count::PlyCount;
-use crate::zobrist::HistoryHash;
 
 mod player_color;
 mod square;
@@ -16,43 +13,7 @@ mod raw_position;
 mod board_mask;
 mod zobrist;
 mod ply_count;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
-pub enum IllegalPosition {
-
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
-pub struct LegalPositionState {
-    raw_state: RawPositionState,
-    halfmove_clock: HalfMoveClock,
-}
-
-#[derive(Clone, Eq, PartialEq, Debug, Default, AsRef, AsMut)]
-pub struct LegalPosition {
-    #[as_ref()]
-    #[as_mut()]
-    position: RawPosition,
-    state: LegalPositionState,
-    hash_history: Box<ArrayVec<HistoryHash, { HALF_MOVE_LIMIT_USIZE }>>,
-}
-
-impl TryFrom<RawPosition> for LegalPosition {
-    type Error = IllegalPosition;
-
-    fn try_from(position: RawPosition) -> Result<Self, Self::Error> {
-        let state = LegalPositionState {
-            raw_state: position.state,
-            halfmove_clock: Default::default(),
-        };
-
-        Ok(Self {
-            position,
-            state,
-            hash_history: Box::new(Default::default()),
-        })
-    }
-}
+mod legal_position;
 
 pub const HALF_MOVE_LIMIT_USIZE: usize = 50;
 
