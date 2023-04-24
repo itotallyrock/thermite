@@ -77,41 +77,35 @@ pub enum CastleRights {
 mod test {
     use super::*;
 
-    #[test]
-    fn default_castle_squares_are_correct() {
-        assert_eq!(KING_FROM_SQUARES[PlayerColor::White], Square::E1);
-        assert_eq!(KING_FROM_SQUARES[PlayerColor::Black], Square::E8);
-        assert_eq!(
-            ROOK_FROM_SQUARES[CastleDirection::KingSide][PlayerColor::White],
-            Square::H1
-        );
-        assert_eq!(
-            ROOK_FROM_SQUARES[CastleDirection::KingSide][PlayerColor::Black],
-            Square::H8
-        );
-        assert_eq!(
-            ROOK_FROM_SQUARES[CastleDirection::QueenSide][PlayerColor::White],
-            Square::A1
-        );
-        assert_eq!(
-            ROOK_FROM_SQUARES[CastleDirection::QueenSide][PlayerColor::Black],
-            Square::A8
-        );
-        assert_eq!(
-            ROOK_TO_SQUARES[CastleDirection::KingSide][PlayerColor::White],
-            Square::F1
-        );
-        assert_eq!(
-            ROOK_TO_SQUARES[CastleDirection::KingSide][PlayerColor::Black],
-            Square::F8
-        );
-        assert_eq!(
-            ROOK_TO_SQUARES[CastleDirection::QueenSide][PlayerColor::White],
-            Square::D1
-        );
-        assert_eq!(
-            ROOK_TO_SQUARES[CastleDirection::QueenSide][PlayerColor::Black],
-            Square::D8
-        );
+    use test_case::test_case;
+
+    #[test_case(PlayerColor::White, Square::E1)]
+    #[test_case(PlayerColor::Black, Square::E8)]
+    fn king_from_squares_are_correct(player: PlayerColor, expected: Square) {
+        assert_eq!(KING_FROM_SQUARES[player], expected);
+    }
+
+    #[test_case(CastleDirection::KingSide, PlayerColor::White, Square::G1)]
+    #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::G8)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::C1)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::C8)]
+    fn king_to_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+        assert_eq!(KING_TO_SQUARES[direction][player], expected);
+    }
+
+    #[test_case(CastleDirection::KingSide, PlayerColor::White, Square::H1)]
+    #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::H8)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::A1)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::A8)]
+    fn rook_from_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+        assert_eq!(ROOK_FROM_SQUARES[direction][player], expected);
+    }
+
+    #[test_case(CastleDirection::KingSide, PlayerColor::White, Square::F1)]
+    #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::F8)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::D1)]
+    #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::D8)]
+    fn rook_to_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+        assert_eq!(ROOK_TO_SQUARES[direction][player], expected);
     }
 }

@@ -12,3 +12,6 @@ arrayvec = "0.7.2"
 enum-map = "2.5.0"
 subenum = "1.0.1"
 bitmask-enum = "2.1.0"
+
+[dev-dependencies]
+test-case = "3.1.0"
