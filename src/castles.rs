@@ -1,4 +1,11 @@
 use bitmask_enum::bitmask;
+use enum_map::Enum;
+
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub enum CastleDirection {
+    KingSide,
+    QueenSide,
+}
 
 #[bitmask(u8)]
 pub enum CastleRights {
