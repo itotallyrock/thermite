@@ -19,4 +19,3 @@ mod raw_position;
 mod searchable;
 mod square;
 mod zobrist;
-

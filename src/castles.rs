@@ -89,7 +89,11 @@ mod test {
     #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::G8)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::C1)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::C8)]
-    fn king_to_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+    fn king_to_squares_are_correct(
+        direction: CastleDirection,
+        player: PlayerColor,
+        expected: Square,
+    ) {
         assert_eq!(KING_TO_SQUARES[direction][player], expected);
     }
 
@@ -97,7 +101,11 @@ mod test {
     #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::H8)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::A1)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::A8)]
-    fn rook_from_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+    fn rook_from_squares_are_correct(
+        direction: CastleDirection,
+        player: PlayerColor,
+        expected: Square,
+    ) {
         assert_eq!(ROOK_FROM_SQUARES[direction][player], expected);
     }
 
@@ -105,7 +113,11 @@ mod test {
     #[test_case(CastleDirection::KingSide, PlayerColor::Black, Square::F8)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::White, Square::D1)]
     #[test_case(CastleDirection::QueenSide, PlayerColor::Black, Square::D8)]
-    fn rook_to_squares_are_correct(direction: CastleDirection, player: PlayerColor, expected: Square) {
+    fn rook_to_squares_are_correct(
+        direction: CastleDirection,
+        player: PlayerColor,
+        expected: Square,
+    ) {
         assert_eq!(ROOK_TO_SQUARES[direction][player], expected);
     }
 }
