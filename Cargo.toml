@@ -4,14 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["std"]
+std = ["arrayvec/std"]
 
 [dependencies]
 nutype = "0.1.0"
 derive_more = "0.99.17"
-arrayvec = "0.7.2"
 enum-map = "2.5.0"
 subenum = "1.0.1"
 bitmask-enum = "2.1.0"
+arrayvec = { version = "0.7.2", no-default-features = false }
 
 [dev-dependencies]
 test-case = "3.1.0"
