@@ -12,6 +12,7 @@ mod player_color;
 mod square;
 mod pieces;
 mod castles;
+mod half_move_clock;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Hash)]
 pub struct BoardMask(u64);
@@ -146,26 +147,6 @@ impl PartialEq<HistoryHash> for ZobristHash {
 }
 
 pub const HALF_MOVE_LIMIT_USIZE: usize = 50;
-
-#[nutype(validate(max = 50))]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
-pub struct HalfMoveClock(u8);
-
-impl Default for HalfMoveClock {
-    fn default() -> Self {
-        Self::new(0).unwrap()
-    }
-}
-
-impl HalfMoveClock {
-    pub fn increment(&mut self) {
-        *self = Self::new(self.into_inner().saturating_add(1)).unwrap();
-    }
-
-    pub fn reset(&mut self) {
-        *self = Self::default();
-    }
-}
 
 #[nutype(validate(max = 255))]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
