@@ -7,6 +7,9 @@ use enum_map::{Enum, EnumMap};
 use derive_more::{AsMut, AsRef};
 use player_color::PlayerColor;
 use square::Square;
+use crate::castles::CastleRights;
+use crate::half_move_clock::HalfMoveClock;
+use crate::pieces::{NonKingPieceType, PieceType};
 
 mod player_color;
 mod square;
