@@ -5,28 +5,16 @@ use arrayvec::ArrayVec;
 use nutype::nutype;
 use enum_map::{Enum, EnumMap};
 use derive_more::{AsMut, AsRef};
-use bitmask_enum::bitmask;
 use player_color::PlayerColor;
 use square::Square;
 
 mod player_color;
 mod square;
 mod pieces;
+mod castles;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Hash)]
 pub struct BoardMask(u64);
-
-#[bitmask(u8)]
-pub enum CastleRights {
-    None = 0,
-    WhiteKing = 0b0001,
-    WhiteQueen = 0b0010,
-    WhiteBoth = Self::WhiteKing.or(Self::WhiteQueen).bits,
-    BlackKing = 0b0100,
-    BlackQueen = 0b1000,
-    BlackBoth = Self::WhiteKing.or(Self::WhiteQueen).bits,
-    All = Self::WhiteBoth.or(Self::BlackBoth).bits
-}
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct RawPositionState {
