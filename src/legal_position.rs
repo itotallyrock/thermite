@@ -1,14 +1,12 @@
-use derive_more::{AsMut, AsRef};
-use arrayvec::ArrayVec;
 use crate::half_move_clock::HalfMoveClock;
 use crate::half_move_clock::HALF_MOVE_LIMIT_USIZE;
 use crate::raw_position::{RawPosition, RawPositionState};
 use crate::zobrist::HistoryHash;
+use arrayvec::ArrayVec;
+use derive_more::{AsMut, AsRef};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
-pub enum IllegalPosition {
-
-}
+pub enum IllegalPosition {}
 
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
 pub struct LegalPositionState {

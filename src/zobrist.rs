@@ -1,5 +1,5 @@
-use std::hash::Hasher;
 use nutype::nutype;
+use std::hash::Hasher;
 
 #[nutype]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
@@ -15,7 +15,8 @@ impl Hasher for ZobristHash {
     }
 
     fn write(&mut self, bytes: &[u8]) {
-        bytes.chunks_exact(u64::BITS as usize / 8)
+        bytes
+            .chunks_exact(u64::BITS as usize / 8)
             .map(|bits| u64::from_be_bytes(bits.try_into().unwrap()))
             .for_each(|chunk| self.write_u64(chunk));
     }

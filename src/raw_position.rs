@@ -1,10 +1,10 @@
-use enum_map::EnumMap;
+use crate::board_mask::BoardMask;
+use crate::castles::CastleRights;
 use crate::pieces::{NonKingPieceType, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
-use crate::board_mask::BoardMask;
-use crate::castles::CastleRights;
 use crate::zobrist::ZobristHash;
+use enum_map::EnumMap;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct RawPositionState {

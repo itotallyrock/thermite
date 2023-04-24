@@ -1,7 +1,7 @@
-use subenum::subenum;
-use enum_map::Enum;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
+use enum_map::Enum;
+use subenum::subenum;
 
 #[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
