@@ -79,8 +79,8 @@ impl CastleRights {
     /// Get the rights for a specific side
     ///
     /// ```
-    /// use thermite_core::castles::CastleRights;
-    /// use thermite_core::player_color::PlayerColor;
+    /// use thermite::castles::CastleRights;
+    /// use thermite::player_color::PlayerColor;
     ///
     /// assert_eq!(CastleRights::for_side(PlayerColor::White), CastleRights::WhiteBoth);
     /// assert_eq!(CastleRights::for_side(PlayerColor::Black), CastleRights::BlackBoth);
@@ -96,8 +96,8 @@ impl CastleRights {
     /// If the castle rights specify the ability for a side to castle in a given direction.
     ///
     /// ```
-    /// use thermite_core::castles::{CastleDirection, CastleRights};
-    /// use thermite_core::player_color::PlayerColor;
+    /// use thermite::castles::{CastleDirection, CastleRights};
+    /// use thermite::player_color::PlayerColor;
     /// // Test if white can king-side castle
     /// assert_eq!(CastleRights::WhiteKing.can_castle(PlayerColor::White, CastleDirection::KingSide), true);
     /// // Test if black can queen-side castle
@@ -106,8 +106,8 @@ impl CastleRights {
     ///
     /// Combination `CastleRights` such as `None` or `All` are supported as well.
     /// ```
-    /// use thermite_core::castles::{CastleDirection, CastleRights};
-    /// use thermite_core::player_color::PlayerColor;
+    /// use thermite::castles::{CastleDirection, CastleRights};
+    /// use thermite::player_color::PlayerColor;
     ///
     /// // CastleRights::None is always false
     /// assert_eq!(CastleRights::None.can_castle(PlayerColor::White, CastleDirection::KingSide), false);
@@ -146,7 +146,7 @@ impl FromStr for CastleRights {
     ///
     /// ```
     /// use std::str::FromStr;
-    /// use thermite_core::castles::{CastleRights, IllegalCastleRights};
+    /// use thermite::castles::{CastleRights, IllegalCastleRights};
     ///
     /// assert_eq!(CastleRights::from_str("KQkq"), Ok(CastleRights::All));
     /// assert_eq!(CastleRights::from_str("KQ"), Ok(CastleRights::WhiteBoth));

@@ -15,7 +15,7 @@ impl PlayerColor {
     /// Switch the side to the next player to move.
     ///
     /// ```rust
-    /// use thermite_core::player_color::PlayerColor;
+    /// use thermite::player_color::PlayerColor;
     ///
     /// assert_eq!(PlayerColor::White.switch(), PlayerColor::Black);
     /// assert_eq!(PlayerColor::Black.switch(), PlayerColor::White);
