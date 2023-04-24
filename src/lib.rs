@@ -1,10 +1,10 @@
 #![warn(missing_docs, clippy::pedantic, rustdoc::missing_doc_code_examples, clippy::nursery, clippy::cargo, clippy::style)]
 
 use arrayvec::ArrayVec;
-use nutype::nutype;
 use derive_more::{AsMut, AsRef};
 use raw_position::{RawPosition, RawPositionState};
 use crate::half_move_clock::HalfMoveClock;
+use crate::ply_count::PlyCount;
 use crate::zobrist::HistoryHash;
 
 mod player_color;
@@ -15,6 +15,7 @@ mod half_move_clock;
 mod raw_position;
 mod board_mask;
 mod zobrist;
+mod ply_count;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum IllegalPosition {
@@ -54,20 +55,6 @@ impl TryFrom<RawPosition> for LegalPosition {
 }
 
 pub const HALF_MOVE_LIMIT_USIZE: usize = 50;
-
-#[nutype(validate(max = 255))]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
-pub struct PlyCount(u8);
-
-impl PlyCount {
-    pub fn increment(&mut self) {
-        *self = Self::new(self.into_inner().saturating_add(1)).unwrap();
-    }
-
-    pub fn decrement(&mut self) {
-        *self = Self::new(self.into_inner().saturating_sub(1)).unwrap();
-    }
-}
 
 
 #[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
