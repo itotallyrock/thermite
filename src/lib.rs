@@ -1,9 +1,7 @@
 #![warn(missing_docs, clippy::pedantic, rustdoc::missing_doc_code_examples, clippy::nursery, clippy::cargo, clippy::style)]
 
-use std::hash::Hasher;
 use arrayvec::ArrayVec;
 use nutype::nutype;
-use enum_map::Enum;
 use derive_more::{AsMut, AsRef};
 use raw_position::{RawPosition, RawPositionState};
 use crate::half_move_clock::HalfMoveClock;
