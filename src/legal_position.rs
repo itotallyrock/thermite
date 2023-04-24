@@ -29,7 +29,7 @@ impl TryFrom<RawPosition> for LegalPosition {
     fn try_from(position: RawPosition) -> Result<Self, Self::Error> {
         let state = LegalPositionState {
             raw_state: position.state,
-            halfmove_clock: Default::default(),
+            halfmove_clock: HalfMoveClock::default(),
         };
 
         Ok(Self {

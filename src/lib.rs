@@ -1,3 +1,5 @@
+//! Thermite - Another rust chess engine
+
 #![warn(
     missing_docs,
     clippy::pedantic,

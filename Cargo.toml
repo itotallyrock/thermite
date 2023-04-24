@@ -1,5 +1,7 @@
 [package]
-name = "thermite_core"
+name = "thermite"
+description = "Another rust chess engine"
+categories = ["games", "command-line-utilities"]
 version = "0.1.0"
 edition = "2021"
 authors = ["Jeffrey Meyer <itotallyrock>"]

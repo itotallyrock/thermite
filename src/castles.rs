@@ -38,6 +38,7 @@ pub enum CastleDirection {
     QueenSide,
 }
 
+/// Keeps track of available castle abilities (king-side or queen-side castle) for both sides.
 #[bitmask(u8)]
 pub enum CastleRights {
     /// No castle abilities for either side
@@ -84,6 +85,7 @@ impl CastleRights {
     /// assert_eq!(CastleRights::for_side(PlayerColor::White), CastleRights::WhiteBoth);
     /// assert_eq!(CastleRights::for_side(PlayerColor::Black), CastleRights::BlackBoth);
     /// ```
+    #[must_use]
     pub const fn for_side(side: PlayerColor) -> Self {
         match side {
             PlayerColor::White => Self::WhiteBoth,

@@ -43,13 +43,13 @@ pub struct RawPosition {
 impl Default for RawPosition {
     fn default() -> Self {
         Self {
-            hash: Default::default(),
+            hash: ZobristHash::default(),
             player_to_move: PlayerColor::White,
-            squares: Default::default(),
-            pieces_masks: Default::default(),
-            side_masks: Default::default(),
+            squares: EnumMap::default(),
+            pieces_masks: EnumMap::default(),
+            side_masks: EnumMap::default(),
             king_squares: EnumMap::from_array([Square::E1, Square::E8]),
-            state: Default::default(),
+            state: RawPositionState::default(),
         }
     }
 }
