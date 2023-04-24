@@ -227,14 +227,25 @@ mod test {
         assert_eq!(ROOK_TO_SQUARES[direction][player], expected);
     }
 
-
     #[test]
     fn castles_bitor_works() {
-        assert_eq!(CastleRights::WhiteQueen.or(CastleRights::WhiteKing), CastleRights::WhiteBoth);
-        assert_eq!(CastleRights::WhiteBoth.or(CastleRights::BlackBoth), CastleRights::All);
-        assert_eq!(CastleRights::None.or(CastleRights::BlackBoth), CastleRights::BlackBoth);
+        assert_eq!(
+            CastleRights::WhiteQueen.or(CastleRights::WhiteKing),
+            CastleRights::WhiteBoth
+        );
+        assert_eq!(
+            CastleRights::WhiteBoth.or(CastleRights::BlackBoth),
+            CastleRights::All
+        );
+        assert_eq!(
+            CastleRights::None.or(CastleRights::BlackBoth),
+            CastleRights::BlackBoth
+        );
         assert_eq!(CastleRights::None.or(CastleRights::All), CastleRights::All);
-        assert_eq!(CastleRights::None.or(CastleRights::None), CastleRights::None);
+        assert_eq!(
+            CastleRights::None.or(CastleRights::None),
+            CastleRights::None
+        );
     }
 
     #[test_case(CastleRights::All, CastleRights::None)]
