@@ -15,9 +15,7 @@ mod pieces;
 mod castles;
 mod half_move_clock;
 mod raw_position;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Hash)]
-pub struct BoardMask(u64);
+mod board_mask;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum IllegalPosition {

@@ -2,7 +2,8 @@ use enum_map::EnumMap;
 use crate::pieces::{NonKingPieceType, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
-use crate::{BoardMask, ZobristHash};
+use crate::ZobristHash;
+use crate::board_mask::BoardMask;
 use crate::castles::CastleRights;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
