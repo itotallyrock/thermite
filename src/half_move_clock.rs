@@ -1,4 +1,7 @@
 use nutype::nutype;
+use derive_more::{AsMut, AsRef};
+use crate::legal_position::LegalPosition;
+use crate::ply_count::PlyCount;
 
 #[nutype(validate(max = 50))]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
@@ -19,3 +22,14 @@ impl HalfMoveClock {
         *self = Self::default();
     }
 }
+
+
+#[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
+pub struct Game {
+    #[as_ref()]
+    #[as_mut()]
+    legal_position: LegalPosition,
+    halfmove_count: PlyCount,
+}
+
+pub const HALF_MOVE_LIMIT_USIZE: usize = 50;

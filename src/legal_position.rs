@@ -1,7 +1,7 @@
 use derive_more::{AsMut, AsRef};
 use arrayvec::ArrayVec;
 use crate::half_move_clock::HalfMoveClock;
-use crate::HALF_MOVE_LIMIT_USIZE;
+use crate::half_move_clock::HALF_MOVE_LIMIT_USIZE;
 use crate::raw_position::{RawPosition, RawPositionState};
 use crate::zobrist::HistoryHash;
 
