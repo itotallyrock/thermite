@@ -22,5 +22,6 @@ pub mod player_color;
 mod ply_count;
 mod raw_position;
 mod searchable;
-mod square;
+/// A single tile on a board where a piece can be placed
+pub mod square;
 mod zobrist;
