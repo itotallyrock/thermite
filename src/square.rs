@@ -25,7 +25,7 @@ pub enum Square {
 }
 
 impl Square {
-    /// Convert a square to a single bit set BoardMask
+    /// Convert a square to a single bit set `BoardMask`
     ///
     /// ```
     /// use thermite::square::Square;
@@ -37,6 +37,7 @@ impl Square {
     /// assert_eq!(Square::H1.to_mask(), BoardMask::new(0b10000000));
     /// assert_eq!(Square::H8.to_mask(), BoardMask::new(0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000));
     /// ```
+    #[must_use]
     pub fn to_mask(self) -> BoardMask {
         BoardMask::new(1u64 << (self as u32))
     }

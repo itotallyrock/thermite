@@ -7,7 +7,7 @@ use crate::zobrist::ZobristHash;
 use enum_map::EnumMap;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct RawPositionState {
+pub struct State {
     checkers: BoardMask,
     pinners_for: EnumMap<PlayerColor, BoardMask>,
     blockers_for: EnumMap<PlayerColor, BoardMask>,
@@ -16,7 +16,7 @@ pub struct RawPositionState {
     castles: CastleRights,
 }
 
-impl Default for RawPositionState {
+impl Default for State {
     fn default() -> Self {
         Self {
             checkers: BoardMask::default(),
@@ -37,7 +37,7 @@ pub struct RawPosition {
     pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
     side_masks: EnumMap<PlayerColor, BoardMask>,
     king_squares: EnumMap<PlayerColor, Square>,
-    pub(crate) state: RawPositionState,
+    pub(crate) state: State,
 }
 
 impl Default for RawPosition {
@@ -49,7 +49,7 @@ impl Default for RawPosition {
             pieces_masks: EnumMap::default(),
             side_masks: EnumMap::default(),
             king_squares: EnumMap::from_array([Square::E1, Square::E8]),
-            state: RawPositionState::default(),
+            state: State::default(),
         }
     }
 }

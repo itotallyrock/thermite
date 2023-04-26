@@ -1,6 +1,6 @@
 use crate::half_move_clock::HalfMoveClock;
 use crate::half_move_clock::HALF_MOVE_LIMIT_USIZE;
-use crate::raw_position::{RawPosition, RawPositionState};
+use crate::raw_position::{RawPosition, State as RawPositionState};
 use crate::zobrist::HistoryHash;
 use arrayvec::ArrayVec;
 use derive_more::{AsMut, AsRef};
@@ -9,7 +9,7 @@ use derive_more::{AsMut, AsRef};
 pub enum IllegalPosition {}
 
 #[derive(Copy, Clone, Eq, PartialEq, Default, Debug)]
-pub struct LegalPositionState {
+pub struct State {
     raw_state: RawPositionState,
     halfmove_clock: HalfMoveClock,
 }
@@ -19,7 +19,7 @@ pub struct LegalPosition {
     #[as_ref()]
     #[as_mut()]
     position: RawPosition,
-    state: LegalPositionState,
+    state: State,
     hash_history: Box<ArrayVec<HistoryHash, { HALF_MOVE_LIMIT_USIZE }>>,
 }
 
@@ -27,7 +27,7 @@ impl TryFrom<RawPosition> for LegalPosition {
     type Error = IllegalPosition;
 
     fn try_from(position: RawPosition) -> Result<Self, Self::Error> {
-        let state = LegalPositionState {
+        let state = State {
             raw_state: position.state,
             halfmove_clock: HalfMoveClock::default(),
         };
