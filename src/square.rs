@@ -288,3 +288,78 @@ impl TryFrom<u8> for Square {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::str::FromStr;
+    use crate::square::{NUM_FILES, NUM_RANKS, Square, Square::*};
+
+    use test_case::test_case;
+
+    #[test]
+    fn display_works() {
+        const FILES: [char; NUM_FILES] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const RANKS: [char; NUM_RANKS] = ['1', '2', '3', '4', '5', '6', '7', '8'];
+        for (column, file) in FILES.into_iter().enumerate() {
+            for (row, rank) in RANKS.into_iter().enumerate() {
+                let input = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
+                let expected = [file as u8, rank as u8];
+                let expected = std::str::from_utf8(&expected).unwrap();
+                assert_eq!(format!("{input}").as_str(), expected);
+            }
+        }
+    }
+
+    #[test_case(0, A1)]
+    #[test_case(8, A2)]
+    #[test_case(16, A3)]
+    #[test_case(24, A4)]
+    #[test_case(32, A5)]
+    #[test_case(40, A6)]
+    #[test_case(48, A7)]
+    #[test_case(56, A8)]
+    #[test_case(1, B1)]
+    #[test_case(2, C1)]
+    #[test_case(3, D1)]
+    #[test_case(4, E1)]
+    #[test_case(5, F1)]
+    #[test_case(6, G1)]
+    #[test_case(7, H1)]
+    #[test_case(63, H8)]
+    #[test_case(34, C5)]
+    #[test_case(44, E6)]
+    #[test_case(57, B8)]
+    #[test_case(26, C4)]
+    #[test_case(18, C3)]
+    #[test_case(14, G2)]
+    #[test_case(12, E2)]
+    fn try_from_valid_works(input: u8, expected: Square) {
+        assert_eq!(Square::try_from(input), Ok(expected));
+    }
+
+    #[test]
+    fn try_from_error_works() {
+        for valid_input in 0..=63 {
+            assert!(Square::try_from(valid_input).is_ok());
+        }
+        for invalid_input in 64..255 {
+            assert!(Square::try_from(invalid_input).is_err());
+        }
+    }
+
+    #[test]
+    fn from_str_works() {
+        const FILES: [char; NUM_FILES] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const RANKS: [char; NUM_RANKS] = ['1', '2', '3', '4', '5', '6', '7', '8'];
+        for (column, file) in FILES.into_iter().enumerate() {
+            for file in [file.to_ascii_lowercase(), file.to_ascii_uppercase()] {
+                for (row, rank) in RANKS.into_iter().enumerate() {
+                    let expected = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
+                    let input = [file as u8, rank as u8];
+                    let input = std::str::from_utf8(&input).unwrap();
+                    assert_eq!(Square::from_str(input).unwrap(), expected);
+                }
+            }
+        }
+    }
+}
