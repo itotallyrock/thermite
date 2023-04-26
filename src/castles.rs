@@ -159,23 +159,23 @@ impl FromStr for CastleRights {
     /// Will error if input is not a valid UCI castle right.
     /// Must be a combination of `'K'`, `'Q'`, `'k'`, and `'q'` or `'-'`.
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        Ok(match input.as_bytes() {
-            b"-" => Self::None,
-            b"K" => Self::WhiteKing,
-            b"Q" => Self::WhiteQueen,
-            b"KQ" => Self::WhiteBoth,
-            b"k" => Self::BlackKing,
-            b"Kk" => Self::BothKings,
-            b"Qk" => Self::WhiteQueenBlackKing,
-            b"KQk" => Self::WhiteBothBlackKing,
-            b"q" => Self::BlackQueen,
-            b"Kq" => Self::WhiteKingBlackQueen,
-            b"Qq" => Self::BothQueens,
-            b"KQq" => Self::WhiteBothBlackQueen,
-            b"kq" => Self::BlackBoth,
-            b"Kkq" => Self::WhiteKingBlackBoth,
-            b"Qkq" => Self::WhiteQueenBlackBoth,
-            b"KQkq" => Self::All,
+        Ok(match input {
+            "-" => Self::None,
+            "K" => Self::WhiteKing,
+            "Q" => Self::WhiteQueen,
+            "KQ" => Self::WhiteBoth,
+            "k" => Self::BlackKing,
+            "Kk" => Self::BothKings,
+            "Qk" => Self::WhiteQueenBlackKing,
+            "KQk" => Self::WhiteBothBlackKing,
+            "q" => Self::BlackQueen,
+            "Kq" => Self::WhiteKingBlackQueen,
+            "Qq" => Self::BothQueens,
+            "KQq" => Self::WhiteBothBlackQueen,
+            "kq" => Self::BlackBoth,
+            "Kkq" => Self::WhiteKingBlackBoth,
+            "Qkq" => Self::WhiteQueenBlackBoth,
+            "KQkq" => Self::All,
             _ => return Err(IllegalCastleRights),
         })
     }
