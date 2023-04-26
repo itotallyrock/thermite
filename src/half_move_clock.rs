@@ -1,18 +1,26 @@
-use nutype::nutype;
+use crate::ply_count::PlyCount;
+use derive_more::{AsRef, Display, FromStr, Into};
 
-#[nutype(validate(max = 50))]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
-pub struct HalfMoveClock(u8);
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Default, AsRef, Into, Display, FromStr)]
+pub struct HalfMoveClock(PlyCount);
 
-impl Default for HalfMoveClock {
-    fn default() -> Self {
-        Self::new(0).unwrap()
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub struct InvalidHalfMoveClock;
+
+impl HalfMoveClock {
+    pub fn new(half_moves: PlyCount) -> Result<Self, InvalidHalfMoveClock> {
+        #[allow(clippy::cast_possible_truncation)]
+        if *half_moves.as_ref() <= HALF_MOVE_LIMIT_USIZE as u8 {
+            Ok(Self(half_moves))
+        } else {
+            Err(InvalidHalfMoveClock)
+        }
     }
 }
 
 impl HalfMoveClock {
     pub fn increment(&mut self) {
-        *self = Self::new(self.into_inner().saturating_add(1)).unwrap();
+        *self = Self::new(PlyCount::new((*self.as_ref().as_ref()).saturating_add(1))).unwrap();
     }
 
     pub fn reset(&mut self) {

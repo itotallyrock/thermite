@@ -1,5 +1,4 @@
-use crate::half_move_clock::HalfMoveClock;
-use crate::half_move_clock::HALF_MOVE_LIMIT_USIZE;
+use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT_USIZE};
 use crate::raw_position::{RawPosition, State as RawPositionState};
 use crate::zobrist::HistoryHash;
 use arrayvec::ArrayVec;

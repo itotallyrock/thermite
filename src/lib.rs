@@ -8,6 +8,7 @@
     clippy::cargo,
     clippy::style
 )]
+#![allow(clippy::module_name_repetitions)]
 
 /// A on-off (0/1) mask of an 8x8 chess board (bitboard)
 pub mod board_mask;

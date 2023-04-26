@@ -1,11 +1,27 @@
-use nutype::nutype;
+use derive_more::{AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, LowerHex, Not, UpperHex};
+use derive_new::new;
 
-#[nutype]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+/// Board mask with single bits representing squares on a 64 tile board
+#[derive(
+    new,
+    Copy,
+    Clone,
+    Eq,
+    Default,
+    PartialEq,
+    PartialOrd,
+    Hash,
+    Debug,
+    UpperHex,
+    LowerHex,
+    BitAnd,
+    BitAndAssign,
+    BitOr,
+    BitOrAssign,
+    BitXor,
+    BitXorAssign,
+    Not,
+    AsRef,
+)]
+#[must_use]
 pub struct BoardMask(u64);
-
-impl Default for BoardMask {
-    fn default() -> Self {
-        Self::new(0)
-    }
-}

@@ -37,7 +37,6 @@ impl Square {
     /// assert_eq!(Square::H1.to_mask(), BoardMask::new(0b10000000));
     /// assert_eq!(Square::H8.to_mask(), BoardMask::new(0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000));
     /// ```
-    #[must_use]
     pub fn to_mask(self) -> BoardMask {
         BoardMask::new(1u64 << (self as u32))
     }
@@ -273,7 +272,6 @@ impl Display for Square {
 }
 
 /// The error that occurs when attempting to create a square that wouldn't be valid for a standard chess board
-#[allow(clippy::module_name_repetitions)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct IllegalSquare;
 
@@ -291,8 +289,8 @@ impl TryFrom<u8> for Square {
 
 #[cfg(test)]
 mod test {
+    use crate::square::{Square, Square::*, NUM_FILES, NUM_RANKS};
     use std::str::FromStr;
-    use crate::square::{NUM_FILES, NUM_RANKS, Square, Square::*};
 
     use test_case::test_case;
 

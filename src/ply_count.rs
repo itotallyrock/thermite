@@ -1,15 +1,30 @@
-use nutype::nutype;
+use derive_more::{AsRef, Display, FromStr, Into};
+use derive_new::new;
 
-#[nutype(validate(max = 255))]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, AsRef, Into, TryFrom, Display, FromStr)]
+#[derive(
+    new,
+    Copy,
+    Clone,
+    Eq,
+    Default,
+    PartialEq,
+    Debug,
+    Hash,
+    AsRef,
+    Into,
+    Display,
+    FromStr,
+    PartialOrd,
+    Ord,
+)]
 pub struct PlyCount(u8);
 
 impl PlyCount {
     pub fn increment(&mut self) {
-        *self = Self::new(self.into_inner().saturating_add(1)).unwrap();
+        *self = Self::new(self.as_ref().saturating_add(1));
     }
 
     pub fn decrement(&mut self) {
-        *self = Self::new(self.into_inner().saturating_sub(1)).unwrap();
+        *self = Self::new(self.as_ref().saturating_sub(1));
     }
 }

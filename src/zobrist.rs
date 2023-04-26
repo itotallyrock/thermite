@@ -1,17 +1,16 @@
 use core::hash::Hasher;
-use nutype::nutype;
+use derive_more::AsRef;
+use derive_new::new;
 
-#[nutype]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
+#[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct HistoryHash(u8);
 
-#[nutype]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
+#[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct ZobristHash(u64);
 
 impl Hasher for ZobristHash {
     fn finish(&self) -> u64 {
-        self.into_inner()
+        *self.as_ref()
     }
 
     fn write(&mut self, bytes: &[u8]) {
@@ -22,7 +21,7 @@ impl Hasher for ZobristHash {
     }
 
     fn write_u64(&mut self, i: u64) {
-        *self = Self::new(self.into_inner() ^ i);
+        *self = Self::new(*self.as_ref() ^ i);
     }
 }
 
@@ -36,7 +35,7 @@ impl From<ZobristHash> for HistoryHash {
     fn from(value: ZobristHash) -> Self {
         // Intentional truncation for a smaller memory footprint with still enough bits to avoid a hash collision
         #[allow(clippy::cast_possible_truncation)]
-        Self::new(value.into_inner() as u8)
+        Self::new(*value.as_ref() as u8)
     }
 }
 
