@@ -1,6 +1,7 @@
 use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT_USIZE};
 use crate::raw_position::{RawPosition, State as RawPositionState};
 use crate::zobrist::HistoryHash;
+use alloc::boxed::Box;
 use arrayvec::ArrayVec;
 use derive_more::{AsMut, AsRef};
 

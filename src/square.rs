@@ -1,7 +1,7 @@
 use crate::board_mask::BoardMask;
+use core::fmt::{Display, Formatter};
+use core::str::FromStr;
 use enum_map::Enum;
-use std::fmt::{Display, Formatter};
-use std::str::FromStr;
 
 /// How many rows on the board
 pub const NUM_RANKS: usize = 8;
@@ -194,7 +194,7 @@ impl FromStr for Square {
 }
 
 impl Display for Square {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match self {
             Self::A1 => write!(f, "a1"),
             Self::B1 => write!(f, "b1"),
@@ -290,7 +290,8 @@ impl TryFrom<u8> for Square {
 #[cfg(test)]
 mod test {
     use crate::square::{Square, Square::*, NUM_FILES, NUM_RANKS};
-    use std::str::FromStr;
+    use alloc::format;
+    use core::str::FromStr;
 
     use test_case::test_case;
 
@@ -302,7 +303,7 @@ mod test {
             for (row, rank) in RANKS.into_iter().enumerate() {
                 let input = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
                 let expected = [file as u8, rank as u8];
-                let expected = std::str::from_utf8(&expected).unwrap();
+                let expected = core::str::from_utf8(&expected).unwrap();
                 assert_eq!(format!("{input}").as_str(), expected);
             }
         }
@@ -354,7 +355,7 @@ mod test {
                 for (row, rank) in RANKS.into_iter().enumerate() {
                     let expected = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
                     let input = [file as u8, rank as u8];
-                    let input = std::str::from_utf8(&input).unwrap();
+                    let input = core::str::from_utf8(&input).unwrap();
                     assert_eq!(Square::from_str(input).unwrap(), expected);
                 }
             }

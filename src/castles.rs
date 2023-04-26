@@ -1,8 +1,8 @@
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use bitmask_enum::bitmask;
+use core::str::FromStr;
 use enum_map::{Enum, EnumMap};
-use std::str::FromStr;
 
 /// The square that the king for a given side moves from when castling in a given direction
 pub const KING_FROM_SQUARES: EnumMap<PlayerColor, Square> =
