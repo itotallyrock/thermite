@@ -9,7 +9,8 @@
     clippy::style
 )]
 
-mod board_mask;
+/// A on-off (0/1) mask of an 8x8 chess board (bitboard)
+pub mod board_mask;
 /// The castle abilities for a game of a chess, containing the rights information for both sides.
 pub mod castles;
 mod game;
