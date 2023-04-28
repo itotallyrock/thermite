@@ -52,7 +52,7 @@ impl PartialEq<HistoryHash> for ZobristHash {
 
 /// Hash value for all piece square possibilities (including some illegal positions like pawns on last rank)
 #[rustfmt::skip]
-const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square, u64>>> = EnumMap::from_array([
+pub const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square, u64>>> = EnumMap::from_array([
     EnumMap::from_array([
         EnumMap::from_array([
             0xBCBD_2C2F_7DAB_FCBE, 0x8756_17FC_113F_9090, 0x314A_7DFE_25D7_39E3, 0x47F5_6D36_49FE_FA55, 0x2276_E9C2_6AD3_4276, 0x776F_E868_69DA_CEAD, 0x4CDA_34E6_051B_A0AC, 0x2580_0E89_C066_3865,
@@ -180,7 +180,7 @@ const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square, u64
 ]);
 
 /// Hash value of one of the 16 possible en-passant squares A3-H3, A6-H6
-const EN_PASSANT_KEYS: EnumMap<PlayerColor, EnumMap<File, u64>> = EnumMap::from_array([
+pub const EN_PASSANT_KEYS: EnumMap<PlayerColor, EnumMap<File, u64>> = EnumMap::from_array([
     EnumMap::from_array([
         0xCC5E_EF11_3797_E347,
         0xAA90_BC6F_508F_C0AE,
@@ -204,7 +204,7 @@ const EN_PASSANT_KEYS: EnumMap<PlayerColor, EnumMap<File, u64>> = EnumMap::from_
 ]);
 
 /// Hash for one of 4 castle rights, white/black king-side/queen-side
-const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap::from_array([
+pub const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap::from_array([
     EnumMap::from_array([
         // White King
         0x8499_3F26_2ABB_0E4A,

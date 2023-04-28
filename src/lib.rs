@@ -28,4 +28,5 @@ pub mod position;
 mod searchable;
 /// A single tile on a board where a piece can be placed
 pub mod square;
-mod zobrist;
+/// Board transposition hashing (if a position is identical in terms of play but could be arrived at via different moves)
+pub mod zobrist;
