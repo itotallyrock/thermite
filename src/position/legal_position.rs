@@ -1,7 +1,7 @@
 use crate::board_mask::BoardMask;
-use crate::castles::CastleRights;
+use crate::castles::{CastleDirection, CastleRights};
 use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT_USIZE};
-use crate::pieces::{NonKingPieceType, OwnedPiece, PieceType};
+use crate::pieces::{NonKingPieceType, OwnedPiece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::position::position_builder::PositionBuilder;
 use crate::square::Square;
@@ -58,20 +58,25 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             en_passant_square,
         } = position;
         // Construct most of the position fields by iterating over all of the squares with pieces
-        let (pieces_masks, side_masks, king_squares, hash) =
-            squares.iter().filter_map(|(s, p)| p.map(|p| (s, p))).fold(
+        let (pieces_masks, side_masks, king_squares, mut hash) =
+            squares.iter().filter_map(|(square, piece)| piece.map(|owned_piece| PlacedPiece { owned_piece, square })).fold(
                 (
                     EnumMap::<NonKingPieceType, BoardMask>::default(),
                     EnumMap::<PlayerColor, BoardMask>::default(),
                     EnumMap::<PlayerColor, Option<Square>>::default(),
                     ZobristHash::default(),
                 ),
-                |(mut pieces_masks, mut side_masks, mut king_squares, hash),
-                 (square, OwnedPiece { piece, player })| {
+                |(mut pieces_masks, mut side_masks, mut king_squares, mut hash),
+                 placed_piece| {
+                    let PlacedPiece { square, owned_piece: OwnedPiece { piece, player } } = placed_piece;
                     let square_offset = square as u8;
                     let square_mask = BoardMask::new(1) << square_offset;
-                    // TODO: update hash using zobrist key lookup
+
+                    // Update hash using zobrist key lookup
+                    hash.toggle_piece_square(placed_piece);
+                    // Add the piece to the side mask
                     side_masks[player] |= square_mask;
+
                     // If the piece is a king add it to the king squares, otherwise add it to the piece masks
                     NonKingPieceType::try_from(piece).map_or_else(
                         |_| {
@@ -85,6 +90,23 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                     (pieces_masks, side_masks, king_squares, hash)
                 },
             );
+
+        // Update hash from non placed piece positional state
+        if player_to_move == PlayerColor::Black {
+            hash.switch_sides();
+        }
+
+        if let Some(en_passant_square) = en_passant_square {
+            hash.toggle_en_passant_square(en_passant_square);
+        }
+
+        for player in [PlayerColor::White, PlayerColor::Black] {
+            for direction in [CastleDirection::KingSide, CastleDirection::QueenSide] {
+                if castles.can_castle(player, direction) {
+                    hash.toggle_castle_ability(player, direction)
+                }
+            }
+        }
 
         // Construct state
         let checkers = BoardMask::default();
