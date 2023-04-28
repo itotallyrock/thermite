@@ -58,17 +58,26 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             en_passant_square,
         } = position;
         // Construct most of the position fields by iterating over all of the squares with pieces
-        let (pieces_masks, side_masks, king_squares, mut hash) =
-            squares.iter().filter_map(|(square, piece)| piece.map(|owned_piece| PlacedPiece { owned_piece, square })).fold(
+        let (pieces_masks, side_masks, king_squares, mut hash) = squares
+            .iter()
+            .filter_map(|(square, piece)| {
+                piece.map(|owned_piece| PlacedPiece {
+                    owned_piece,
+                    square,
+                })
+            })
+            .fold(
                 (
                     EnumMap::<NonKingPieceType, BoardMask>::default(),
                     EnumMap::<PlayerColor, BoardMask>::default(),
                     EnumMap::<PlayerColor, Option<Square>>::default(),
                     ZobristHash::default(),
                 ),
-                |(mut pieces_masks, mut side_masks, mut king_squares, mut hash),
-                 placed_piece| {
-                    let PlacedPiece { square, owned_piece: OwnedPiece { piece, player } } = placed_piece;
+                |(mut pieces_masks, mut side_masks, mut king_squares, mut hash), placed_piece| {
+                    let PlacedPiece {
+                        square,
+                        owned_piece: OwnedPiece { piece, player },
+                    } = placed_piece;
                     let square_offset = square as u8;
                     let square_mask = BoardMask::new(1) << square_offset;
 
