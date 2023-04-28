@@ -1,15 +1,17 @@
 use crate::castles::CastleDirection;
-use crate::pieces::PieceType;
+use crate::pieces::{PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
-use crate::square::{File, Square};
+use crate::square::{EnPassantSquare, Square};
 use core::hash::Hasher;
 use derive_more::AsRef;
 use derive_new::new;
 use enum_map::EnumMap;
 
+/// The truncated Zobrist hash for a specific position to save memory when collisions are less likely
 #[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct HistoryHash(u8);
 
+/// The Zobrist hash for a specific position
 #[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct ZobristHash(u64);
 
@@ -30,9 +32,43 @@ impl Hasher for ZobristHash {
     }
 }
 
+impl ZobristHash {
+    fn toggle(&mut self, mask: u64) {
+        self.write_u64(mask);
+    }
+
+    /// Toggle the placement of a piece on a given square for a given side.
+    /// Adds the piece placement to the hash; otherwise, removes the piece if it is already included.
+    pub fn toggle_piece_square(&mut self, placed_piece: PlacedPiece) {
+        self.toggle(
+            PIECE_SQUARES[placed_piece.owned_piece.player][placed_piece.owned_piece.piece]
+                [placed_piece.square],
+        );
+    }
+
+    /// Toggle the side to move between white and black.
+    pub fn switch_sides(&mut self) {
+        self.toggle(SIDE_KEY);
+    }
+
+    /// Toggle the side to move between white and black.
+    pub fn toggle_en_passant_square(&mut self, en_passant_square: EnPassantSquare) {
+        self.toggle(EN_PASSANT_KEYS[en_passant_square]);
+    }
+
+    /// Toggle the castle rights for a side to castle in one direction
+    pub fn toggle_castle_ability(
+        &mut self,
+        player: PlayerColor,
+        castle_direction: CastleDirection,
+    ) {
+        self.toggle(CASTLE_KEYS[castle_direction][player]);
+    }
+}
+
 impl Default for ZobristHash {
     fn default() -> Self {
-        Self::new(0xF1DC_4349_4EA4_76CE)
+        Self::new(EMPTY_ZOBRIST_KEY)
     }
 }
 
@@ -50,9 +86,15 @@ impl PartialEq<HistoryHash> for ZobristHash {
     }
 }
 
+/// The base key for an empty position
+const EMPTY_ZOBRIST_KEY: u64 = 0xF1DC_4349_4EA4_76CE;
+
+/// Hash value used for black to move
+const SIDE_KEY: u64 = 0xA92C_CEB8_91EA_45C2;
+
 /// Hash value for all piece square possibilities (including some illegal positions like pawns on last rank)
 #[rustfmt::skip]
-pub const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square, u64>>> = EnumMap::from_array([
+const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square, u64>>> = EnumMap::from_array([
     EnumMap::from_array([
         EnumMap::from_array([
             0xBCBD_2C2F_7DAB_FCBE, 0x8756_17FC_113F_9090, 0x314A_7DFE_25D7_39E3, 0x47F5_6D36_49FE_FA55, 0x2276_E9C2_6AD3_4276, 0x776F_E868_69DA_CEAD, 0x4CDA_34E6_051B_A0AC, 0x2580_0E89_C066_3865,
@@ -180,31 +222,27 @@ pub const PIECE_SQUARES: EnumMap<PlayerColor, EnumMap<PieceType, EnumMap<Square,
 ]);
 
 /// Hash value of one of the 16 possible en-passant squares A3-H3, A6-H6
-pub const EN_PASSANT_KEYS: EnumMap<PlayerColor, EnumMap<File, u64>> = EnumMap::from_array([
-    EnumMap::from_array([
-        0xCC5E_EF11_3797_E347,
-        0xAA90_BC6F_508F_C0AE,
-        0x735D_A197_A644_D75E,
-        0x3774_4D11_E638_E6DA,
-        0x0197_A767_F276_8F84,
-        0x2051_D4EE_0123_676B,
-        0x2B9A_D8C0_0CFF_B700,
-        0x9C54_065D_4D23_E231,
-    ]),
-    EnumMap::from_array([
-        0x3D93_FE65_2786_B4DF,
-        0x946E_EEB8_1F3B_174D,
-        0x4C2E_C39C_EE8B_9A0A,
-        0x276F_22C3_BA40_D7E9,
-        0x2529_97C6_9EB7_4C9C,
-        0xEC92_6AE5_50EE_73E0,
-        0x3CE2_A3E8_8BC5_6598,
-        0xB6CF_5D2A_80FB_EBD7,
-    ]),
+const EN_PASSANT_KEYS: EnumMap<EnPassantSquare, u64> = EnumMap::from_array([
+    0xCC5E_EF11_3797_E347,
+    0xAA90_BC6F_508F_C0AE,
+    0x735D_A197_A644_D75E,
+    0x3774_4D11_E638_E6DA,
+    0x0197_A767_F276_8F84,
+    0x2051_D4EE_0123_676B,
+    0x2B9A_D8C0_0CFF_B700,
+    0x9C54_065D_4D23_E231,
+    0x3D93_FE65_2786_B4DF,
+    0x946E_EEB8_1F3B_174D,
+    0x4C2E_C39C_EE8B_9A0A,
+    0x276F_22C3_BA40_D7E9,
+    0x2529_97C6_9EB7_4C9C,
+    0xEC92_6AE5_50EE_73E0,
+    0x3CE2_A3E8_8BC5_6598,
+    0xB6CF_5D2A_80FB_EBD7,
 ]);
 
 /// Hash for one of 4 castle rights, white/black king-side/queen-side
-pub const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap::from_array([
+const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap::from_array([
     EnumMap::from_array([
         // White King
         0x8499_3F26_2ABB_0E4A,
