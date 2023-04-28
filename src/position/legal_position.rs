@@ -85,7 +85,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         let pinners_for = EnumMap::default();
         let blockers_for = EnumMap::default();
         let check_squares = EnumMap::default();
-        let en_passant_square = en_passant_square.map(|s| s.into());
+        let en_passant_square = en_passant_square.map(Into::into);
         let state = State {
             halfmove_clock,
             en_passant_square,

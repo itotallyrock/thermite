@@ -26,6 +26,53 @@ pub enum Square {
     A8, B8, C8, D8, E8, F8, G8, H8,
 }
 
+/// A single row on the board
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum Rank {
+    /// The first rank, the lower most rank from white's pov, white's back rank
+    First,
+    /// The second rank, white's pawn rank
+    Second,
+    /// The third rank
+    Third,
+    /// The fourth rank
+    Fourth,
+    /// The fifth rank
+    Fifth,
+    /// The sixth rank
+    Sixth,
+    /// The seventh rank, black's pawn rank
+    Seventh,
+    /// The eighth and upper-most rank from whites pov, black's back rank
+    Eighth,
+}
+
+
+/// A single column on the board
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum File {
+    /// The A or first file
+    A,
+    /// The B or second file
+    B,
+    /// The C or third file
+    C,
+    /// The D or fourth file
+    D,
+    /// The E or fifth file
+    E,
+    /// The F or sixth file
+    F,
+    /// The G or seventh file
+    G,
+    /// The H or eighth file
+    H,
+}
+
+
+
 impl Square {
     /// Convert a square to a single bit set `BoardMask`
     ///
@@ -43,33 +90,40 @@ impl Square {
         BoardMask::new(1u64 << (self as u32))
     }
 
-    /// Get the rank index offset 0-7 for ranks 1-8
+    /// Get the [`Rank`] for a [`Square`]
     ///
     /// ```
-    /// use thermite::square::Square;
+    /// use thermite::square::{Rank, Square};
     ///
-    /// assert_eq!(Square::A1.rank(), 0);
-    /// assert_eq!(Square::B3.rank(), 2);
-    /// assert_eq!(Square::F5.rank(), 4);
-    /// assert_eq!(Square::E8.rank(), 7);
+    /// assert_eq!(Square::A1.rank(), Rank::First);
+    /// assert_eq!(Square::B3.rank(), Rank::Third);
+    /// assert_eq!(Square::F5.rank(), Rank::Fifth);
+    /// assert_eq!(Square::E8.rank(), Rank::Eighth);
     /// ```
     #[must_use]
-    pub const fn rank(self) -> usize {
-        (self as usize) / NUM_RANKS
+    pub const fn rank(self) -> Rank {
+        // SAFETY: Because this value is at most 63usize divided by 8 (Rank::LENGTH) gives a maximum
+        // of 7 for our `Rank`. Which is valid for our discriminant as there are 8 variants.
+        // ALLOW: truncation is not possible when Rank::LENGTH is under 255 and 8 is well under
+        #[allow(clippy::cast_possible_truncation)]
+        unsafe { std::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8) }
     }
 
-    /// Get the file index offset 0-7 for files A-H
+    /// Get the [`File`] for a [`Square`]
     ///
     /// ```
-    /// use thermite::square::Square;
+    /// use thermite::square::{File, Square};
     ///
-    /// assert_eq!(Square::A3.file(), 0);
-    /// assert_eq!(Square::H8.file(), 7);
-    /// assert_eq!(Square::F5.file(), 5);
+    /// assert_eq!(Square::A3.file(), File::A);
+    /// assert_eq!(Square::H8.file(), File::H);
+    /// assert_eq!(Square::F5.file(), File::F);
     /// ```
     #[must_use]
-    pub const fn file(self) -> usize {
-        (self as usize) % NUM_FILES
+    pub const fn file(self) -> File {
+        // SAFETY: Because this value is mod File::LENGTH it will always be a valid discriminant for it
+        // ALLOW: truncation is not possible when File::LENGTH is under 255 and 8 is well under
+        #[allow(clippy::cast_possible_truncation)]
+        unsafe { std::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8) }
     }
 
     /// Try to add an offset to a square
