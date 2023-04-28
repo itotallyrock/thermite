@@ -102,7 +102,8 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             check_squares,
         };
 
-        let hash_history = Box::default(); // TODO: Get this from builder (when we have starting moves implemented)
+        // TODO: Get this from builder (when we have starting moves implemented)
+        let hash_history = Box::default();
         // Make sure we have two kings
         let king_squares = king_squares.into_iter().try_fold(
             EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
