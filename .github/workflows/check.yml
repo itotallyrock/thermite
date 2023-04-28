@@ -59,13 +59,13 @@ jobs:
         run: cargo doc --no-deps --all-features
         env:
           RUSTDOCFLAGS: --cfg docsrs
-  check typos:
+  check-typos:
     runs-on: ubuntu-latest
     name: ubuntu / typos
     steps:
-      uses: crate-ci/typos@master
-      with:
-        config: typos.toml
+      - uses: crate-ci/typos@master
+        with:
+          config: typos.toml
   hack:
     runs-on: ubuntu-latest
     name: ubuntu / stable / build features-powerset
