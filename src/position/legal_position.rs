@@ -112,7 +112,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         for player in [PlayerColor::White, PlayerColor::Black] {
             for direction in [CastleDirection::KingSide, CastleDirection::QueenSide] {
                 if castles.can_castle(player, direction) {
-                    hash.toggle_castle_ability(player, direction)
+                    hash.toggle_castle_ability(player, direction);
                 }
             }
         }
