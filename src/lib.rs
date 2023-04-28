@@ -15,14 +15,16 @@ extern crate alloc;
 pub mod board_mask;
 /// The castle abilities for a game of a chess, containing the rights information for both sides.
 pub mod castles;
-mod game;
+/// A game of chess
+pub mod game;
 mod half_move_clock;
-mod legal_position;
-mod pieces;
+/// A piece that can be placed on the board
+pub mod pieces;
 /// A player in the game, or one side of the board, represented by their piece's color.
 pub mod player_color;
 mod ply_count;
-mod raw_position;
+/// The total representation of a single frozen state of a [`game`](Game) and its internal logic
+pub mod position;
 mod searchable;
 /// A single tile on a board where a piece can be placed
 pub mod square;

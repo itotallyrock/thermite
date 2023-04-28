@@ -1,5 +1,5 @@
-use crate::legal_position::LegalPosition;
 use crate::ply_count::PlyCount;
+use crate::position::LegalPosition;
 use derive_more::{AsMut, AsRef};
 
 #[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]

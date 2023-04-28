@@ -1,5 +1,6 @@
 use derive_more::{
-    AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, LowerHex, Not, UpperHex,
+    AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, LowerHex, Not, Shl,
+    ShlAssign, Shr, ShrAssign, UpperHex,
 };
 use derive_new::new;
 
@@ -24,6 +25,10 @@ use derive_new::new;
     BitXorAssign,
     Not,
     AsRef,
+    Shl,
+    ShlAssign,
+    Shr,
+    ShrAssign,
 )]
 #[must_use]
 pub struct BoardMask(u64);

@@ -2,6 +2,7 @@ use crate::board_mask::BoardMask;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use enum_map::Enum;
+use subenum::subenum;
 
 /// How many rows on the board
 pub const NUM_RANKS: usize = 8;
@@ -11,15 +12,16 @@ pub const NUM_FILES: usize = 8;
 /// A single tile on a chess board
 #[allow(missing_docs)]
 #[rustfmt::skip]
+#[subenum(EnPassantSquare, WhiteEnPassantSquare, BlackEnPassantSquare)]
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 #[repr(u8)]
 pub enum Square {
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
-    A3, B3, C3, D3, E3, F3, G3, H3,
+    #[subenum(EnPassantSquare, WhiteEnPassantSquare)] A3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] B3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] C3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] D3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] E3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] F3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] G3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] H3,
     A4, B4, C4, D4, E4, F4, G4, H4,
     A5, B5, C5, D5, E5, F5, G5, H5,
-    A6, B6, C6, D6, E6, F6, G6, H6,
+    #[subenum(EnPassantSquare, BlackEnPassantSquare)] A6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] B6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] C6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] D6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] E6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] F6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] G6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] H6,
     A7, B7, C7, D7, E7, F7, G7, H7,
     A8, B8, C8, D8, E8, F8, G8, H8,
 }
