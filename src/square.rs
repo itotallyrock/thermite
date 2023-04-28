@@ -48,7 +48,6 @@ pub enum Rank {
     Eighth,
 }
 
-
 /// A single column on the board
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 #[repr(u8)]
@@ -70,8 +69,6 @@ pub enum File {
     /// The H or eighth file
     H,
 }
-
-
 
 impl Square {
     /// Convert a square to a single bit set `BoardMask`
@@ -106,7 +103,9 @@ impl Square {
         // of 7 for our `Rank`. Which is valid for our discriminant as there are 8 variants.
         // ALLOW: truncation is not possible when Rank::LENGTH is under 255 and 8 is well under
         #[allow(clippy::cast_possible_truncation)]
-        unsafe { std::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8) }
+        unsafe {
+            std::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8)
+        }
     }
 
     /// Get the [`File`] for a [`Square`]
@@ -123,7 +122,9 @@ impl Square {
         // SAFETY: Because this value is mod File::LENGTH it will always be a valid discriminant for it
         // ALLOW: truncation is not possible when File::LENGTH is under 255 and 8 is well under
         #[allow(clippy::cast_possible_truncation)]
-        unsafe { std::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8) }
+        unsafe {
+            std::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8)
+        }
     }
 
     /// Try to add an offset to a square

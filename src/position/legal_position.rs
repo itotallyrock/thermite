@@ -100,14 +100,14 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         };
 
         let hash_history = Box::default(); // TODO: Get this from builder (when we have starting moves implemented)
-        let king_squares = king_squares.into_iter()
-            .try_fold(
-                EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
-                |mut king_squares, (player, square)| {
-                    king_squares[player] = square.ok_or(IllegalPosition::MissingKing(player))?;
+        let king_squares = king_squares.into_iter().try_fold(
+            EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
+            |mut king_squares, (player, square)| {
+                king_squares[player] = square.ok_or(IllegalPosition::MissingKing(player))?;
 
-                    Ok(king_squares)
-                })?;
+                Ok(king_squares)
+            },
+        )?;
         let pseudo_legal_position = Self {
             hash,
             player_to_move,
