@@ -4,11 +4,6 @@ use core::str::FromStr;
 use enum_map::Enum;
 use subenum::subenum;
 
-/// How many rows on the board
-pub const NUM_RANKS: usize = 8;
-/// How many columns on the board
-pub const NUM_FILES: usize = 8;
-
 /// A single tile on a chess board
 #[allow(missing_docs)]
 #[rustfmt::skip]
@@ -346,19 +341,20 @@ impl TryFrom<u8> for Square {
 
 #[cfg(test)]
 mod test {
-    use crate::square::{Square, Square::*, NUM_FILES, NUM_RANKS};
+    use crate::square::{File, Rank, Square, Square::*};
     use alloc::format;
     use core::str::FromStr;
+    use enum_map::Enum;
 
     use test_case::test_case;
 
     #[test]
     fn display_works() {
-        const FILES: [char; NUM_FILES] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        const RANKS: [char; NUM_RANKS] = ['1', '2', '3', '4', '5', '6', '7', '8'];
+        const FILES: [char; File::LENGTH] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const RANKS: [char; Rank::LENGTH] = ['1', '2', '3', '4', '5', '6', '7', '8'];
         for (column, file) in FILES.into_iter().enumerate() {
             for (row, rank) in RANKS.into_iter().enumerate() {
-                let input = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
+                let input = Square::try_from((row * File::LENGTH + column) as u8).unwrap();
                 let expected = [file as u8, rank as u8];
                 let expected = core::str::from_utf8(&expected).unwrap();
                 assert_eq!(format!("{input}").as_str(), expected);
@@ -405,12 +401,12 @@ mod test {
 
     #[test]
     fn from_str_works() {
-        const FILES: [char; NUM_FILES] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        const RANKS: [char; NUM_RANKS] = ['1', '2', '3', '4', '5', '6', '7', '8'];
+        const FILES: [char; File::LENGTH] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const RANKS: [char; Rank::LENGTH] = ['1', '2', '3', '4', '5', '6', '7', '8'];
         for (column, file) in FILES.into_iter().enumerate() {
             for file in [file.to_ascii_lowercase(), file.to_ascii_uppercase()] {
                 for (row, rank) in RANKS.into_iter().enumerate() {
-                    let expected = Square::try_from((row * NUM_FILES + column) as u8).unwrap();
+                    let expected = Square::try_from((row * File::LENGTH + column) as u8).unwrap();
                     let input = [file as u8, rank as u8];
                     let input = core::str::from_utf8(&input).unwrap();
                     assert_eq!(Square::from_str(input).unwrap(), expected);
