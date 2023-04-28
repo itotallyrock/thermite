@@ -57,6 +57,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             castle_rights: castles,
             en_passant_square,
         } = position;
+        // Construct most of the position fields by iterating over all of the squares with pieces
         let (pieces_masks, side_masks, king_squares, hash) =
             squares.iter().filter_map(|(s, p)| p.map(|p| (s, p))).fold(
                 (
@@ -84,6 +85,8 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                     (pieces_masks, side_masks, king_squares, hash)
                 },
             );
+
+        // Construct state
         let checkers = BoardMask::default();
         let pinners_for = EnumMap::default();
         let blockers_for = EnumMap::default();
@@ -100,6 +103,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         };
 
         let hash_history = Box::default(); // TODO: Get this from builder (when we have starting moves implemented)
+        // Make sure we have two kings
         let king_squares = king_squares.into_iter().try_fold(
             EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
             |mut king_squares, (player, square)| {
@@ -108,6 +112,8 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                 Ok(king_squares)
             },
         )?;
+
+        // Create the position that might still have some invalid states
         let pseudo_legal_position = Self {
             hash,
             player_to_move,
@@ -118,8 +124,8 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             hash_history,
         };
 
-        // TODO: Update state, hash_history
-        // TODO: Check legality
+        // TODO: Update state
+        // TODO: Check legality (ie. back rank pawns)
 
         Ok(pseudo_legal_position)
     }
