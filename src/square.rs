@@ -79,7 +79,7 @@ impl Square {
     /// assert_eq!(Square::H8.to_mask(), BoardMask::new(0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000));
     /// ```
     pub fn to_mask(self) -> BoardMask {
-        BoardMask::new(1u64 << (self as u32))
+        BoardMask::A1 << self as u32
     }
 
     /// Get the [`Rank`] for a [`Square`]
