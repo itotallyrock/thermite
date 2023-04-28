@@ -1,8 +1,7 @@
-use derive_more::{AsRef, Display, FromStr, Into};
-use derive_new::new;
+use derive_more::{AsRef, Constructor, Display, FromStr, Into};
 
 #[derive(
-    new,
+    Constructor,
     Copy,
     Clone,
     Eq,

@@ -51,11 +51,11 @@ impl TryFrom<PositionBuilder> for LegalPosition {
     fn try_from(position: PositionBuilder) -> Result<Self, Self::Error> {
         let PositionBuilder {
             halfmove_clock,
-            halfmove_count,
             squares,
             starting_player: player_to_move,
             castle_rights: castles,
             en_passant_square,
+            ..
         } = position;
         // Construct most of the position fields by iterating over all of the squares with pieces
         let (pieces_masks, side_masks, king_squares, mut hash) = squares
@@ -78,8 +78,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                         square,
                         owned_piece: OwnedPiece { piece, player },
                     } = placed_piece;
-                    let square_offset = square as u8;
-                    let square_mask = BoardMask::new(1) << square_offset;
+                    let square_mask = BoardMask::new(1) << square as u8;
 
                     // Update hash using zobrist key lookup
                     hash.toggle_piece_square(placed_piece);

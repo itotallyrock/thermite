@@ -1,12 +1,11 @@
 use derive_more::{
-    AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, LowerHex, Not, Shl,
-    ShlAssign, Shr, ShrAssign, UpperHex,
+    AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Constructor, LowerHex,
+    Not, Shl, ShlAssign, Shr, ShrAssign, UpperHex,
 };
-use derive_new::new;
 
 /// Board mask with single bits representing squares on a 64 tile board
 #[derive(
-    new,
+    Constructor,
     Copy,
     Clone,
     Eq,

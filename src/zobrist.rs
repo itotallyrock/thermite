@@ -4,15 +4,14 @@ use crate::player_color::PlayerColor;
 use crate::square::{EnPassantSquare, Square};
 use core::hash::Hasher;
 use derive_more::AsRef;
-use derive_new::new;
 use enum_map::EnumMap;
 
 /// The truncated Zobrist hash for a specific position to save memory when collisions are less likely
-#[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct HistoryHash(u8);
 
 /// The Zobrist hash for a specific position
-#[derive(new, Copy, Clone, Eq, PartialEq, Debug, AsRef)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
 pub struct ZobristHash(u64);
 
 impl Hasher for ZobristHash {
@@ -20,15 +19,12 @@ impl Hasher for ZobristHash {
         *self.as_ref()
     }
 
-    fn write(&mut self, bytes: &[u8]) {
-        bytes
-            .chunks_exact(u64::BITS as usize / 8)
-            .map(|bits| u64::from_be_bytes(bits.try_into().unwrap()))
-            .for_each(|chunk| self.write_u64(chunk));
+    fn write(&mut self, _: &[u8]) {
+        unimplemented!()
     }
 
     fn write_u64(&mut self, i: u64) {
-        *self = Self::new(*self.as_ref() ^ i);
+        *self = Self(*self.as_ref() ^ i);
     }
 }
 
@@ -68,7 +64,7 @@ impl ZobristHash {
 
 impl Default for ZobristHash {
     fn default() -> Self {
-        Self::new(EMPTY_ZOBRIST_KEY)
+        Self(EMPTY_ZOBRIST_KEY)
     }
 }
 
@@ -76,7 +72,7 @@ impl From<ZobristHash> for HistoryHash {
     fn from(value: ZobristHash) -> Self {
         // ALLOW: Intentional truncation for a smaller memory footprint with still enough bits to avoid a hash collision
         #[allow(clippy::cast_possible_truncation)]
-        Self::new(*value.as_ref() as u8)
+        Self(*value.as_ref() as u8)
     }
 }
 
