@@ -8,12 +8,15 @@ use crate::square::Square;
 use crate::zobrist::{HistoryHash, ZobristHash};
 use alloc::boxed::Box;
 use arrayvec::ArrayVec;
-use derive_more::{AsMut, AsRef, Display, Error};
+use derive_more::{AsMut, AsRef};
 use enum_map::EnumMap;
 
 /// Invalid standard chess position (violates rules)
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash, Error, Display)]
-pub enum IllegalPosition {}
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
+pub enum IllegalPosition {
+    /// Missing a king on the board for a given [player](PlayerColor)
+    MissingKing(PlayerColor),
+}
 
 /// The hard to compute or irrecoverable/irreversible state
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
@@ -59,7 +62,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                 (
                     EnumMap::<NonKingPieceType, BoardMask>::default(),
                     EnumMap::<PlayerColor, BoardMask>::default(),
-                    EnumMap::from_array([Square::E1, Square::E8]),
+                    EnumMap::<PlayerColor, Option<Square>>::default(),
                     ZobristHash::default(),
                 ),
                 |(mut pieces_masks, mut side_masks, mut king_squares, hash),
@@ -71,7 +74,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                     // If the piece is a king add it to the king squares, otherwise add it to the piece masks
                     NonKingPieceType::try_from(piece).map_or_else(
                         |_| {
-                            king_squares[player] = square;
+                            king_squares[player] = Some(square);
                         },
                         |non_king_piece| {
                             pieces_masks[non_king_piece] |= square_mask;
@@ -97,7 +100,14 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         };
 
         let hash_history = Box::default(); // TODO: Get this from builder (when we have starting moves implemented)
+        let king_squares = king_squares.into_iter()
+            .try_fold(
+                EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
+                |mut king_squares, (player, square)| {
+                    king_squares[player] = square.ok_or(IllegalPosition::MissingKing(player))?;
 
+                    Ok(king_squares)
+                })?;
         let pseudo_legal_position = Self {
             hash,
             player_to_move,
