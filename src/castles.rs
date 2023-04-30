@@ -279,4 +279,55 @@ mod test {
     fn castles_are_expected_u8(castle_rights: CastleRights, expected_repr: u8) {
         assert_eq!(castle_rights.bits, expected_repr);
     }
+
+    #[test_case(CastleRights::All, PlayerColor::White, CastleDirection::KingSide, true)]
+    #[test_case(CastleRights::All, PlayerColor::White, CastleDirection::QueenSide, true)]
+    #[test_case(CastleRights::All, PlayerColor::Black, CastleDirection::KingSide, true)]
+    #[test_case(CastleRights::All, PlayerColor::Black, CastleDirection::QueenSide, true)]
+    #[test_case(CastleRights::WhiteBoth, PlayerColor::White, CastleDirection::KingSide, true)]
+    #[test_case(CastleRights::WhiteBoth, PlayerColor::White, CastleDirection::QueenSide, true)]
+    #[test_case(CastleRights::WhiteBoth, PlayerColor::Black, CastleDirection::KingSide, false)]
+    #[test_case(CastleRights::WhiteBoth, PlayerColor::Black, CastleDirection::QueenSide, false)]
+    #[test_case(CastleRights::BlackBoth, PlayerColor::White, CastleDirection::KingSide, false)]
+    #[test_case(CastleRights::BlackBoth, PlayerColor::White, CastleDirection::QueenSide, false)]
+    #[test_case(CastleRights::BlackBoth, PlayerColor::Black, CastleDirection::KingSide, true)]
+    #[test_case(CastleRights::BlackBoth, PlayerColor::Black, CastleDirection::QueenSide, true)]
+    #[test_case(CastleRights::None, PlayerColor::White, CastleDirection::KingSide, false)]
+    #[test_case(CastleRights::None, PlayerColor::White, CastleDirection::QueenSide, false)]
+    #[test_case(CastleRights::None, PlayerColor::Black, CastleDirection::KingSide, false)]
+    #[test_case(CastleRights::None, PlayerColor::Black, CastleDirection::QueenSide, false)]
+    fn can_castle_works(rights: CastleRights, player: PlayerColor, direction: CastleDirection, expected: bool) {
+        assert_eq!(rights.can_castle(player, direction), expected);
+    }
+
+    #[test_case("-", Ok(CastleRights::None))]
+    #[test_case("K", Ok(CastleRights::WhiteKing))]
+    #[test_case("Q", Ok(CastleRights::WhiteQueen))]
+    #[test_case("KQ", Ok(CastleRights::WhiteBoth))]
+    #[test_case("k", Ok(CastleRights::BlackKing))]
+    #[test_case("Kk", Ok(CastleRights::BothKings))]
+    #[test_case("Qk", Ok(CastleRights::WhiteQueenBlackKing))]
+    #[test_case("KQk", Ok(CastleRights::WhiteBothBlackKing))]
+    #[test_case("q", Ok(CastleRights::BlackQueen))]
+    #[test_case("Kq", Ok(CastleRights::WhiteKingBlackQueen))]
+    #[test_case("Qq", Ok(CastleRights::BothQueens))]
+    #[test_case("KQq", Ok(CastleRights::WhiteBothBlackQueen))]
+    #[test_case("kq", Ok(CastleRights::BlackBoth))]
+    #[test_case("Kkq", Ok(CastleRights::WhiteKingBlackBoth))]
+    #[test_case("Qkq", Ok(CastleRights::WhiteQueenBlackBoth))]
+    #[test_case("KQkq", Ok(CastleRights::All))]
+    #[test_case("KQkqa", Err(IllegalCastleRights))]
+    #[test_case("lKQkq", Err(IllegalCastleRights))]
+    #[test_case("9430", Err(IllegalCastleRights))]
+    #[test_case("____", Err(IllegalCastleRights))]
+    fn from_str_works(input: &str, expected: Result<CastleRights, IllegalCastleRights>) {
+        assert_eq!(CastleRights::from_str(input), expected);
+    }
+
+    #[test_case(PlayerColor::White, CastleRights::WhiteBoth)]
+    #[test_case(PlayerColor::Black, CastleRights::BlackBoth)]
+    fn for_side_works(player: PlayerColor, expected: CastleRights) {
+        assert_eq!(CastleRights::for_player(player), expected);
+    }
+
 }
