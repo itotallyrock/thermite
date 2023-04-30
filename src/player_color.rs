@@ -28,3 +28,15 @@ impl PlayerColor {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use test_case::test_case;
+    use crate::player_color::PlayerColor;
+
+    #[test_case(PlayerColor::White, PlayerColor::Black)]
+    #[test_case(PlayerColor::Black, PlayerColor::White)]
+    fn switch_works(input: PlayerColor, expected: PlayerColor) {
+        assert_eq!(input.switch(), expected);
+    }
+}
