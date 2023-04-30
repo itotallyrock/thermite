@@ -252,3 +252,81 @@ const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap
         0xE111_D878_8EEF_CFDE,
     ]),
 ]);
+
+#[cfg(test)]
+mod test {
+    use crate::castles::CastleDirection;
+    use crate::pieces::PieceType;
+    use crate::player_color::PlayerColor;
+    use crate::square::Square;
+    use crate::zobrist::ZobristHash;
+
+    use test_case::test_case;
+
+    #[test_case(PieceType::Pawn, PlayerColor::White, Square::E2)]
+    #[test_case(PieceType::Pawn, PlayerColor::Black, Square::E2)]
+    #[test_case(PieceType::Queen, PlayerColor::White, Square::A3)]
+    #[test_case(PieceType::King, PlayerColor::Black, Square::B8)]
+    #[test_case(PieceType::Rook, PlayerColor::Black, Square::C2)]
+    #[test_case(PieceType::Knight, PlayerColor::Black, Square::C2)]
+    #[test_case(PieceType::Rook, PlayerColor::White, Square::D4)]
+    #[test_case(PieceType::King, PlayerColor::White, Square::H1)]
+    #[test_case(PieceType::Rook, PlayerColor::Black, Square::F5)]
+    fn toggle_piece_square_symmetric(piece: PieceType, player: PlayerColor, square: Square) {
+        let mut hasher = ZobristHash::default();
+        let hasher_original = hasher.clone();
+        hasher.toggle_piece_square(piece.owned_by(player).placed_on(square));
+        assert_ne!(hasher_original, hasher);
+        hasher.toggle_piece_square(piece.owned_by(player).placed_on(square));
+        assert_eq!(hasher_original, hasher);
+    }
+
+    #[test]
+    fn switch_sides_symmetric() {
+        let mut hasher = ZobristHash::default();
+        let hasher_original = hasher.clone();
+        hasher.switch_sides();
+        assert_ne!(hasher_original, hasher);
+        hasher.switch_sides();
+        assert_eq!(hasher_original, hasher);
+    }
+
+    #[test_case(Square::A3)]
+    #[test_case(Square::B3)]
+    #[test_case(Square::C3)]
+    #[test_case(Square::D3)]
+    #[test_case(Square::E3)]
+    #[test_case(Square::F3)]
+    #[test_case(Square::G3)]
+    #[test_case(Square::H3)]
+    #[test_case(Square::A6)]
+    #[test_case(Square::B6)]
+    #[test_case(Square::C6)]
+    #[test_case(Square::D6)]
+    #[test_case(Square::E6)]
+    #[test_case(Square::F6)]
+    #[test_case(Square::G6)]
+    #[test_case(Square::H6)]
+    fn toggle_en_passant_square_symmetric(input: Square) {
+        let input = input.try_into().expect("invalid test setup");
+        let mut hasher = ZobristHash::default();
+        let hasher_original = hasher.clone();
+        hasher.toggle_en_passant_square(input);
+        assert_ne!(hasher_original, hasher);
+        hasher.toggle_en_passant_square(input);
+        assert_eq!(hasher_original, hasher);
+    }
+
+    #[test_case(PlayerColor::White, CastleDirection::KingSide)]
+    #[test_case(PlayerColor::White, CastleDirection::QueenSide)]
+    #[test_case(PlayerColor::Black, CastleDirection::KingSide)]
+    #[test_case(PlayerColor::Black, CastleDirection::QueenSide)]
+    fn toggle_castle_ability_symmetric(player: PlayerColor, castle_direction: CastleDirection) {
+        let mut hasher = ZobristHash::default();
+        let hasher_original = hasher.clone();
+        hasher.toggle_castle_ability(player, castle_direction);
+        assert_ne!(hasher_original, hasher);
+        hasher.toggle_castle_ability(player, castle_direction);
+        assert_eq!(hasher_original, hasher);
+    }
+}
