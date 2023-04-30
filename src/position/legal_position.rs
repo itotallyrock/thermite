@@ -1,6 +1,6 @@
 use crate::bitboard::BoardMask;
 use crate::castles::{CastleDirection, CastleRights};
-use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT_USIZE};
+use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT};
 use crate::pieces::{NonKingPieceType, OwnedPiece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::position::position_builder::PositionBuilder;
@@ -42,7 +42,7 @@ pub struct LegalPosition {
     side_masks: EnumMap<PlayerColor, BoardMask>,
     king_squares: EnumMap<PlayerColor, Square>,
     state: State,
-    hash_history: Box<ArrayVec<HistoryHash, { HALF_MOVE_LIMIT_USIZE }>>,
+    hash_history: Box<ArrayVec<HistoryHash, { HALF_MOVE_LIMIT }>>,
 }
 
 impl TryFrom<PositionBuilder> for LegalPosition {

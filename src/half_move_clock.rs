@@ -1,16 +1,19 @@
 use crate::ply_count::PlyCount;
 use derive_more::{AsRef, Display, FromStr, Into};
 
+/// The counter representing a single player's moves, incremented each move until it's reset during a capture or pawn move.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash, Default, AsRef, Into, Display, FromStr)]
 pub struct HalfMoveClock(PlyCount);
 
+/// Out of bounds [`PlyCount`] for [`HalfMoveClock`]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct InvalidHalfMoveClock;
 
 impl HalfMoveClock {
+    /// Try to create a new clock with a value. Ok for values under the [limit](HALF_MOVE_LIMIT), error otherwise.
     pub fn new(half_moves: PlyCount) -> Result<Self, InvalidHalfMoveClock> {
         #[allow(clippy::cast_possible_truncation)]
-        if *half_moves.as_ref() <= HALF_MOVE_LIMIT_USIZE as u8 {
+        if *half_moves.as_ref() <= HALF_MOVE_LIMIT as u8 {
             Ok(Self(half_moves))
         } else {
             Err(InvalidHalfMoveClock)
@@ -19,9 +22,10 @@ impl HalfMoveClock {
 }
 
 impl HalfMoveClock {
+    /// Try and increment the half-move clock if under the [limit](HALF_MOVE_LIMIT), otherwise error
     pub fn increment(&mut self) -> Result<(), InvalidHalfMoveClock> {
         #[allow(clippy::cast_possible_truncation)]
-        if self.0 < PlyCount::new(HALF_MOVE_LIMIT_USIZE as u8) {
+        if self.0 < PlyCount::new(HALF_MOVE_LIMIT as u8) {
             self.0.increment();
             Ok(())
         } else {
@@ -29,12 +33,14 @@ impl HalfMoveClock {
         }
     }
 
+    /// Reset the clock back to zero
     pub fn reset(&mut self) {
         *self = Self::default();
     }
 }
 
-pub const HALF_MOVE_LIMIT_USIZE: usize = 50;
+/// How many half-moves until a draw
+pub const HALF_MOVE_LIMIT: usize = 50;
 
 #[cfg(test)]
 mod test {

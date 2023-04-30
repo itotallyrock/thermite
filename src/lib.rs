@@ -17,7 +17,8 @@ pub mod bitboard;
 pub mod castles;
 /// A game of chess
 pub mod game;
-mod half_move_clock;
+/// A clock for keeping track of half moves without a capture or pawn push before a draw
+pub mod half_move_clock;
 /// A piece that can be placed on the board
 pub mod pieces;
 /// A player in the game, or one side of the board, represented by their piece's color.
