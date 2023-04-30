@@ -341,7 +341,7 @@ impl TryFrom<u8> for Square {
 
 #[cfg(test)]
 mod test {
-    use crate::square::{File, Rank, Square, Square::*, File::*, Rank::*};
+    use crate::square::{File, File::*, Rank, Rank::*, Square, Square::*};
     use alloc::format;
     use core::str::FromStr;
     use enum_map::Enum;
@@ -487,5 +487,4 @@ mod test {
     fn checked_add_works(input: Square, offset: u8, expected: Option<Square>) {
         assert_eq!(input.checked_add(offset), expected);
     }
-
 }
