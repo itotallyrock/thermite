@@ -63,7 +63,8 @@ impl PieceType {
     /// assert_eq!(PieceType::Queen.owned_by(PlayerColor::White), OwnedPiece { piece: PieceType::Queen, player: PlayerColor::White });
     /// assert_eq!(PieceType::Queen.owned_by(PlayerColor::Black), OwnedPiece { piece: PieceType::Queen, player: PlayerColor::Black });
     /// ```
-    pub fn owned_by(self, player: PlayerColor) -> OwnedPiece {
+    #[must_use]
+    pub const fn owned_by(self, player: PlayerColor) -> OwnedPiece {
         OwnedPiece {
             piece: self,
             player,
@@ -83,7 +84,8 @@ impl OwnedPiece {
     /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::Black).placed_on(Square::A2), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::Black}, square: Square::A2 });
     /// assert_eq!(PieceType::Rook.owned_by(PlayerColor::Black).placed_on(Square::A1), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Rook, player: PlayerColor::Black}, square: Square::A1 });
     /// ```
-    pub fn placed_on(self, square: Square) -> PlacedPiece {
+    #[must_use]
+    pub const fn placed_on(self, square: Square) -> PlacedPiece {
         PlacedPiece {
             owned_piece: self,
             square,
