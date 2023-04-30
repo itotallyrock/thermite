@@ -78,12 +78,50 @@ impl Default for PositionBuilder {
 mod test {
     use crate::position::PositionBuilder;
     use test_case::test_case;
+    use crate::castles::CastleRights;
     use crate::half_move_clock::HalfMoveClock;
+    use crate::pieces::{PieceType, PlacedPiece};
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
     use crate::square::{Square, Square::*};
 
+    #[test_case(CastleRights::None)]
+    #[test_case(CastleRights::WhiteKing)]
+    #[test_case(CastleRights::WhiteQueen)]
+    #[test_case(CastleRights::WhiteBoth)]
+    #[test_case(CastleRights::BlackKing)]
+    #[test_case(CastleRights::BothKings)]
+    #[test_case(CastleRights::WhiteQueenBlackKing)]
+    #[test_case(CastleRights::WhiteBothBlackKing)]
+    #[test_case(CastleRights::BlackQueen)]
+    #[test_case(CastleRights::WhiteKingBlackQueen)]
+    #[test_case(CastleRights::BothQueens)]
+    #[test_case(CastleRights::WhiteBothBlackQueen)]
+    #[test_case(CastleRights::BlackBoth)]
+    #[test_case(CastleRights::WhiteKingBlackBoth)]
+    #[test_case(CastleRights::WhiteQueenBlackBoth)]
+    #[test_case(CastleRights::All)]
+    fn with_castle_rights_works(input: CastleRights) {
+        let pos = PositionBuilder::default().with_castle_rights(input);
+        assert_eq!(pos.castle_rights, input);
+    }
 
+    #[test_case(PieceType::Pawn, PlayerColor::White, Square::E2)]
+    #[test_case(PieceType::Pawn, PlayerColor::Black, Square::E7)]
+    #[test_case(PieceType::Knight, PlayerColor::White, Square::F4)]
+    #[test_case(PieceType::Queen, PlayerColor::Black, Square::G2)]
+    #[test_case(PieceType::King, PlayerColor::Black, Square::G8)]
+    #[test_case(PieceType::Pawn, PlayerColor::Black, Square::E2)]
+    #[test_case(PieceType::Pawn, PlayerColor::White, Square::E7)]
+    #[test_case(PieceType::Knight, PlayerColor::Black, Square::F4)]
+    #[test_case(PieceType::Queen, PlayerColor::White, Square::G2)]
+    #[test_case(PieceType::King, PlayerColor::White, Square::G8)]
+    fn with_piece_works(piece: PieceType, player: PlayerColor, square: Square) {
+        let owned = piece.owned_by(player);
+        let placed = owned.placed_on(square);
+        let pos = PositionBuilder::default().with_piece(placed);
+        assert_eq!(pos.squares[square], Some(owned));
+    }
 
     #[test_case(0)]
     #[test_case(1)]
