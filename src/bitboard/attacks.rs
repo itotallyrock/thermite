@@ -1,7 +1,7 @@
-use enum_map::EnumMap;
 use crate::bitboard::direction::Direction;
 use crate::bitboard::BoardMask;
 use crate::player_color::PlayerColor;
+use enum_map::EnumMap;
 
 impl BoardMask {
     /// Calculate the knight attacks mask for a given mask of knight attacker(s)

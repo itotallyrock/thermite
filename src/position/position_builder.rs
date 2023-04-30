@@ -50,7 +50,7 @@ impl PositionBuilder {
 
     /// Set how many full moves into the game we are
     pub fn with_fullmove_count(mut self, fullmove_count: PlyCount) -> Self {
-        self.halfmove_count = PlyCount::new(*fullmove_count.as_ref() / 2);
+        self.halfmove_count = PlyCount::new(*fullmove_count.as_ref() * 2);
         self
     }
 
@@ -71,5 +71,70 @@ impl Default for PositionBuilder {
             castle_rights: CastleRights::None,
             en_passant_square: None,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::position::PositionBuilder;
+    use test_case::test_case;
+    use crate::half_move_clock::HalfMoveClock;
+    use crate::player_color::PlayerColor;
+    use crate::ply_count::PlyCount;
+    use crate::square::{Square, Square::*};
+
+
+
+    #[test_case(0)]
+    #[test_case(1)]
+    #[test_case(2)]
+    #[test_case(3)]
+    #[test_case(4)]
+    #[test_case(5)]
+    #[test_case(6)]
+    #[test_case(7)]
+    #[test_case(20)]
+    #[test_case(50)]
+    fn with_halfmove_clock_works(input: u8) {
+        let input = HalfMoveClock::new(PlyCount::new(input)).unwrap();
+        let pos = PositionBuilder::default().with_halfmove_clock(input);
+        assert_eq!(pos.halfmove_clock, input);
+    }
+
+    #[test_case(0, PlayerColor::White, 0)]
+    #[test_case(0, PlayerColor::Black, 0)]
+    #[test_case(1, PlayerColor::White, 2)]
+    #[test_case(1, PlayerColor::Black, 2)]
+    #[test_case(2, PlayerColor::White, 4)]
+    #[test_case(2, PlayerColor::Black, 4)]
+    #[test_case(30, PlayerColor::White, 60)]
+    #[test_case(30, PlayerColor::Black, 60)]
+    #[test_case(50, PlayerColor::White, 100)]
+    #[test_case(50, PlayerColor::Black, 100)]
+    fn with_fullmove_count_works(input_full_moves: u8, player: PlayerColor, expected_half_move_count: u8) {
+        let input_full_moves = PlyCount::new(input_full_moves);
+        let expected_half_move_count = PlyCount::new(expected_half_move_count);
+        let pos = PositionBuilder::default().with_starting_player(player).with_fullmove_count(input_full_moves);
+        assert_eq!(pos.halfmove_count, expected_half_move_count);
+    }
+
+    #[test_case(A3)]
+    #[test_case(B3)]
+    #[test_case(C3)]
+    #[test_case(D3)]
+    #[test_case(E3)]
+    #[test_case(F3)]
+    #[test_case(G3)]
+    #[test_case(H3)]
+    #[test_case(C6)]
+    #[test_case(D6)]
+    #[test_case(E6)]
+    #[test_case(F6)]
+    #[test_case(G6)]
+    #[test_case(H6)]
+    fn with_en_passant_square_works(square: Square) {
+        let square = square.try_into().unwrap();
+        let pos = PositionBuilder::default().with_en_passant_square(square);
+        assert_eq!(pos.en_passant_square, Some(square));
     }
 }
