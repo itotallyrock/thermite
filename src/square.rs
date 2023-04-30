@@ -341,7 +341,7 @@ impl TryFrom<u8> for Square {
 
 #[cfg(test)]
 mod test {
-    use crate::square::{File, Rank, Square, Square::*};
+    use crate::square::{File, Rank, Square, Square::*, File::*, Rank::*};
     use alloc::format;
     use core::str::FromStr;
     use enum_map::Enum;
@@ -414,4 +414,78 @@ mod test {
             }
         }
     }
+
+    #[test_case(E1, First)]
+    #[test_case(E2, Second)]
+    #[test_case(E3, Third)]
+    #[test_case(E4, Fourth)]
+    #[test_case(E6, Sixth)]
+    #[test_case(E7, Seventh)]
+    #[test_case(E8, Eighth)]
+    #[test_case(A1, First)]
+    #[test_case(A2, Second)]
+    #[test_case(A3, Third)]
+    #[test_case(A4, Fourth)]
+    #[test_case(A5, Fifth)]
+    #[test_case(A6, Sixth)]
+    #[test_case(A7, Seventh)]
+    #[test_case(A8, Eighth)]
+    #[test_case(H1, First)]
+    #[test_case(G2, Second)]
+    #[test_case(F3, Third)]
+    #[test_case(D4, Fourth)]
+    #[test_case(E5, Fifth)]
+    #[test_case(C6, Sixth)]
+    #[test_case(B7, Seventh)]
+    #[test_case(D8, Eighth)]
+    fn rank_works(square: Square, rank: Rank) {
+        assert_eq!(square.rank(), rank);
+    }
+
+    #[test_case(E1, E)]
+    #[test_case(E2, E)]
+    #[test_case(E3, E)]
+    #[test_case(E4, E)]
+    #[test_case(E5, E)]
+    #[test_case(E6, E)]
+    #[test_case(E7, E)]
+    #[test_case(E8, E)]
+    #[test_case(A1, A)]
+    #[test_case(A2, A)]
+    #[test_case(A3, A)]
+    #[test_case(A4, A)]
+    #[test_case(A5, A)]
+    #[test_case(A6, A)]
+    #[test_case(A7, A)]
+    #[test_case(A8, A)]
+    #[test_case(H1, H)]
+    #[test_case(G2, G)]
+    #[test_case(F3, F)]
+    #[test_case(D4, D)]
+    #[test_case(C6, C)]
+    #[test_case(B7, B)]
+    #[test_case(D8, D)]
+    fn file_works(square: Square, file: File) {
+        assert_eq!(square.file(), file);
+    }
+
+    #[test_case(A1, 0, Some(A1))]
+    #[test_case(A1, 1, None)]
+    #[test_case(H1, 7, Some(A1))]
+    #[test_case(A8, 8, Some(A7))]
+    #[test_case(H8, 63, Some(A1))]
+    #[test_case(G2, 2, Some(E2))]
+    fn checked_sub_works(input: Square, offset: u8, expected: Option<Square>) {
+        assert_eq!(input.checked_sub(offset), expected);
+    }
+
+    #[test_case(A1, 8, Some(A2))]
+    #[test_case(A1, 1, Some(B1))]
+    #[test_case(B1, 6, Some(H1))]
+    #[test_case(A8, 7, Some(H8))]
+    #[test_case(H8, 1, None)]
+    fn checked_add_works(input: Square, offset: u8, expected: Option<Square>) {
+        assert_eq!(input.checked_add(offset), expected);
+    }
+
 }
