@@ -82,11 +82,11 @@ impl CastleRights {
     /// use thermite::castles::CastleRights;
     /// use thermite::player_color::PlayerColor;
     ///
-    /// assert_eq!(CastleRights::for_side(PlayerColor::White), CastleRights::WhiteBoth);
-    /// assert_eq!(CastleRights::for_side(PlayerColor::Black), CastleRights::BlackBoth);
+    /// assert_eq!(CastleRights::for_player(PlayerColor::White), CastleRights::WhiteBoth);
+    /// assert_eq!(CastleRights::for_player(PlayerColor::Black), CastleRights::BlackBoth);
     /// ```
     #[must_use]
-    pub const fn for_side(side: PlayerColor) -> Self {
+    pub const fn for_player(side: PlayerColor) -> Self {
         match side {
             PlayerColor::White => Self::WhiteBoth,
             PlayerColor::Black => Self::BlackBoth,
