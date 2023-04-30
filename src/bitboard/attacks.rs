@@ -1,3 +1,4 @@
+use enum_map::EnumMap;
 use crate::bitboard::direction::Direction;
 use crate::bitboard::BoardMask;
 use crate::player_color::PlayerColor;
@@ -58,25 +59,22 @@ impl BoardMask {
         self.shift(direction)
     }
 
-    const fn get_sliding_mask(direction: Direction) -> Self {
-        match direction {
-            Direction::North => Self(0xFFFF_FFFF_FFFF_FF00),
-            Direction::South => Self(0x00FF_FFFF_FFFF_FFFF),
-            Direction::East => Self(0xFEFE_FEFE_FEFE_FEFE),
-            Direction::West => Self(0x7F7F_7F7F_7F7F_7F7F),
-            Direction::NorthEast => Self(0xFEFE_FEFE_FEFE_FE00),
-            Direction::NorthWest => Self(0x7F7F_7F7F_7F7F_7F00),
-            Direction::SouthEast => Self(0x00FE_FEFE_FEFE_FEFE),
-            Direction::SouthWest => Self(0x007F_7F7F_7F7F_7F7F),
-        }
-    }
-
     fn occluded_fill(mut self, occupied: Self, direction: Direction) -> Self {
+        const SLIDING_MASKS: EnumMap<Direction, BoardMask> = EnumMap::from_array([
+            Self(0xFFFF_FFFF_FFFF_FF00),
+            Self(0x00FF_FFFF_FFFF_FFFF),
+            Self(0xFEFE_FEFE_FEFE_FEFE),
+            Self(0x7F7F_7F7F_7F7F_7F7F),
+            Self(0xFEFE_FEFE_FEFE_FE00),
+            Self(0x7F7F_7F7F_7F7F_7F00),
+            Self(0x00FE_FEFE_FEFE_FEFE),
+            Self(0x007F_7F7F_7F7F_7F7F),
+        ]);
         let mut empty = !occupied;
         let mut flood = Self::EMPTY;
         if self != Self::EMPTY {
             let direction_shift = direction as i32;
-            empty &= Self::get_sliding_mask(direction);
+            empty &= SLIDING_MASKS[direction];
             loop {
                 flood |= self;
                 self = self.shift_raw(direction_shift) & empty;
