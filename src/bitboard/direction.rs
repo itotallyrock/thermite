@@ -1,5 +1,6 @@
 use subenum::subenum;
 
+/// An absolute (always white's perspective) direction for rays and shifts
 #[subenum(CardinalDirection, OrdinalDirection)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Direction {

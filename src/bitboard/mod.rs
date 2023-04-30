@@ -2,6 +2,8 @@ mod attacks;
 mod direction;
 mod shifts;
 
+pub use direction::{Direction, CardinalDirection, OrdinalDirection, CardinalDirectionConvertError, OrdinalDirectionConvertError};
+
 use crate::square::Square;
 use derive_more::{
     AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Constructor, LowerHex,
