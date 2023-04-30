@@ -31,8 +31,8 @@ impl PlayerColor {
 
 #[cfg(test)]
 mod test {
-    use test_case::test_case;
     use crate::player_color::PlayerColor;
+    use test_case::test_case;
 
     #[test_case(PlayerColor::White, PlayerColor::Black)]
     #[test_case(PlayerColor::Black, PlayerColor::White)]

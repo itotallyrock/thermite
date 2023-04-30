@@ -76,14 +76,14 @@ impl Default for PositionBuilder {
 
 #[cfg(test)]
 mod test {
-    use crate::position::PositionBuilder;
-    use test_case::test_case;
     use crate::castles::CastleRights;
     use crate::half_move_clock::HalfMoveClock;
     use crate::pieces::{PieceType, PlacedPiece};
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
+    use crate::position::PositionBuilder;
     use crate::square::{Square, Square::*};
+    use test_case::test_case;
 
     #[test_case(CastleRights::None)]
     #[test_case(CastleRights::WhiteKing)]
@@ -149,10 +149,16 @@ mod test {
     #[test_case(30, PlayerColor::Black, 60)]
     #[test_case(50, PlayerColor::White, 100)]
     #[test_case(50, PlayerColor::Black, 100)]
-    fn with_fullmove_count_works(input_full_moves: u8, player: PlayerColor, expected_half_move_count: u8) {
+    fn with_fullmove_count_works(
+        input_full_moves: u8,
+        player: PlayerColor,
+        expected_half_move_count: u8,
+    ) {
         let input_full_moves = PlyCount::new(input_full_moves);
         let expected_half_move_count = PlyCount::new(expected_half_move_count);
-        let pos = PositionBuilder::default().with_starting_player(player).with_fullmove_count(input_full_moves);
+        let pos = PositionBuilder::default()
+            .with_starting_player(player)
+            .with_fullmove_count(input_full_moves);
         assert_eq!(pos.halfmove_count, expected_half_move_count);
     }
 
