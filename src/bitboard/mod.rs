@@ -2,7 +2,10 @@ mod attacks;
 mod direction;
 mod shifts;
 
-pub use direction::{Direction, CardinalDirection, OrdinalDirection, CardinalDirectionConvertError, OrdinalDirectionConvertError};
+pub use direction::{
+    CardinalDirection, CardinalDirectionConvertError, Direction, OrdinalDirection,
+    OrdinalDirectionConvertError,
+};
 
 use crate::square::Square;
 use derive_more::{
