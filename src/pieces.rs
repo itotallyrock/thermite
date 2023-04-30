@@ -48,3 +48,45 @@ pub struct PlacedPiece {
     /// The square the piece is placed on
     pub square: Square,
 }
+
+impl PieceType {
+    /// Associate this [piece](PieceType) with a [player](PlayerColor)
+    ///
+    /// ```
+    /// use thermite::pieces::{OwnedPiece, PieceType};
+    /// use thermite::player_color::PlayerColor;
+    ///
+    /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::White), OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::White });
+    /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::Black), OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::Black });
+    /// assert_eq!(PieceType::Rook.owned_by(PlayerColor::White), OwnedPiece { piece: PieceType::Rook, player: PlayerColor::White });
+    /// assert_eq!(PieceType::Rook.owned_by(PlayerColor::Black), OwnedPiece { piece: PieceType::Rook, player: PlayerColor::Black });
+    /// assert_eq!(PieceType::Queen.owned_by(PlayerColor::White), OwnedPiece { piece: PieceType::Queen, player: PlayerColor::White });
+    /// assert_eq!(PieceType::Queen.owned_by(PlayerColor::Black), OwnedPiece { piece: PieceType::Queen, player: PlayerColor::Black });
+    /// ```
+    pub fn owned_by(self, player: PlayerColor) -> OwnedPiece {
+        OwnedPiece {
+            piece: self,
+            player,
+        }
+    }
+}
+
+impl OwnedPiece {
+    /// Associate this [player's piece](OwnedPiece) with a specific [`Square`] on the board
+    ///
+    /// ```
+    /// use thermite::pieces::{OwnedPiece, PieceType, PlacedPiece};
+    /// use thermite::player_color::PlayerColor;
+    /// use thermite::square::Square;
+    ///
+    /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::White).placed_on(Square::A2), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::White}, square: Square::A2 });
+    /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::Black).placed_on(Square::A2), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::Black}, square: Square::A2 });
+    /// assert_eq!(PieceType::Rook.owned_by(PlayerColor::Black).placed_on(Square::A1), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Rook, player: PlayerColor::Black}, square: Square::A1 });
+    /// ```
+    pub fn placed_on(self, square: Square) -> PlacedPiece {
+        PlacedPiece {
+            owned_piece: self,
+            square,
+        }
+    }
+}
