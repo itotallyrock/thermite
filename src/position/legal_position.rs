@@ -60,12 +60,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         // Construct most of the position fields by iterating over all of the squares with pieces
         let (pieces_masks, side_masks, king_squares, mut hash) = squares
             .iter()
-            .filter_map(|(square, piece)| {
-                piece.map(|owned_piece| PlacedPiece {
-                    owned_piece,
-                    square,
-                })
-            })
+            .filter_map(|(square, piece)| piece.map(|owned_piece| owned_piece.placed_on(square)))
             .fold(
                 (
                     EnumMap::<NonKingPieceType, BoardMask>::default(),
