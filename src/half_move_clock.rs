@@ -11,6 +11,9 @@ pub struct InvalidHalfMoveClock;
 
 impl HalfMoveClock {
     /// Try to create a new clock with a value. Ok for values under the [limit](HALF_MOVE_LIMIT), error otherwise.
+    ///
+    /// # Errors
+    /// If the supplied ply count would overflow the [limit](HALF_MOVE_LIMIT)
     pub fn new(half_moves: PlyCount) -> Result<Self, InvalidHalfMoveClock> {
         #[allow(clippy::cast_possible_truncation)]
         if *half_moves.as_ref() <= HALF_MOVE_LIMIT as u8 {
@@ -23,6 +26,9 @@ impl HalfMoveClock {
 
 impl HalfMoveClock {
     /// Try and increment the half-move clock if under the [limit](HALF_MOVE_LIMIT), otherwise error
+    ///
+    /// # Errors
+    /// If the supplied ply count would overflow the [limit](HALF_MOVE_LIMIT)
     pub fn increment(&mut self) -> Result<(), InvalidHalfMoveClock> {
         #[allow(clippy::cast_possible_truncation)]
         if self.0 < PlyCount::new(HALF_MOVE_LIMIT as u8) {
