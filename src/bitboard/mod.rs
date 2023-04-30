@@ -102,10 +102,48 @@ impl Iterator for MaskSquareIterator {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let squares = self.0 .0.count_ones() as usize;
+        let squares = self.0.num_squares() as usize;
 
         (squares, Some(squares))
     }
 }
 
 impl ExactSizeIterator for MaskSquareIterator {}
+
+#[cfg(test)]
+mod test {
+    use crate::bitboard::BoardMask;
+    use crate::square::{Square, Square::*};
+    use std::ops::Not;
+
+    use test_case::test_case;
+
+    #[test]
+    fn is_empty_works() {
+        assert!(BoardMask::EMPTY.is_empty());
+        assert!(!BoardMask::EMPTY.not().is_empty());
+        assert!(!BoardMask::new(0x12300).is_empty());
+        assert!(!BoardMask::new(0x8400400004000).is_empty());
+        assert!(!BoardMask::new(0x22000812).is_empty());
+    }
+
+    #[test]
+    fn num_squares_works() {
+        assert_eq!(BoardMask::EMPTY.num_squares(), 0);
+        assert_eq!(BoardMask::EMPTY.not().num_squares(), 64);
+        assert_eq!(BoardMask::new(0x12300).num_squares(), 4);
+        assert_eq!(BoardMask::new(0x8400400004000).num_squares(), 4);
+        assert_eq!(BoardMask::new(0x22000812).num_squares(), 5);
+    }
+
+    #[test_case(0x0, vec![])]
+    #[test_case(0x400400000, vec![G3, C5])]
+    #[test_case(0x22000812, vec![B1, E1, D2, B4, F4])]
+    #[test_case(0x8400400004000, vec![G2, C5, G6, D7])]
+    fn into_iter_works(mask: u64, expected: Vec<Square>) {
+        assert_eq!(
+            BoardMask::new(mask).into_iter().collect::<Vec<_>>(),
+            expected
+        );
+    }
+}
