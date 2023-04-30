@@ -1,5 +1,5 @@
-use crate::bitboard::BoardMask;
 use crate::bitboard::direction::Direction;
+use crate::bitboard::BoardMask;
 
 impl BoardMask {
     #[inline(always)]

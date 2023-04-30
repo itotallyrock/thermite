@@ -1,5 +1,5 @@
-use crate::bitboard::BoardMask;
 use crate::bitboard::direction::Direction;
+use crate::bitboard::BoardMask;
 use crate::player_color::PlayerColor;
 
 impl BoardMask {
@@ -110,93 +110,280 @@ impl BoardMask {
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use test_case::test_case;
     use crate::pieces::PieceType;
     use crate::square::Square;
+    use test_case::test_case;
 
     use super::*;
 
-    #[test_case(BoardMask(0x0020_0000_0000), BoardMask(0x0020_0000_0000), BoardMask(0x2020_2020))]
-    #[test_case(BoardMask(0x0400_2000_0000), BoardMask(0x0400_2000_0000), BoardMask(0x0004_0424_2424))]
-    #[test_case(BoardMask(0x0002_0004_0020_0000), BoardMask(0x0002_0204_0020_0420), BoardMask(0x0200_0404_2420))]
-    #[test_case(BoardMask(0x0002_0004_0020_0000), BoardMask(0x0006_0004_0421_0020), BoardMask(0x0202_0602_2222))]
+    #[test_case(
+        BoardMask(0x0020_0000_0000),
+        BoardMask(0x0020_0000_0000),
+        BoardMask(0x2020_2020)
+    )]
+    #[test_case(
+        BoardMask(0x0400_2000_0000),
+        BoardMask(0x0400_2000_0000),
+        BoardMask(0x0004_0424_2424)
+    )]
+    #[test_case(
+        BoardMask(0x0002_0004_0020_0000),
+        BoardMask(0x0002_0204_0020_0420),
+        BoardMask(0x0200_0404_2420)
+    )]
+    #[test_case(
+        BoardMask(0x0002_0004_0020_0000),
+        BoardMask(0x0006_0004_0421_0020),
+        BoardMask(0x0202_0602_2222)
+    )]
     fn south_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::South), expected);
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::South),
+            expected
+        );
     }
 
     #[test_case(BoardMask(0x400), BoardMask(0x400), BoardMask(0x0404_0404_0404_0000))]
-    #[test_case(BoardMask(0x42000), BoardMask(0x42000), BoardMask(0x2424_2424_2420_0000))]
-    #[test_case(BoardMask(0x0420_0100), BoardMask(0x0400_2000_0421_0100), BoardMask(0x0404_2424_2001_0000))]
+    #[test_case(
+        BoardMask(0x42000),
+        BoardMask(0x42000),
+        BoardMask(0x2424_2424_2420_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0420_0100),
+        BoardMask(0x0400_2000_0421_0100),
+        BoardMask(0x0404_2424_2001_0000)
+    )]
     fn north_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::North), expected);
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::North), expected);
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::North), expected);
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::North),
+            expected
+        );
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::North),
+            expected
+        );
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::North),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x0010_0000_0000_0000), BoardMask(0x0010_0000_0000_0000), BoardMask(0x00E0_0000_0000_0000))]
-    #[test_case(BoardMask(0x0004_0000_0008_0000), BoardMask(0x0004_0000_0008_0000), BoardMask(0x00F8_0000_00F0_0000))]
-    #[test_case(BoardMask(0x0010_0800_0010_0000), BoardMask(0x0010_1800_0090_0000), BoardMask(0x00E0_1000_00E0_0000))]
-    #[test_case(BoardMask(0x0020_0008_0000_0400), BoardMask(0x2020_0048_0000_1404), BoardMask(0x00C0_0070_0000_1800))]
+    #[test_case(
+        BoardMask(0x0010_0000_0000_0000),
+        BoardMask(0x0010_0000_0000_0000),
+        BoardMask(0x00E0_0000_0000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0004_0000_0008_0000),
+        BoardMask(0x0004_0000_0008_0000),
+        BoardMask(0x00F8_0000_00F0_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0010_0800_0010_0000),
+        BoardMask(0x0010_1800_0090_0000),
+        BoardMask(0x00E0_1000_00E0_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0020_0008_0000_0400),
+        BoardMask(0x2020_0048_0000_1404),
+        BoardMask(0x00C0_0070_0000_1800)
+    )]
     fn east_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::East), expected);
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::East),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x2000_0000_0000), BoardMask(0x2000_0000_0000), BoardMask(0x1F00_0000_0000))]
-    #[test_case(BoardMask(0x0008_0000_0040_0000), BoardMask(0x0008_0000_0040_0000), BoardMask(0x0007_0000_003F_0000))]
-    #[test_case(BoardMask(0x0800_0000_0020_2000), BoardMask(0x0900_0000_0030_2400), BoardMask(0x0700_0000_0010_1C00))]
-    #[test_case(BoardMask(0x0020_0004_0020_0000), BoardMask(0x0020_1005_0028_0000), BoardMask(0x001F_0003_0018_0000))]
+    #[test_case(
+        BoardMask(0x2000_0000_0000),
+        BoardMask(0x2000_0000_0000),
+        BoardMask(0x1F00_0000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0008_0000_0040_0000),
+        BoardMask(0x0008_0000_0040_0000),
+        BoardMask(0x0007_0000_003F_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0800_0000_0020_2000),
+        BoardMask(0x0900_0000_0030_2400),
+        BoardMask(0x0700_0000_0010_1C00)
+    )]
+    #[test_case(
+        BoardMask(0x0020_0004_0020_0000),
+        BoardMask(0x0020_1005_0028_0000),
+        BoardMask(0x001F_0003_0018_0000)
+    )]
     fn west_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::West), expected);
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::West),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x1000_0000), BoardMask(0x1000_0000), BoardMask(0x0080_4020_0000_0000))]
-    #[test_case(BoardMask(0x0002_0020_0000), BoardMask(0x0002_0020_0000), BoardMask(0x1008_0480_4000_0000))]
-    #[test_case(BoardMask(0x0400_0004_2000), BoardMask(0x1000_0410_0004_2000), BoardMask(0x1008_0010_8840_0000))]
-    #[test_case(BoardMask(0x0200_0800_0010), BoardMask(0x2600_0840_0030), BoardMask(0x0804_2010_0040_2000))]
-    fn north_east_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::NorthEast), expected);
+    #[test_case(
+        BoardMask(0x1000_0000),
+        BoardMask(0x1000_0000),
+        BoardMask(0x0080_4020_0000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0002_0020_0000),
+        BoardMask(0x0002_0020_0000),
+        BoardMask(0x1008_0480_4000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0400_0004_2000),
+        BoardMask(0x1000_0410_0004_2000),
+        BoardMask(0x1008_0010_8840_0000)
+    )]
+    #[test_case(
+        BoardMask(0x0200_0800_0010),
+        BoardMask(0x2600_0840_0030),
+        BoardMask(0x0804_2010_0040_2000)
+    )]
+    fn north_east_sliding_attacks_works(
+        sliders: BoardMask,
+        occupied: BoardMask,
+        expected: BoardMask,
+    ) {
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::NorthEast),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x0010_0000_0000), BoardMask(0x0010_0000_0000), BoardMask(0x0804_0201))]
-    #[test_case(BoardMask(0x0008_0000_0010_0000), BoardMask(0x0008_0000_0010_0000), BoardMask(0x0402_0100_0804))]
-    #[test_case(BoardMask(0x0004_0020_0000_2000), BoardMask(0x0004_0020_0008_2010), BoardMask(0x0201_1008_0010))]
-    #[test_case(BoardMask(0x0004_0000_8800_0000), BoardMask(0x0004_0400_8880_2200), BoardMask(0x0201_0044_2200))]
-    fn south_west_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::SouthWest), expected);
+    #[test_case(
+        BoardMask(0x0010_0000_0000),
+        BoardMask(0x0010_0000_0000),
+        BoardMask(0x0804_0201)
+    )]
+    #[test_case(
+        BoardMask(0x0008_0000_0010_0000),
+        BoardMask(0x0008_0000_0010_0000),
+        BoardMask(0x0402_0100_0804)
+    )]
+    #[test_case(
+        BoardMask(0x0004_0020_0000_2000),
+        BoardMask(0x0004_0020_0008_2010),
+        BoardMask(0x0201_1008_0010)
+    )]
+    #[test_case(
+        BoardMask(0x0004_0000_8800_0000),
+        BoardMask(0x0004_0400_8880_2200),
+        BoardMask(0x0201_0044_2200)
+    )]
+    fn south_west_sliding_attacks_works(
+        sliders: BoardMask,
+        occupied: BoardMask,
+        expected: BoardMask,
+    ) {
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::SouthWest),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x0010_0000_0000), BoardMask(0x0010_0000_0000), BoardMask(0x2040_8000))]
-    #[test_case(BoardMask(0x1002_0000_0000), BoardMask(0x1002_0000_0000), BoardMask(0x0020_4488_1020))]
-    #[test_case(BoardMask(0x0020_0400_0400_0000), BoardMask(0x0020_0480_0420_0000), BoardMask(0x4088_1028_1020))]
-    #[test_case(BoardMask(0x2200_0002_0000), BoardMask(0x2220_0026_2000), BoardMask(0x0044_8810_2408))]
-    fn south_east_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(sliders, occupied, Direction::SouthEast), expected);
+    #[test_case(
+        BoardMask(0x0010_0000_0000),
+        BoardMask(0x0010_0000_0000),
+        BoardMask(0x2040_8000)
+    )]
+    #[test_case(
+        BoardMask(0x1002_0000_0000),
+        BoardMask(0x1002_0000_0000),
+        BoardMask(0x0020_4488_1020)
+    )]
+    #[test_case(
+        BoardMask(0x0020_0400_0400_0000),
+        BoardMask(0x0020_0480_0420_0000),
+        BoardMask(0x4088_1028_1020)
+    )]
+    #[test_case(
+        BoardMask(0x2200_0002_0000),
+        BoardMask(0x2220_0026_2000),
+        BoardMask(0x0044_8810_2408)
+    )]
+    fn south_east_sliding_attacks_works(
+        sliders: BoardMask,
+        occupied: BoardMask,
+        expected: BoardMask,
+    ) {
+        assert_eq!(
+            BoardMask::sliding_attacks(sliders, occupied, Direction::SouthEast),
+            expected
+        );
     }
 
     #[test_case(BoardMask(0x1), BoardMask(0x1), BoardMask(0x0101_0101_0101_01FE))]
     #[test_case(BoardMask(0x80), BoardMask(0x80), BoardMask(0x8080_8080_8080_807F))]
-    #[test_case(BoardMask(0x2000_0000_0000), BoardMask(0x2000_0000_0000), BoardMask(0x2020_DF20_2020_2020))]
-    #[test_case(BoardMask(0x2000_0004_0000), BoardMask(0x2000_0004_0000), BoardMask(0x2424_DF24_24FB_2424))]
-    #[test_case(BoardMask(0x2002_0400_0000), BoardMask(0x0022_200a_1400_0400), BoardMask(0x0426_DF2D_3B26_2622))]
-    #[test_case(BoardMask(0x0040_0002_0010_0000), BoardMask(0x0048_400a_0130_0000), BoardMask(0x52BA_521D_122F_1212))]
-    fn cardinal_sliding_attacks_works(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::cardinal_sliding_attacks(sliders, occupied), expected);
+    #[test_case(
+        BoardMask(0x2000_0000_0000),
+        BoardMask(0x2000_0000_0000),
+        BoardMask(0x2020_DF20_2020_2020)
+    )]
+    #[test_case(
+        BoardMask(0x2000_0004_0000),
+        BoardMask(0x2000_0004_0000),
+        BoardMask(0x2424_DF24_24FB_2424)
+    )]
+    #[test_case(
+        BoardMask(0x2002_0400_0000),
+        BoardMask(0x0022_200a_1400_0400),
+        BoardMask(0x0426_DF2D_3B26_2622)
+    )]
+    #[test_case(
+        BoardMask(0x0040_0002_0010_0000),
+        BoardMask(0x0048_400a_0130_0000),
+        BoardMask(0x52BA_521D_122F_1212)
+    )]
+    fn cardinal_sliding_attacks_works(
+        sliders: BoardMask,
+        occupied: BoardMask,
+        expected: BoardMask,
+    ) {
+        assert_eq!(
+            BoardMask::cardinal_sliding_attacks(sliders, occupied),
+            expected
+        );
     }
 
-    #[test_case(BoardMask(0x0800_0000_0000), BoardMask(0x0800_0000_0000), BoardMask(0x2214_0014_2241_8000))]
-    #[test_case(BoardMask(0x0800_0040_0000), BoardMask(0x0800_0040_0000), BoardMask(0x2214_0814_A241_A010))]
-    #[test_case(BoardMask(0x0420_0000_2000), BoardMask(0x0010_0420_1100_2020), BoardMask(0x158B_520E_D9D0_0050))]
-    #[test_case(BoardMask(0x0010_0002_0000_0080), BoardMask(0x2010_0c06_01a8_0080), BoardMask(0x2800_2D40_8528_4000))]
+    #[test_case(
+        BoardMask(0x0800_0000_0000),
+        BoardMask(0x0800_0000_0000),
+        BoardMask(0x2214_0014_2241_8000)
+    )]
+    #[test_case(
+        BoardMask(0x0800_0040_0000),
+        BoardMask(0x0800_0040_0000),
+        BoardMask(0x2214_0814_A241_A010)
+    )]
+    #[test_case(
+        BoardMask(0x0420_0000_2000),
+        BoardMask(0x0010_0420_1100_2020),
+        BoardMask(0x158B_520E_D9D0_0050)
+    )]
+    #[test_case(
+        BoardMask(0x0010_0002_0000_0080),
+        BoardMask(0x2010_0c06_01a8_0080),
+        BoardMask(0x2800_2D40_8528_4000)
+    )]
     fn ordinal_sliding_attacks(sliders: BoardMask, occupied: BoardMask, expected: BoardMask) {
-        assert_eq!(BoardMask::ordinal_sliding_attacks(sliders, occupied), expected);
+        assert_eq!(
+            BoardMask::ordinal_sliding_attacks(sliders, occupied),
+            expected
+        );
     }
 
     #[test_case(BoardMask(1), BoardMask(0x302u64))]
     #[test_case(BoardMask(0x0020_0000_0000_u64), BoardMask(0x7050_7000_0000_u64))]
-    #[test_case(BoardMask(0x0080_0000_0000_0000_u64), BoardMask(0xC040_C000_0000_0000_u64))]
+    #[test_case(
+        BoardMask(0x0080_0000_0000_0000_u64),
+        BoardMask(0xC040_C000_0000_0000_u64)
+    )]
     fn king_attacks_works(knights: BoardMask, expected: BoardMask) {
         assert_eq!(BoardMask::king_attacks(knights), expected);
     }
@@ -217,7 +404,11 @@ mod test {
     #[test_case(BoardMask(0x20000), PlayerColor::Black, BoardMask(0x100))]
     #[test_case(BoardMask(0x0100_0000), PlayerColor::Black, BoardMask::EMPTY)]
     #[test_case(BoardMask(0xFF00), PlayerColor::White, BoardMask(0x007F_0000))]
-    #[test_case(BoardMask(0x00FF_0000_0000_0000), PlayerColor::Black, BoardMask(0x7F00_0000_0000))]
+    #[test_case(
+        BoardMask(0x00FF_0000_0000_0000),
+        PlayerColor::Black,
+        BoardMask(0x7F00_0000_0000)
+    )]
     fn pawn_west_attacks_works(pawns: BoardMask, player: PlayerColor, expected: BoardMask) {
         assert_eq!(BoardMask::pawn_west_attacks(pawns, player), expected);
     }
@@ -225,7 +416,11 @@ mod test {
     #[test_case(BoardMask::EMPTY, PlayerColor::White, BoardMask::EMPTY)]
     #[test_case(BoardMask::EMPTY, PlayerColor::Black, BoardMask::EMPTY)]
     #[test_case(BoardMask(0x0010_0000), PlayerColor::White, BoardMask(0x2000_0000))]
-    #[test_case(BoardMask(0x2000_0000), PlayerColor::White, BoardMask(0x0040_0000_0000))]
+    #[test_case(
+        BoardMask(0x2000_0000),
+        PlayerColor::White,
+        BoardMask(0x0040_0000_0000)
+    )]
     #[test_case(BoardMask(0x8000_0000_0000), PlayerColor::White, BoardMask::EMPTY)]
     #[test_case(BoardMask(0x0010_0000), PlayerColor::Black, BoardMask(0x2000))]
     #[test_case(BoardMask(0x2000_0000), PlayerColor::Black, BoardMask(0x0040_0000))]
@@ -236,22 +431,50 @@ mod test {
 
     #[test_case(BoardMask::EMPTY, PlayerColor::White, BoardMask::EMPTY)]
     #[test_case(BoardMask::EMPTY, PlayerColor::Black, BoardMask::EMPTY)]
-    #[test_case(BoardMask(0x0800_0000), PlayerColor::White, BoardMask(0x0014_0000_0000))]
+    #[test_case(
+        BoardMask(0x0800_0000),
+        PlayerColor::White,
+        BoardMask(0x0014_0000_0000)
+    )]
     #[test_case(BoardMask(0x0800_0000), PlayerColor::Black, BoardMask(0x0014_0000))]
-    #[test_case(BoardMask(0x2010_0440_0000), PlayerColor::White, BoardMask(0x0050_280A_A000_0000))]
-    #[test_case(BoardMask(0x2010_0440_0000), PlayerColor::Black, BoardMask(0x0050_280A_A000))]
+    #[test_case(
+        BoardMask(0x2010_0440_0000),
+        PlayerColor::White,
+        BoardMask(0x0050_280A_A000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x2010_0440_0000),
+        PlayerColor::Black,
+        BoardMask(0x0050_280A_A000)
+    )]
     #[test_case(BoardMask(0xFF00), PlayerColor::White, BoardMask(0x00FF_0000))]
     fn pawn_attacks_works(pawns: BoardMask, player: PlayerColor, expected: BoardMask) {
-        assert_eq!(BoardMask::pawn_attacks(pawns, player),expected);
+        assert_eq!(BoardMask::pawn_attacks(pawns, player), expected);
     }
 
-    #[test_case(BoardMask(0x00FF_0000_0000_0000), PlayerColor::Black, BoardMask(0xFF00_0000_0000))]
+    #[test_case(
+        BoardMask(0x00FF_0000_0000_0000),
+        PlayerColor::Black,
+        BoardMask(0xFF00_0000_0000)
+    )]
     #[test_case(BoardMask::EMPTY, PlayerColor::White, BoardMask::EMPTY)]
     #[test_case(BoardMask::EMPTY, PlayerColor::Black, BoardMask::EMPTY)]
-    #[test_case(BoardMask(0x0800_0000), PlayerColor::White, BoardMask(0x0008_0000_0000))]
+    #[test_case(
+        BoardMask(0x0800_0000),
+        PlayerColor::White,
+        BoardMask(0x0008_0000_0000)
+    )]
     #[test_case(BoardMask(0x0800_0000), PlayerColor::Black, BoardMask(0x80000))]
-    #[test_case(BoardMask(0x2010_0440_0000), PlayerColor::White, BoardMask(0x0020_1004_4000_0000))]
-    #[test_case(BoardMask(0x2010_0440_0000), PlayerColor::Black, BoardMask(0x0020_1004_4000))]
+    #[test_case(
+        BoardMask(0x2010_0440_0000),
+        PlayerColor::White,
+        BoardMask(0x0020_1004_4000_0000)
+    )]
+    #[test_case(
+        BoardMask(0x2010_0440_0000),
+        PlayerColor::Black,
+        BoardMask(0x0020_1004_4000)
+    )]
     fn pawn_pushes_works(pawns: BoardMask, player: PlayerColor, expected: BoardMask) {
         assert_eq!(BoardMask::pawn_push(pawns, player), expected);
     }
@@ -267,7 +490,15 @@ mod test {
     #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthWest, BoardMask(0x80402))]
     #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::NorthWest, BoardMask(0x0102_0408_0000_0000))]
     #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthEast, BoardMask(0x0020_4080))]
-    fn sliding_attacks_works(mask: BoardMask, occluded: BoardMask, direction: Direction, expected: BoardMask) {
-        assert_eq!(BoardMask::sliding_attacks(mask, occluded, direction), expected);
+    fn sliding_attacks_works(
+        mask: BoardMask,
+        occluded: BoardMask,
+        direction: Direction,
+        expected: BoardMask,
+    ) {
+        assert_eq!(
+            BoardMask::sliding_attacks(mask, occluded, direction),
+            expected
+        );
     }
 }

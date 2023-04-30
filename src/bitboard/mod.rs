@@ -1,6 +1,6 @@
 mod attacks;
-mod shifts;
 mod direction;
+mod shifts;
 
 use crate::square::Square;
 use derive_more::{
