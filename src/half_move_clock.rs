@@ -60,7 +60,8 @@ mod test {
     #[test_case(250, Err(InvalidHalfMoveClock))]
     fn new_works(input: u8, expected: Result<u8, InvalidHalfMoveClock>) {
         let input = PlyCount::new(input);
-        let expected = expected.map(|n| HalfMoveClock::new(PlyCount::new(n)).expect("invalid test setup"));
+        let expected =
+            expected.map(|n| HalfMoveClock::new(PlyCount::new(n)).expect("invalid test setup"));
         assert_eq!(HalfMoveClock::new(input), expected);
     }
 
@@ -77,7 +78,8 @@ mod test {
     #[test_case(50, Err(InvalidHalfMoveClock))]
     fn increment_works(input: u8, expected: Result<u8, InvalidHalfMoveClock>) {
         let mut input = HalfMoveClock::new(PlyCount::new(input)).expect("invalid test input");
-        let expected = expected.map(|n| HalfMoveClock::new(PlyCount::new(n)).expect("invalid test setup"));
+        let expected =
+            expected.map(|n| HalfMoveClock::new(PlyCount::new(n)).expect("invalid test setup"));
         assert_eq!(input.increment().map(|_| input), expected);
     }
 
