@@ -1,4 +1,4 @@
-use crate::board_mask::BoardMask;
+use crate::bitboard::BoardMask;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use enum_map::Enum;
@@ -69,8 +69,8 @@ impl Square {
     /// Convert a square to a single bit set `BoardMask`
     ///
     /// ```
+    /// use thermite::bitboard::BoardMask;
     /// use thermite::square::Square;
-    /// use thermite::board_mask::BoardMask;
     ///
     /// assert_eq!(Square::A1.to_mask(), BoardMask::new(0b1));
     /// assert_eq!(Square::B1.to_mask(), BoardMask::new(0b10));

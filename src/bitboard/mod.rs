@@ -1,3 +1,7 @@
+mod attacks;
+mod shifts;
+mod direction;
+
 use crate::square::Square;
 use derive_more::{
     AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Constructor, LowerHex,

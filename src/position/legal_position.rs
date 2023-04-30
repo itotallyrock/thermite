@@ -1,4 +1,4 @@
-use crate::board_mask::BoardMask;
+use crate::bitboard::BoardMask;
 use crate::castles::{CastleDirection, CastleRights};
 use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT_USIZE};
 use crate::pieces::{NonKingPieceType, OwnedPiece, PieceType, PlacedPiece};
