@@ -22,7 +22,8 @@ mod half_move_clock;
 pub mod pieces;
 /// A player in the game, or one side of the board, represented by their piece's color.
 pub mod player_color;
-mod ply_count;
+/// The depth or number of single moves deep into a game
+pub mod ply_count;
 /// The total representation of a single frozen state of a [`game`](Game) and its internal logic
 pub mod position;
 mod searchable;
