@@ -15,8 +15,6 @@ extern crate alloc;
 pub mod bitboard;
 /// The castle abilities for a game of a chess, containing the rights information for both sides.
 pub mod castles;
-/// A game of chess
-pub mod game;
 /// A clock for keeping track of half moves without a capture or pawn push before a draw
 pub mod half_move_clock;
 /// A piece that can be placed on the board
