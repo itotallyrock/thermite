@@ -25,7 +25,6 @@ pub mod player_color;
 pub mod ply_count;
 /// The total representation of a single frozen state of a [`game`](Game) and its internal logic
 pub mod position;
-mod searchable;
 /// A single tile on a board where a piece can be placed
 pub mod square;
 /// Board transposition hashing (if a position is identical in terms of play but could be arrived at via different moves)
