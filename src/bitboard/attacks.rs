@@ -110,8 +110,7 @@ impl BoardMask {
 
 #[cfg(test)]
 mod test {
-    use crate::pieces::PieceType;
-    use crate::square::Square;
+    use crate::square::Square::*;
     use test_case::test_case;
 
     use super::*;
@@ -477,17 +476,17 @@ mod test {
         assert_eq!(BoardMask::pawn_push(pawns, player), expected);
     }
 
-    #[test_case(Square::A1.to_mask(), BoardMask::EMPTY, Direction::NorthEast, BoardMask(0x8040_2010_0804_0200))]
-    #[test_case(Square::A1.to_mask(), BoardMask(0xffff), Direction::North, BoardMask(0x100))]
-    #[test_case(Square::H1.to_mask(), BoardMask(0xffff), Direction::North, BoardMask(0x8000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::North, BoardMask(0x1010_1010_0000_0000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::South, BoardMask(0x0010_1010))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::East, BoardMask(0xE000_0000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::West, BoardMask(0x0F00_0000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::NorthEast, BoardMask(0x0080_4020_0000_0000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthWest, BoardMask(0x80402))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::NorthWest, BoardMask(0x0102_0408_0000_0000))]
-    #[test_case(Square::E4.to_mask(), Square::E4.to_mask(), Direction::SouthEast, BoardMask(0x0020_4080))]
+    #[test_case(A1.to_mask(), BoardMask::EMPTY, Direction::NorthEast, BoardMask(0x8040_2010_0804_0200))]
+    #[test_case(A1.to_mask(), BoardMask(0xffff), Direction::North, BoardMask(0x100))]
+    #[test_case(H1.to_mask(), BoardMask(0xffff), Direction::North, BoardMask(0x8000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::North, BoardMask(0x1010_1010_0000_0000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::South, BoardMask(0x0010_1010))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::East, BoardMask(0xE000_0000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::West, BoardMask(0x0F00_0000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::NorthEast, BoardMask(0x0080_4020_0000_0000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::SouthWest, BoardMask(0x80402))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::NorthWest, BoardMask(0x0102_0408_0000_0000))]
+    #[test_case(E4.to_mask(), E4.to_mask(), Direction::SouthEast, BoardMask(0x0020_4080))]
     fn sliding_attacks_works(
         mask: BoardMask,
         occluded: BoardMask,
