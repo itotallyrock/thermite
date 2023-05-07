@@ -4,7 +4,12 @@ use enum_iterator::Sequence;
 use enum_map::Enum;
 use subenum::subenum;
 
-#[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
+#[subenum(
+    NonKingPieceType,
+    NonPawnPieceType,
+    SlidingPieceType,
+    PromotablePieceType
+)]
 #[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum PieceType {
     /// A pawn that can only push forward one square at a time, except for its first move, which can move two squares forward (if unobstructed).
@@ -16,14 +21,29 @@ pub enum PieceType {
     Knight,
     /// A bishop can move diagonally on either axis as far is it can without capturing or bumping into its own side's pieces.
     /// A bishop is locked to the specific colored square it starts on.
-    #[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
+    #[subenum(
+        NonKingPieceType,
+        SlidingPieceType,
+        NonPawnPieceType,
+        PromotablePieceType
+    )]
     Bishop,
     /// A rook can move cardinally on either axis as far is it can without capturing or bumping into its own side's pieces.
     /// A rook can also [castle](crate::castles::CastleRights) or semi-switch places with its king.
-    #[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
+    #[subenum(
+        NonKingPieceType,
+        SlidingPieceType,
+        NonPawnPieceType,
+        PromotablePieceType
+    )]
     Rook,
     /// Most powerful piece, featuring the same moves as [`Bishop`](Self::Bishop) and [`Rook`](Self::Rook) combined.
-    #[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
+    #[subenum(
+        NonKingPieceType,
+        SlidingPieceType,
+        NonPawnPieceType,
+        PromotablePieceType
+    )]
     Queen,
     /// The piece that must be protected in order to win.  Your king being attacked is checked, and
     /// ending your turn with your king attacked is check-mate (a loss).  A king can move/capture a single
