@@ -1,9 +1,36 @@
 use crate::bitboard::direction::Direction;
 use crate::bitboard::BoardMask;
+use crate::pieces::NonPawnPieceType;
 use crate::player_color::PlayerColor;
+use crate::square::Square;
+use enum_iterator::all;
 use enum_map::EnumMap;
+use std::sync::OnceLock;
+
+/// Precomputed attack mask lookup for a piece on a square on an empty board
+static PSEUDO_ATTACKS: OnceLock<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
+    OnceLock::new();
 
 impl BoardMask {
+    /// Get the attack [mask](Self) for a [piece](NonPawnPieceType) on a [`Square`] on an empty board
+    pub fn pseudo_attacks_for(piece: NonPawnPieceType, square: Square) -> Self {
+        PSEUDO_ATTACKS.get_or_init(|| {
+            let mut piece_mask_map: EnumMap<NonPawnPieceType, EnumMap<Square, Self>> =
+                EnumMap::default();
+            for sq in all::<Square>() {
+                let mask = sq.to_mask();
+                piece_mask_map[NonPawnPieceType::Knight][sq] = mask.knight_attacks();
+                piece_mask_map[NonPawnPieceType::Bishop][sq] = mask.ordinal_sliding_attacks(mask);
+                piece_mask_map[NonPawnPieceType::Rook][sq] = mask.cardinal_sliding_attacks(mask);
+                piece_mask_map[NonPawnPieceType::Queen][sq] = piece_mask_map
+                    [NonPawnPieceType::Bishop][sq]
+                    | piece_mask_map[NonPawnPieceType::Rook][sq];
+                piece_mask_map[NonPawnPieceType::King][sq] = mask.king_attacks();
+            }
+            piece_mask_map
+        })[piece][square]
+    }
+
     /// Calculate the knight attacks mask for a given mask of knight attacker(s)
     pub fn knight_attacks(self) -> Self {
         let l1 = Self(self.0 >> 1) & Self(0x7F7F_7F7F_7F7F_7F7F);
