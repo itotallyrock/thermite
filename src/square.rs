@@ -1,6 +1,7 @@
 use crate::bitboard::BoardMask;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
+use enum_iterator::Sequence;
 use enum_map::Enum;
 use subenum::subenum;
 
@@ -8,7 +9,7 @@ use subenum::subenum;
 #[allow(missing_docs)]
 #[rustfmt::skip]
 #[subenum(EnPassantSquare, WhiteEnPassantSquare, BlackEnPassantSquare)]
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
+#[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 #[repr(u8)]
 pub enum Square {
     A1, B1, C1, D1, E1, F1, G1, H1,

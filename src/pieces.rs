@@ -1,10 +1,11 @@
 use crate::player_color::PlayerColor;
 use crate::square::Square;
+use enum_iterator::Sequence;
 use enum_map::Enum;
 use subenum::subenum;
 
 #[subenum(NonKingPieceType, NonPawnPieceType, PromotablePieceType)]
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
+#[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum PieceType {
     /// A pawn that can only push forward one square at a time, except for its first move, which can move two squares forward (if unobstructed).
     /// Can also attack diagonally forward-left/right.  Upon reaching the opposite sides back-rank the pawn will promote to a promotion piece ([`Queen`](Self::Queen), [`Rook`](Self::Rook), [`Knight`](Self::Knight), [`Bishop`](Self::Bishop)).
