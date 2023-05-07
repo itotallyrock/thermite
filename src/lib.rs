@@ -17,6 +17,8 @@ pub mod bitboard;
 pub mod castles;
 /// A clock for keeping track of half moves without a capture or pawn push before a draw
 pub mod half_move_clock;
+/// A counter for the sum of the number of a piece on a board
+pub mod piece_count;
 /// A piece that can be placed on the board
 pub mod pieces;
 /// A player in the game, or one side of the board, represented by their piece's color.
