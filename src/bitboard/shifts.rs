@@ -4,8 +4,8 @@ use crate::bitboard::BoardMask;
 impl BoardMask {
     #[inline(always)]
     const fn get_shift_mask(direction: Direction) -> Self {
-        const NOT_A_FILE_MASK: BoardMask = Self(0xFEFE_FEFE_FEFE_FEFE);
-        const NOT_H_FILE_MASK: BoardMask = Self(0x7F7F_7F7F_7F7F_7F7F);
+        const NOT_A_FILE_MASK: BoardMask = BoardMask(0xFEFE_FEFE_FEFE_FEFE);
+        const NOT_H_FILE_MASK: BoardMask = BoardMask(0x7F7F_7F7F_7F7F_7F7F);
         match direction {
             Direction::North | Direction::South => Self::FULL,
             Direction::East | Direction::NorthEast | Direction::SouthEast => NOT_H_FILE_MASK,
