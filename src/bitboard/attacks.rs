@@ -19,12 +19,12 @@ impl BoardMask {
                 EnumMap::default();
             for sq in all::<Square>() {
                 let mask = sq.to_mask();
+                let ordinal_attacks = mask.ordinal_sliding_attacks(mask);
+                let cardinal_attacks = mask.cardinal_sliding_attacks(mask);
                 piece_mask_map[NonPawnPieceType::Knight][sq] = mask.knight_attacks();
-                piece_mask_map[NonPawnPieceType::Bishop][sq] = mask.ordinal_sliding_attacks(mask);
-                piece_mask_map[NonPawnPieceType::Rook][sq] = mask.cardinal_sliding_attacks(mask);
-                piece_mask_map[NonPawnPieceType::Queen][sq] = piece_mask_map
-                    [NonPawnPieceType::Bishop][sq]
-                    | piece_mask_map[NonPawnPieceType::Rook][sq];
+                piece_mask_map[NonPawnPieceType::Bishop][sq] = ordinal_attacks;
+                piece_mask_map[NonPawnPieceType::Rook][sq] = cardinal_attacks;
+                piece_mask_map[NonPawnPieceType::Queen][sq] = ordinal_attacks | cardinal_attacks;
                 piece_mask_map[NonPawnPieceType::King][sq] = mask.king_attacks();
             }
             piece_mask_map
