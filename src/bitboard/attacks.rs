@@ -88,14 +88,14 @@ impl BoardMask {
 
     fn occluded_fill(mut self, occupied: Self, direction: Direction) -> Self {
         const SLIDING_MASKS: EnumMap<Direction, BoardMask> = EnumMap::from_array([
-            Self(0xFFFF_FFFF_FFFF_FF00),
-            Self(0x00FF_FFFF_FFFF_FFFF),
-            Self(0xFEFE_FEFE_FEFE_FEFE),
-            Self(0x7F7F_7F7F_7F7F_7F7F),
-            Self(0xFEFE_FEFE_FEFE_FE00),
-            Self(0x7F7F_7F7F_7F7F_7F00),
-            Self(0x00FE_FEFE_FEFE_FEFE),
-            Self(0x007F_7F7F_7F7F_7F7F),
+            BoardMask(0xFFFF_FFFF_FFFF_FF00),
+            BoardMask(0x00FF_FFFF_FFFF_FFFF),
+            BoardMask(0xFEFE_FEFE_FEFE_FEFE),
+            BoardMask(0x7F7F_7F7F_7F7F_7F7F),
+            BoardMask(0xFEFE_FEFE_FEFE_FE00),
+            BoardMask(0x7F7F_7F7F_7F7F_7F00),
+            BoardMask(0x00FE_FEFE_FEFE_FEFE),
+            BoardMask(0x007F_7F7F_7F7F_7F7F),
         ]);
         let mut empty = !occupied;
         let mut flood = Self::EMPTY;
