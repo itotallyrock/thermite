@@ -4,12 +4,12 @@ use crate::pieces::NonPawnPieceType;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use enum_iterator::all;
-use enum_map::EnumMap;
-use std::sync::OnceLock;
+use enum_map::{Enum, EnumMap};
+use once_cell::sync::OnceCell;
 
 /// Precomputed attack mask lookup for a piece on a square on an empty board
-static PSEUDO_ATTACKS: OnceLock<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
-    OnceLock::new();
+static PSEUDO_ATTACKS: OnceCell<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
+    OnceCell::new();
 
 impl BoardMask {
     /// Get the attack [mask](Self) for a [piece](NonPawnPieceType) on a [`Square`] on an empty board
@@ -21,6 +21,7 @@ impl BoardMask {
                 let mask = sq.to_mask();
                 let ordinal_attacks = mask.ordinal_sliding_attacks(mask);
                 let cardinal_attacks = mask.cardinal_sliding_attacks(mask);
+
                 piece_mask_map[NonPawnPieceType::Knight][sq] = mask.knight_attacks();
                 piece_mask_map[NonPawnPieceType::Bishop][sq] = ordinal_attacks;
                 piece_mask_map[NonPawnPieceType::Rook][sq] = cardinal_attacks;
