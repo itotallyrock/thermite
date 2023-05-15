@@ -4,7 +4,7 @@ use crate::pieces::NonPawnPieceType;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use enum_iterator::all;
-use enum_map::{Enum, EnumMap};
+use enum_map::EnumMap;
 use once_cell::sync::OnceCell;
 
 /// Precomputed attack mask lookup for a piece on a square on an empty board
