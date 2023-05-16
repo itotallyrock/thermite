@@ -3,6 +3,8 @@ use crate::piece_type::{ByPieceType, PieceType};
 use crate::player::{ByPlayer, Player};
 use crate::square::{BySquare, Square, NUM_FILES};
 use crate::board::zobrist::ZobristInner;
+use lazy_static::lazy_static;
+use crate::sided_piece::SidedPiece;
 
 /// The base key for an empty position
 pub const EMPTY_ZOBRIST_KEY: ZobristInner = 0xF1DC_4349_4EA4_76CE;
@@ -10,9 +12,10 @@ pub const EMPTY_ZOBRIST_KEY: ZobristInner = 0xF1DC_4349_4EA4_76CE;
 /// Hash value used for black to move
 pub const SIDE_KEY: ZobristInner = 0xA92C_CEB8_91EA_45C2;
 
+lazy_static! {
 /// Hash value for all piece square possibilities (including some illegal positions like pawns on last rank)
 #[rustfmt::skip]
-const PIECE_SQUARES: ByPlayer<ByPieceType<BySquare<ZobristInner>>> = ByPlayer::from([
+static ref PIECE_SQUARES: ByPlayer<ByPieceType<BySquare<ZobristInner>>> = ByPlayer::from([
     ByPieceType::from([
         BySquare::from([
             0xBCBD_2C2F_7DAB_FCBE, 0x8756_17FC_113F_9090, 0x314A_7DFE_25D7_39E3, 0x47F5_6D36_49FE_FA55, 0x2276_E9C2_6AD3_4276, 0x776F_E868_69DA_CEAD, 0x4CDA_34E6_051B_A0AC, 0x2580_0E89_C066_3865,
@@ -138,6 +141,7 @@ const PIECE_SQUARES: ByPlayer<ByPieceType<BySquare<ZobristInner>>> = ByPlayer::f
         ]),
     ]),
 ]);
+}
 
 /// Hash value of one of the 16 possible en-passant squares A3-H3, A6-H6
 #[rustfmt::skip]
@@ -159,8 +163,8 @@ const CASTLE_KEYS: [ZobristInner; NUM_CASTLES] = [
 ];
 
 /// Lookup the hash value for a piece placed on a specific square
-pub const fn piece_square_lookup(square: Square, piece: PieceType, side: Player) -> ZobristInner {
-    *PIECE_SQUARES.get_side(side).get_piece(piece).get_square(square)
+pub fn piece_square_lookup(square: Square, piece: SidedPiece) -> ZobristInner {
+    *PIECE_SQUARES.get_side(piece.player).get_piece(piece.piece_type).get_square(square)
 }
 
 /// Lookup the hash value for an en-passant square

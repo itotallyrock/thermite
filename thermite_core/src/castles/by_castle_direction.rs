@@ -28,13 +28,13 @@ impl<T: Copy> ByCastleDirection<T> {
     }
 }
 
-impl<T> const From<[T; NUM_CASTLE_DIRECTIONS]> for ByCastleDirection<T> {
+impl<T> From<[T; NUM_CASTLE_DIRECTIONS]> for ByCastleDirection<T> {
     fn from(value: [T; NUM_CASTLE_DIRECTIONS]) -> Self {
         Self { items: value }
     }
 }
 
-impl<T: ~const Default + Copy> const Default for ByCastleDirection<T> {
+impl<T: Default + Copy> Default for ByCastleDirection<T> {
     fn default() -> Self {
         Self {
             items: [T::default(); NUM_CASTLE_DIRECTIONS],
@@ -42,7 +42,7 @@ impl<T: ~const Default + Copy> const Default for ByCastleDirection<T> {
     }
 }
 
-impl<T: ~const PartialEq> const PartialEq for ByCastleDirection<T> {
+impl<T: PartialEq> PartialEq for ByCastleDirection<T> {
     fn eq(&self, other: &Self) -> bool {
         debug_assert!(NUM_CASTLE_DIRECTIONS == 2);
         self.items[0] == other.items[0] && self.items[1] == other.items[1]

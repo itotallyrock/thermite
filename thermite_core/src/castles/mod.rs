@@ -1,3 +1,5 @@
+use derive_more::{AsMut, AsRef};
+
 pub use rights::{CastleRights, IllegalCastleRights};
 
 use crate::bitboard::Bitboard;
@@ -20,8 +22,10 @@ pub const NUM_CASTLES: usize = 4;
 
 /// The state management for a game of chess's castle permissions
 /// Keep track of starting rights, the squares to monitor for invalidating those rights, and masks for checking attacked squares.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
 pub struct Castles {
+    #[as_ref]
+    #[as_mut]
     rights: CastleRights,
     #[cfg(feature = "chess_960")]
     king_starting_squares: ByPlayer<Square>,
@@ -31,31 +35,19 @@ pub struct Castles {
     is_chess_960: bool,
 }
 
-const fn get_unoccupied_path(king_square: Square, rook_square: Square) -> Bitboard {
+fn get_unoccupied_path(king_square: Square, rook_square: Square) -> Bitboard {
     Bitboard::line_between(king_square, rook_square) ^ rook_square.to_mask()
 }
 
-const fn get_unattacked_path(king_square: Square, king_to_square: Square) -> Bitboard {
+fn get_unattacked_path(king_square: Square, king_to_square: Square) -> Bitboard {
     Bitboard::line_between(king_square, king_to_square)
-}
-
-impl const AsRef<CastleRights> for Castles {
-    fn as_ref(&self) -> &CastleRights {
-        &self.rights
-    }
-}
-
-impl const AsMut<CastleRights> for Castles {
-    fn as_mut(&mut self) -> &mut CastleRights {
-        &mut self.rights
-    }
 }
 
 impl Castles {
     /// Create the state management for a board's castle permissions, needs a starting set of rights, and each rook and king square needs to be included as well.
     #[cfg(feature = "chess_960")]
     #[must_use]
-    pub const fn new(
+    pub fn new(
         rights: CastleRights,
         white_king_square: Square,
         black_king_square: Square,
@@ -64,7 +56,7 @@ impl Castles {
         white_king_rook_square: Square,
         black_king_rook_square: Square,
     ) -> Self {
-        const DEFAULT_CASTLES: Castles = Castles::default();
+        const DEFAULT_CASTLES: Castles = Castles::empty();
         let king_starting_squares = ByPlayer::new_with(white_king_square, black_king_square);
         let rook_starting_squares = ByCastleDirection::new_with(ByPlayer::new_with(white_king_rook_square, black_king_rook_square), ByPlayer::new_with(white_queen_rook_square, black_queen_rook_square));
         // If a position doesnt have standard castle squares then assume chess_960 when constructing
@@ -88,6 +80,25 @@ impl Castles {
     ) -> Self {
         Self {
             rights,
+        }
+    }
+
+    /// Default castles with no rights (empty)
+    #[cfg(feature = "chess_960")]
+    pub const fn empty() -> Self {
+        Self {
+            rights: CastleRights::None,
+            king_starting_squares: STANDARD_KING_FROM_SQUARES,
+            rook_starting_squares: STANDARD_ROOK_FROM_SQUARES,
+            is_chess_960: false,
+        }
+    }
+
+    /// Default castles with no rights (empty)
+    #[cfg(not(feature = "chess_960"))]
+    pub const fn empty() -> Self {
+        Self {
+            rights: CastleRights::None,
         }
     }
 
@@ -119,7 +130,7 @@ impl Castles {
     /// Compare the starting squares for the kings and rooks for both sides
     #[cfg(feature = "chess_960")]
     #[must_use]
-    pub const fn eq_starting_squares(&self, other: Self) -> bool {
+    pub fn eq_starting_squares(&self, other: Self) -> bool {
         self.king_starting_squares == other.king_starting_squares
             && self.rook_starting_squares == other.rook_starting_squares
     }
@@ -137,12 +148,12 @@ impl Castles {
     }
 
     /// The mask that must not contain any pieces in order to castle for a [player](Player) in a given [direction](CastleDirection)
-    pub const fn get_unoccupied_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
+    pub fn get_unoccupied_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
         get_unoccupied_path(self.king_from_square(side), self.rook_from_square(side, direction))
     }
 
     /// The mask that must not be attacked for the king to pass through in order to castle for a [player](Player) in a given [direction](CastleDirection)
-    pub const fn get_unattacked_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
+    pub fn get_unattacked_path(&self, side: Player, direction: CastleDirection) -> Bitboard {
         get_unattacked_path(self.king_from_square(side), self.king_to_square(side, direction))
     }
 
@@ -150,24 +161,6 @@ impl Castles {
     #[cfg(feature = "chess_960")]
     pub(crate) const fn set_chess_960(&mut self, is_chess_960: bool) {
         self.is_chess_960 = is_chess_960;
-    }
-}
-
-impl const Default for Castles {
-    fn default() -> Self {
-        #[cfg(feature = "chess_960")]
-        let default = Self {
-            rights: CastleRights::None,
-            king_starting_squares: STANDARD_KING_FROM_SQUARES,
-            rook_starting_squares: STANDARD_ROOK_FROM_SQUARES,
-            is_chess_960: false,
-        };
-        #[cfg(not(feature = "chess_960"))]
-        let default = Self {
-            rights: CastleRights::None,
-        };
-
-        default
     }
 }
 
@@ -191,7 +184,7 @@ mod test {
 
     #[test]
     fn default_rights_are_empty() {
-        assert_eq!(Castles::default().rights, CastleRights::None);
+        assert_eq!(Castles::empty().rights, CastleRights::None);
     }
 
     #[test_case(Player::White, CastleDirection::QueenSide, Bitboard(0xE); "white queen side")]
@@ -199,7 +192,7 @@ mod test {
     #[test_case(Player::Black, CastleDirection::QueenSide, Bitboard(0x0E00_0000_0000_0000); "black queen side")]
     #[test_case(Player::Black, CastleDirection::KingSide, Bitboard(0x6000_0000_0000_0000); "black king side")]
     fn get_unoccupied_path_works(side: Player, direction: CastleDirection, expected: Bitboard) {
-        let castles = Castles::default();
+        let castles = Castles::empty();
         assert_eq!(get_unoccupied_path(castles.king_from_square(side), castles.rook_from_square(side, direction)), expected);
     }
 }

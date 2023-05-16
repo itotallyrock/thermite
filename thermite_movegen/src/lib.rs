@@ -1,14 +1,15 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+// const features
+#![feature(
+    const_mut_refs,
+    const_trait_impl,
+    const_option,
+)]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub use generator::MoveGenerator;
+pub use move_list::LegalMoveContainer;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+mod move_list;
+mod pseudo_legal_move;
+mod create_moves;
+mod generator;
+

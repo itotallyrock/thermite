@@ -2,9 +2,10 @@ use std::fmt::{Display, Formatter};
 use crate::castles::{CastleDirection, NUM_CASTLES};
 use crate::player::Player;
 use std::ops::{BitAnd, BitOr, Not};
+use std::str::FromStr;
 
 /// Keeps track of available castle abilities (king-side or queen-side castle) for both sides.
-#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialOrd, PartialEq)]
 #[repr(u8)]
 #[must_use]
 pub enum CastleRights {
@@ -152,26 +153,31 @@ impl CastleRights {
     /// assert_eq!(CastleRights::BothKings.filter(CastleRights::WhiteKing), CastleRights::BlackKing);
     /// assert_eq!(CastleRights::WhiteBoth.filter(CastleRights::WhiteKing), CastleRights::WhiteQueen);
     /// ```
-    pub const fn filter(&self, other: Self) -> Self {
+    pub fn filter(&self, other: Self) -> Self {
         *self & !other
     }
+
+}
+
+impl FromStr for CastleRights {
+    type Err = IllegalCastleRights;
 
     /// Attempt to parse a UCI string into a [`CastleRight`](CastleRights).
     ///
     /// ```
+    /// use std::str::FromStr;
     /// use thermite_core::castles::{CastleRights, IllegalCastleRights};
     ///
-    /// assert_eq!(CastleRights::parse("-"), Ok(CastleRights::None));
-    /// assert_eq!(CastleRights::parse("KQkq"), Ok(CastleRights::All));
-    /// assert_eq!(CastleRights::parse("KQ"), Ok(CastleRights::WhiteBoth));
-    /// assert_eq!(CastleRights::parse("q"), Ok(CastleRights::BlackQueen));
-    /// assert_eq!(CastleRights::parse("32"), Err(IllegalCastleRights));
+    /// assert_eq!(CastleRights::from_str("KQkq"), Ok(CastleRights::All));
+    /// assert_eq!(CastleRights::from_str("KQ"), Ok(CastleRights::WhiteBoth));
+    /// assert_eq!(CastleRights::from_str("q"), Ok(CastleRights::BlackQueen));
+    /// assert_eq!(CastleRights::from_str("32"), Err(IllegalCastleRights));
     /// ```
     ///
     /// # Errors
     /// Will error if input is not a valid UCI castle right.
     /// Must be a combination of `'K'`, `'Q'`, `'k'`, and `'q'` or `'-'`.
-    pub const fn parse(input: &str) -> Result<Self, IllegalCastleRights> {
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
         Ok(match input.as_bytes() {
             b"-" => Self::None,
             b"K" => Self::WhiteKing,
@@ -194,13 +200,7 @@ impl CastleRights {
     }
 }
 
-impl const PartialEq for CastleRights {
-    fn eq(&self, other: &Self) -> bool {
-        *self as u8 == *other as u8
-    }
-}
-
-impl const BitAnd for CastleRights {
+impl BitAnd for CastleRights {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -208,7 +208,7 @@ impl const BitAnd for CastleRights {
     }
 }
 
-impl const BitOr for CastleRights {
+impl BitOr for CastleRights {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -216,7 +216,7 @@ impl const BitOr for CastleRights {
     }
 }
 
-impl const Not for CastleRights {
+impl Not for CastleRights {
     type Output = Self;
 
     fn not(self) -> Self::Output {
@@ -266,16 +266,10 @@ impl Display for CastleRights {
 
 /// Invalid flag input value for the `u8` provided to `CastleRights::try_from`.
 /// Wasn't a valid combination of the 4 castle abilities or none.
-#[derive(Copy, Clone, Debug, Eq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct IllegalCastleRights;
 
-impl const PartialEq for IllegalCastleRights {
-    fn eq(&self, _: &Self) -> bool {
-        true
-    }
-}
-
-impl const TryFrom<u8> for CastleRights {
+impl TryFrom<u8> for CastleRights {
     type Error = IllegalCastleRights;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {

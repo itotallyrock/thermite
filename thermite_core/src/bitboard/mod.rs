@@ -1,9 +1,11 @@
-use std::cmp::Ordering;
 use std::fmt::{Debug, Formatter};
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
+
+use derive_more::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, From, Not};
 
 use crate::piece_type::PieceType;
-use crate::square::{BySquare, NUM_FILES, NUM_RANKS, NUM_SQUARES, Square};
+use crate::square::{BySquare, NUM_FILES, NUM_RANKS, Square};
+
+use lazy_static::lazy_static;
 
 mod shift;
 mod direction;
@@ -13,44 +15,43 @@ mod attacks;
 type BitboardInner = u64;
 
 /// Board mask with single bits representing squares on a 64 tile board
-#[derive(Copy, Clone, Eq)]
+#[derive(Copy, Clone, Eq, Default, PartialEq, PartialOrd, From, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not)]
 #[must_use]
 pub struct Bitboard(pub(crate) BitboardInner);
 
-const fn line_generator<const BETWEEN: bool>() -> BySquare<BySquare<Bitboard>> {
-    let mut items: BySquare<BySquare<Bitboard>> = BySquare::default();
-    let mut a_square_offset = 0;
-    while a_square_offset < NUM_SQUARES {
-        let a_square = Square::SQUARES[a_square_offset];
-        let mut b_square_offset = 0;
-        while b_square_offset < NUM_SQUARES {
-            const SLIDING_PIECES: [PieceType; 2] = [PieceType::Rook, PieceType::Bishop];
-            let b_square = Square::SQUARES[b_square_offset];
-            let b_mask = b_square.to_mask();
-            let mut piece_index = 0;
-            while piece_index < SLIDING_PIECES.len() {
-                let piece = SLIDING_PIECES[piece_index];
-                let a_attacks = Bitboard::attacks_mask(piece, a_square);
-                // If there is a connectable line through the two squares
-                if a_attacks & b_mask != Bitboard::EMPTY {
-                    *items.mut_square(a_square).mut_square(b_square) = if BETWEEN {
-                        Bitboard::occluded_attacks_mask(piece, a_square, b_mask) & Bitboard::occluded_attacks_mask(piece, b_square, a_square.to_mask())
-                    } else {
-                        (a_attacks & Bitboard::attacks_mask(piece, b_square)) | b_mask | a_square.to_mask()
-                    };
-                }
-                piece_index += 1;
-            }
-            if BETWEEN {
-                *items.mut_square(a_square).mut_square(b_square) |= b_mask;
-            }
+// Get an iterator over squares that share a diagonal or cardinal line, the piece type that connected, and the attacks from that piece from the first square
+fn connectable_iter() -> impl Iterator<Item=(Square, Square, PieceType, Bitboard)> {
+    Square::SQUARES
+        .into_iter()
+        .flat_map(|a_square| Square::SQUARES
+            .into_iter()
+            .map(move |b_square| (a_square, b_square)))
+        .filter_map(|(a_square, b_square)| [PieceType::Rook, PieceType::Bishop]
+            .into_iter()
+            .map(|piece| (a_square, b_square, piece, Bitboard::attacks_mask(piece, a_square)))
+            .find(|&(_, b_square, _, a_attacks)| a_attacks & b_square.to_mask() != Bitboard::EMPTY))
+}
 
-            b_square_offset += 1;
+lazy_static! {
+    static ref LINE_THROUGH: BySquare<BySquare<Bitboard>> = {
+        let mut items: BySquare<BySquare<Bitboard>> = BySquare::default();
+
+        for (a, b, piece, _) in connectable_iter() {
+            *items.mut_square(a).mut_square(b) = Bitboard::occluded_attacks_mask(piece, a, b.to_mask()) & Bitboard::occluded_attacks_mask(piece, b, a.to_mask());
         }
-        a_square_offset += 1;
-    }
 
-    items
+        items
+    };
+
+    static ref LINE_BETWEEN: BySquare<BySquare<Bitboard>> = {
+        let mut items: BySquare<BySquare<Bitboard>> = BySquare::default();
+
+        for (a, b, piece, a_attacks) in connectable_iter() {
+            *items.mut_square(a).mut_square(b) = (a_attacks & Bitboard::attacks_mask(piece, b)) | b.to_mask() | a.to_mask();
+        }
+
+        items
+    };
 }
 
 impl Bitboard {
@@ -67,28 +68,25 @@ impl Bitboard {
     #[rustfmt::skip]
     pub const FILES: [Self; NUM_FILES] = [Self(0x8080_8080_8080_8080), Self(0x4040_4040_4040_4040), Self(0x2020_2020_2020_2020), Self(0x1010_1010_1010_1010), Self(0x0808_0808_0808_0808), Self(0x0404_0404_0404_0404), Self(0x0202_0202_0202_0202), Self(0x0101_0101_0101_0101)];
 
-    const LINE_THROUGH: BySquare<BySquare<Self>> = line_generator::<false>();
-    const LINE_BETWEEN: BySquare<BySquare<Self>> = line_generator::<true>();
-
     /// Get the board mask of the line through two squares, if any, the line extends from edge to edge.
-    pub const fn line_through(a: Square, b: Square) -> Self {
-        *Self::LINE_THROUGH.get_square(a).get_square(b)
+    pub fn line_through(a: Square, b: Square) -> Self {
+        *LINE_THROUGH.get_square(a).get_square(b)
     }
 
     /// Get the board mask of the line between two squares, if any, not including the start squares.
-    pub const fn line_between(start: Square, end: Square) -> Self {
-        *Self::LINE_BETWEEN.get_square(start).get_square(end)
+    pub fn line_between(start: Square, end: Square) -> Self {
+        *LINE_BETWEEN.get_square(start).get_square(end)
     }
 
     /// If three squares share a common rank, file, or diagonal
     #[must_use]
-    pub const fn is_aligned(a: Square, b: Square, c: Square) -> bool {
-        Self::line_through(a, b) & c.to_mask() != Self::EMPTY
+    pub fn is_aligned(a: Square, b: Square, c: Square) -> bool {
+        !(Self::line_through(a, b) & c.to_mask()).is_empty()
     }
 
     /// If a bit is set, return that [`Square`](Square) and unset the bit
     #[must_use]
-    pub const fn pop_square(&mut self) -> Option<Square> {
+    pub fn pop_square(&mut self) -> Option<Square> {
         let square_offset = self.0.trailing_zeros();
         #[allow(clippy::cast_possible_truncation)]
          let square = Square::try_from(square_offset as u8).ok()?;
@@ -104,40 +102,11 @@ impl Bitboard {
         #[allow(clippy::cast_possible_truncation)]
         { self.0.count_ones() as u8 }
     }
-}
 
-impl const Default for Bitboard {
-    fn default() -> Self {
-        Self::EMPTY
-    }
-}
-
-impl const PartialEq for Bitboard {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl const PartialOrd for Bitboard {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        #[allow(clippy::comparison_chain)] // Allow because cmp is non-const
-        let ordering = if self.0 > other.0 {
-            Ordering::Greater
-        } else if self.0 < other.0 {
-            Ordering::Less
-        } else {
-            Ordering::Equal
-        };
-
-        Some(ordering)
-    }
-}
-
-impl const Not for Bitboard {
-    type Output = Self;
-
-    fn not(self) -> Self::Output {
-        Self(self.0.not())
+    /// If the current bitboard contains no set bits
+    #[must_use]
+    pub const fn is_empty(self) -> bool {
+        matches!(self, Self::EMPTY)
     }
 }
 
@@ -146,7 +115,7 @@ impl const Not for Bitboard {
 #[must_use]
 pub struct MaskSquareIterator(Bitboard);
 
-impl const IntoIterator for Bitboard {
+impl IntoIterator for Bitboard {
     type Item = Square;
     type IntoIter = MaskSquareIterator;
 
@@ -171,13 +140,6 @@ impl Iterator for MaskSquareIterator {
 
 impl ExactSizeIterator for MaskSquareIterator {}
 
-impl const From<BitboardInner> for Bitboard {
-    /// Convert a raw inner bitboard to a an actual [Bitboard]
-    fn from(inner: BitboardInner) -> Self {
-        Self(inner)
-    }
-}
-
 impl Debug for Bitboard {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
@@ -185,48 +147,6 @@ impl Debug for Bitboard {
         } else {
             f.write_str(&format!("{:X}", self.0))
         }
-    }
-}
-
-impl const BitAnd for Bitboard {
-    type Output = Self;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Self(self.0 & rhs.0)
-    }
-}
-
-impl const BitAndAssign for Bitboard {
-    fn bitand_assign(&mut self, rhs: Self) {
-        *self = *self & rhs;
-    }
-}
-
-impl const BitOr for Bitboard {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Self(self.0 | rhs.0)
-    }
-}
-
-impl const BitOrAssign for Bitboard {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = *self | rhs;
-    }
-}
-
-impl const BitXor for Bitboard {
-    type Output = Self;
-
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Self(self.0 ^ rhs.0)
-    }
-}
-
-impl const BitXorAssign for Bitboard {
-    fn bitxor_assign(&mut self, rhs: Self) {
-        *self = *self ^ rhs;
     }
 }
 

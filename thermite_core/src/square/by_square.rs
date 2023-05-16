@@ -24,13 +24,13 @@ impl<T: Copy> BySquare<T> {
     }
 }
 
-impl<T> const From<[T; NUM_SQUARES]> for BySquare<T> {
+impl<T> From<[T; NUM_SQUARES]> for BySquare<T> {
     fn from(value: [T; NUM_SQUARES]) -> Self {
         Self { items: value }
     }
 }
 
-impl<T: ~const Default + Copy> const Default for BySquare<T> {
+impl<T: Default + Copy> Default for BySquare<T> {
     fn default() -> Self {
         Self {
             items: [T::default(); NUM_SQUARES],

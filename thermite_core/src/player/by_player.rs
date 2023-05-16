@@ -28,13 +28,13 @@ impl<T: Copy> ByPlayer<T> {
     }
 }
 
-impl<T: ~const PartialEq> const PartialEq for ByPlayer<T> {
+impl<T: PartialEq> PartialEq for ByPlayer<T> {
     fn eq(&self, other: &Self) -> bool {
         self.items[0] == other.items[0] && self.items[1] == other.items[1]
     }
 }
 
-impl<T: ~const Default + Copy> const Default for ByPlayer<T> {
+impl<T: Default + Copy> Default for ByPlayer<T> {
     fn default() -> Self {
         Self {
             items: [T::default(); NUM_PLAYERS],
@@ -42,7 +42,7 @@ impl<T: ~const Default + Copy> const Default for ByPlayer<T> {
     }
 }
 
-impl<T> const From<[T; NUM_PLAYERS]> for ByPlayer<T> {
+impl<T> From<[T; NUM_PLAYERS]> for ByPlayer<T> {
     fn from(value: [T; NUM_PLAYERS]) -> Self {
         Self { items: value }
     }

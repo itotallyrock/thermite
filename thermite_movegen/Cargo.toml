@@ -18,4 +18,8 @@ q_moves = []
 chess_960 = ["thermite_core/chess_960"]
 
 [dependencies]
-thermite_core = { path = "../thermite_core", features = ["move_generation"] }
+thermite_core = { path = "../thermite_core", features = [] }
+arrayvec = "0.7.2"
+
+[dev-dependencies]
+test-case = "2.2.1"

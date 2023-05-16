@@ -5,6 +5,7 @@ use crate::board::zobrist::keys::{castle_lookup, en_passant_lookup, piece_square
 use keys::EMPTY_ZOBRIST_KEY;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hasher;
+use crate::sided_piece::SidedPiece;
 
 mod keys;
 
@@ -30,33 +31,33 @@ impl ZobristHasher {
         Self(EMPTY_ZOBRIST_KEY)
     }
 
-    const fn toggle(&mut self, mask: ZobristInner) {
+    fn toggle(&mut self, mask: ZobristInner) {
         self.write_u64(mask);
     }
 
     /// Toggle the placement of a piece on a given square for a given side.
     /// Adds the piece placement to the hash; otherwise, removes the piece if it is already included.
-    pub const fn toggle_piece_square(&mut self, square: Square, piece: PieceType, side: Player) {
-        self.toggle(piece_square_lookup(square, piece, side));
+    pub fn toggle_piece_square(&mut self, square: Square, piece: SidedPiece) {
+        self.toggle(piece_square_lookup(square, piece));
     }
 
     /// Toggle the side to move between white and black.
-    pub const fn switch_sides(&mut self) {
+    pub fn switch_sides(&mut self) {
         self.toggle(SIDE_KEY);
     }
 
     /// Toggle the side to move between white and black.
-    pub const fn toggle_en_passant_square(&mut self, square: Square) {
+    pub fn toggle_en_passant_square(&mut self, square: Square) {
         self.toggle(en_passant_lookup(square));
     }
 
     /// Toggle the castle rights for a side to castle in one direction
-    pub const fn toggle_castle_ability(&mut self, side: Player, king_side: bool) {
+    pub fn toggle_castle_ability(&mut self, side: Player, king_side: bool) {
         self.toggle(castle_lookup(side, king_side));
     }
 }
 
-impl const Hasher for ZobristHasher {
+impl Hasher for ZobristHasher {
     /// Get the pre-computed hash value
     fn finish(&self) -> u64 {
         self.0

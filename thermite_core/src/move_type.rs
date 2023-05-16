@@ -4,6 +4,7 @@ use crate::promotion_piece_type::PromotionPieceType;
 use crate::square::Square;
 
 /// The different types of chess moves and the relevant metadata to make (or undo) them
+#[cfg_attr(feature = "hashable_chess_move", derive(Hash))]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum MoveType {
     /// Plain chess move, take a piece from a square and move it to another square

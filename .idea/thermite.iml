@@ -8,7 +8,10 @@
       <sourceFolder url="file://$MODULE_DIR$/thermite_movegen/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/thermite_search/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/uci_driver/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/search_trace/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/thermite_search/examples" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/logs" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

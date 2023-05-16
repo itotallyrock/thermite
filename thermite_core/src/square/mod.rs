@@ -3,11 +3,13 @@ pub use by_square::BySquare;
 
 use crate::bitboard::Bitboard;
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 
 /// A single tile on a chess board
 #[rustfmt::skip]
 #[allow(missing_docs)]
-#[derive(Copy, Clone, Debug, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "hashable_chess_move", derive(Hash))]
+#[derive(Copy, Clone, Debug, Eq, PartialOrd, Ord, PartialEq)]
 #[repr(u8)]
 pub enum Square {
     A1, B1, C1, D1, E1, F1, G1, H1,
@@ -63,7 +65,7 @@ impl Square {
     /// assert_eq!(Square::H1.to_mask(), Bitboard::from(0b10000000));
     /// assert_eq!(Square::H8.to_mask(), Bitboard::from(0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000));
     /// ```
-    pub const fn to_mask(self) -> Bitboard {
+    pub fn to_mask(self) -> Bitboard {
         Bitboard::from(1u64 << (self as u32))
     }
 
@@ -107,7 +109,7 @@ impl Square {
     /// assert_eq!(Square::A8.checked_add(7), Some(Square::H8));
     /// assert_eq!(Square::H8.checked_add(1), None);
     #[must_use]
-    pub const fn checked_add(self, rhs: u8) -> Option<Self> {
+    pub fn checked_add(self, rhs: u8) -> Option<Self> {
         Self::try_from((self as u8).saturating_add(rhs)).ok()
     }
 
@@ -124,91 +126,96 @@ impl Square {
     /// assert_eq!(Square::G2.checked_sub(2), Some(Square::E2));
     /// ```
     #[must_use]
-    pub const fn checked_sub(self, rhs: u8) -> Option<Self> {
+    pub fn checked_sub(self, rhs: u8) -> Option<Self> {
         Self::try_from((self as u8).wrapping_sub(rhs)).ok()
     }
+}
+
+impl FromStr for Square {
+    type Err = IllegalSquare;
 
     /// 2 character, case-insensitive, file-rank string parse into a `Square`
     ///
     /// ```
+    /// use std::str::FromStr;
     /// use thermite_core::square::{IllegalSquare, Square};
     ///
-    /// assert_eq!(Square::parse("A1"), Ok(Square::A1));
-    /// assert_eq!(Square::parse("C8"), Ok(Square::C8));
-    /// assert_eq!(Square::parse("A9"), Err(IllegalSquare));
-    /// assert_eq!(Square::parse("L1"), Err(IllegalSquare));
+    /// assert_eq!(Square::from_str("A1"), Ok(Square::A1));
+    /// assert_eq!(Square::from_str("C8"), Ok(Square::C8));
+    /// assert_eq!(Square::from_str("A9"), Err(IllegalSquare));
+    /// assert_eq!(Square::from_str("L1"), Err(IllegalSquare));
     /// ```
     ///
     /// # Errors
     /// Will error if input is not a valid square on a typical 8x8 board.
     /// - Files A-H
     /// - Ranks 1-8
-    pub const fn parse(input: &str) -> Result<Self, IllegalSquare> {
-        Ok(match input.as_bytes() {
-            b"a1" | b"A1" => Self::A1,
-            b"b1" | b"B1" => Self::B1,
-            b"c1" | b"C1" => Self::C1,
-            b"d1" | b"D1" => Self::D1,
-            b"e1" | b"E1" => Self::E1,
-            b"f1" | b"F1" => Self::F1,
-            b"g1" | b"G1" => Self::G1,
-            b"h1" | b"H1" => Self::H1,
-            b"a2" | b"A2" => Self::A2,
-            b"b2" | b"B2" => Self::B2,
-            b"c2" | b"C2" => Self::C2,
-            b"d2" | b"D2" => Self::D2,
-            b"e2" | b"E2" => Self::E2,
-            b"f2" | b"F2" => Self::F2,
-            b"g2" | b"G2" => Self::G2,
-            b"h2" | b"H2" => Self::H2,
-            b"a3" | b"A3" => Self::A3,
-            b"b3" | b"B3" => Self::B3,
-            b"c3" | b"C3" => Self::C3,
-            b"d3" | b"D3" => Self::D3,
-            b"e3" | b"E3" => Self::E3,
-            b"f3" | b"F3" => Self::F3,
-            b"g3" | b"G3" => Self::G3,
-            b"h3" | b"H3" => Self::H3,
-            b"a4" | b"A4" => Self::A4,
-            b"b4" | b"B4" => Self::B4,
-            b"c4" | b"C4" => Self::C4,
-            b"d4" | b"D4" => Self::D4,
-            b"e4" | b"E4" => Self::E4,
-            b"f4" | b"F4" => Self::F4,
-            b"g4" | b"G4" => Self::G4,
-            b"h4" | b"H4" => Self::H4,
-            b"a5" | b"A5" => Self::A5,
-            b"b5" | b"B5" => Self::B5,
-            b"c5" | b"C5" => Self::C5,
-            b"d5" | b"D5" => Self::D5,
-            b"e5" | b"E5" => Self::E5,
-            b"f5" | b"F5" => Self::F5,
-            b"g5" | b"G5" => Self::G5,
-            b"h5" | b"H5" => Self::H5,
-            b"a6" | b"A6" => Self::A6,
-            b"b6" | b"B6" => Self::B6,
-            b"c6" | b"C6" => Self::C6,
-            b"d6" | b"D6" => Self::D6,
-            b"e6" | b"E6" => Self::E6,
-            b"f6" | b"F6" => Self::F6,
-            b"g6" | b"G6" => Self::G6,
-            b"h6" | b"H6" => Self::H6,
-            b"a7" | b"A7" => Self::A7,
-            b"b7" | b"B7" => Self::B7,
-            b"c7" | b"C7" => Self::C7,
-            b"d7" | b"D7" => Self::D7,
-            b"e7" | b"E7" => Self::E7,
-            b"f7" | b"F7" => Self::F7,
-            b"g7" | b"G7" => Self::G7,
-            b"h7" | b"H7" => Self::H7,
-            b"a8" | b"A8" => Self::A8,
-            b"b8" | b"B8" => Self::B8,
-            b"c8" | b"C8" => Self::C8,
-            b"d8" | b"D8" => Self::D8,
-            b"e8" | b"E8" => Self::E8,
-            b"f8" | b"F8" => Self::F8,
-            b"g8" | b"G8" => Self::G8,
-            b"h8" | b"H8" => Self::H8,
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        Ok(match input {
+            "a1" | "A1" => Self::A1,
+            "b1" | "B1" => Self::B1,
+            "c1" | "C1" => Self::C1,
+            "d1" | "D1" => Self::D1,
+            "e1" | "E1" => Self::E1,
+            "f1" | "F1" => Self::F1,
+            "g1" | "G1" => Self::G1,
+            "h1" | "H1" => Self::H1,
+            "a2" | "A2" => Self::A2,
+            "b2" | "B2" => Self::B2,
+            "c2" | "C2" => Self::C2,
+            "d2" | "D2" => Self::D2,
+            "e2" | "E2" => Self::E2,
+            "f2" | "F2" => Self::F2,
+            "g2" | "G2" => Self::G2,
+            "h2" | "H2" => Self::H2,
+            "a3" | "A3" => Self::A3,
+            "b3" | "B3" => Self::B3,
+            "c3" | "C3" => Self::C3,
+            "d3" | "D3" => Self::D3,
+            "e3" | "E3" => Self::E3,
+            "f3" | "F3" => Self::F3,
+            "g3" | "G3" => Self::G3,
+            "h3" | "H3" => Self::H3,
+            "a4" | "A4" => Self::A4,
+            "b4" | "B4" => Self::B4,
+            "c4" | "C4" => Self::C4,
+            "d4" | "D4" => Self::D4,
+            "e4" | "E4" => Self::E4,
+            "f4" | "F4" => Self::F4,
+            "g4" | "G4" => Self::G4,
+            "h4" | "H4" => Self::H4,
+            "a5" | "A5" => Self::A5,
+            "b5" | "B5" => Self::B5,
+            "c5" | "C5" => Self::C5,
+            "d5" | "D5" => Self::D5,
+            "e5" | "E5" => Self::E5,
+            "f5" | "F5" => Self::F5,
+            "g5" | "G5" => Self::G5,
+            "h5" | "H5" => Self::H5,
+            "a6" | "A6" => Self::A6,
+            "b6" | "B6" => Self::B6,
+            "c6" | "C6" => Self::C6,
+            "d6" | "D6" => Self::D6,
+            "e6" | "E6" => Self::E6,
+            "f6" | "F6" => Self::F6,
+            "g6" | "G6" => Self::G6,
+            "h6" | "H6" => Self::H6,
+            "a7" | "A7" => Self::A7,
+            "b7" | "B7" => Self::B7,
+            "c7" | "C7" => Self::C7,
+            "d7" | "D7" => Self::D7,
+            "e7" | "E7" => Self::E7,
+            "f7" | "F7" => Self::F7,
+            "g7" | "G7" => Self::G7,
+            "h7" | "H7" => Self::H7,
+            "a8" | "A8" => Self::A8,
+            "b8" | "B8" => Self::B8,
+            "c8" | "C8" => Self::C8,
+            "d8" | "D8" => Self::D8,
+            "e8" | "E8" => Self::E8,
+            "f8" | "F8" => Self::F8,
+            "g8" | "G8" => Self::G8,
+            "h8" | "H8" => Self::H8,
             _ => return Err(IllegalSquare),
         })
     }
@@ -292,18 +299,12 @@ impl Display for Square {
     }
 }
 
-impl const PartialEq for Square {
-    fn eq(&self, other: &Self) -> bool {
-        (*self as u8) == (*other as u8)
-    }
-}
-
 /// The error that occurs when attempting to create a square that wouldn't be valid for a standard chess board
 #[allow(clippy::module_name_repetitions)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct IllegalSquare;
 
-impl const TryFrom<u8> for Square {
+impl TryFrom<u8> for Square {
     type Error = IllegalSquare;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -410,8 +411,8 @@ mod test {
     #[test_case("\n", None; "newline")]
     #[test_case("\0", None; "null char")]
     fn parse_works(input: &str, expected: Option<Square>) {
-        assert_eq!(Square::parse(input).ok(), expected);
-        assert_eq!(Square::parse(input.to_ascii_uppercase().as_str()).ok(), expected);
+        assert_eq!(Square::from_str(input).ok(), expected);
+        assert_eq!(Square::from_str(input.to_ascii_uppercase().as_str()).ok(), expected);
     }
 
     #[test_case(Square::A5, "a5")]
@@ -439,30 +440,32 @@ mod test {
 mod bench {
     extern crate test;
 
+    use std::str::FromStr;
     use crate::square::Square;
     use test::{black_box, Bencher};
+    use crate::bitboard::Bitboard;
 
     #[bench]
     fn parse_bench(bencher: &mut Bencher) {
         let input = black_box("a4");
-        bencher.iter(|| Square::parse(input));
+        bencher.iter(|| assert_eq!(black_box(Square::from_str(input)), black_box(Ok(Square::A4))));
     }
 
     #[bench]
     fn rank_bench(bencher: &mut Bencher) {
         let input = black_box(Square::A3);
-        bencher.iter(|| Square::rank(input));
+        bencher.iter(|| assert_eq!(black_box(Square::rank(input)), black_box(2)));
     }
 
     #[bench]
     fn file_bench(bencher: &mut Bencher) {
         let input = black_box(Square::C8);
-        bencher.iter(|| Square::file(input));
+        bencher.iter(|| assert_eq!(black_box(Square::file(input)), black_box(2)));
     }
 
     #[bench]
     fn to_mask_bench(bencher: &mut Bencher) {
         let input = black_box(Square::H7);
-        bencher.iter(|| Square::to_mask(input));
+        bencher.iter(|| assert_eq!(black_box(Square::to_mask(input)), black_box(Bitboard(0x0080_0000_0000_0000))));
     }
 }

@@ -15,6 +15,10 @@ readme.workspace = true
 [dependencies]
 uci_driver = { path = "./uci_driver" }
 thermite_search = { path = "./thermite_search", features = ["q_search", "move_ordering", "transposition_table", "progress_reporting", "multipv", "opening_book", "reductions", "pruning", "aspiration_windows"] }
+thermite_core = { path = "./thermite_core" }
+lazy_static = "1.4.0"
+spmc = "0.3.0"
+repl-rs = "0.2.7"
 
 [workspace]
 members = [
@@ -24,6 +28,7 @@ members = [
     "thermite_evaluation",
     "thermite_search",
     "uci_driver",
+    "search_trace"
 ]
 
 [workspace.package]
@@ -34,3 +39,9 @@ version = "0.1.0"
 edition = "2021"
 license-file = "./LICENSE.md"
 readme = "./README.md"
+
+[profile.release]
+opt-level = 3
+lto = 'fat'
+codegen-units = 1
+debug = 2

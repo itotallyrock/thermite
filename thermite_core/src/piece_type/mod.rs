@@ -6,7 +6,8 @@ pub use by_piece_type::ByPieceType;
 pub const NUM_PIECE_TYPES: usize = 6;
 
 /// A specific type of piece that can occupy a square or be moved.
-#[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd)]
+#[cfg_attr(feature = "hashable_chess_move", derive(Hash))]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd, PartialEq)]
 #[repr(u8)]
 pub enum PieceType {
     /// A pawn that can only push forward one square at a time, except for its first move, which can move two squares forward (if unobstructed).
@@ -68,12 +69,6 @@ impl PieceType {
             Self::Queen => 'Q',
             Self::King => 'K',
         }
-    }
-}
-
-impl const PartialEq for PieceType {
-    fn eq(&self, other: &Self) -> bool {
-        *self as u8 == *other as u8
     }
 }
 

@@ -4,7 +4,7 @@ use crate::piece_type::PieceType;
 pub const NUM_PROMOTION_PIECE_TYPES: usize = 4;
 
 /// Types of pieces that can be promoted to by a pawn reaching the opposite player's back rank
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum PromotionPieceType {
     /// Promote to a [`Queen`](PieceType::Queen)
     Queen,
@@ -25,7 +25,7 @@ impl PromotionPieceType {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct IllegalPromotion(PieceType);
 
-impl const TryFrom<PieceType> for PromotionPieceType {
+impl TryFrom<PieceType> for PromotionPieceType {
     type Error = IllegalPromotion;
 
     fn try_from(piece_type: PieceType) -> Result<Self, Self::Error> {
@@ -39,7 +39,7 @@ impl const TryFrom<PieceType> for PromotionPieceType {
     }
 }
 
-impl const From<PromotionPieceType> for PieceType {
+impl From<PromotionPieceType> for PieceType {
     fn from(promotion: PromotionPieceType) -> Self {
         match promotion {
             PromotionPieceType::Queen => Self::Queen,

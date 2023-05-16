@@ -16,8 +16,8 @@ readme.workspace = true
 default = []
 q_search = ["thermite_movegen/q_moves"]
 move_ordering = ["killer_heuristic", "history_heuristic", "countermove_heuristic", "static_exchange_eval", "piece_square_heuristic"]
-transposition_table = ["thermite_core/zobrist", "dashmap"]
-killer_heuristic = []
+transposition_table = ["thermite_core/zobrist"]
+killer_heuristic = ["thermite_core/hashable_chess_move"]
 history_heuristic = []
 countermove_heuristic = []
 piece_square_heuristic = ["thermite_evaluation/piece_square_evaluation"]
@@ -34,9 +34,14 @@ pruning = ["futility_pruning", "null_move_pruning"]
 futility_pruning = []
 null_move_pruning = []
 chess_960 = ["thermite_core/chess_960", "thermite_movegen/chess_960"]
+tracing = ["dep:tracing"]
 
 [dependencies]
 thermite_core = { path = "../thermite_core", default-features = false, features = ["repetitions"] }
 thermite_movegen = { path = "../thermite_movegen", default-features = false }
 thermite_evaluation = { path = "../thermite_evaluation", features = ["nnue_eval", "piece_square_evaluation", "evaluation_table"] }
-dashmap = { version = "5.3.4", optional = true }
+tracing = { version = "0.1.37", optional = true }
+arrayvec = "0.7.2"
+
+[dev-dependencies]
+test-case = "2.2.2"

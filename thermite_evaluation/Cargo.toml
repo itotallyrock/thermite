@@ -19,6 +19,6 @@ evaluation_table = ["thermite_core/zobrist", "dashmap"]
 nnue_eval = ["thermite_core/nnue_accumulator", "dfdx"]
 
 [dependencies]
-thermite_core = { path = "../thermite_core", features = [] }
-dfdx = { version = "0.8.0", optional = true }
+thermite_core = { path = "../thermite_core", features = ["piece_square_eval", "material_eval"] }
+dfdx = { version = "0.10.0", optional = true }
 dashmap = { version = "5.3.4", optional = true }

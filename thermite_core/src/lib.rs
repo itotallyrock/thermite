@@ -1,30 +1,25 @@
 // const features
 #![feature(
     const_mut_refs,
-    const_trait_impl,
-    const_fmt_arguments_new,
-    const_ops,
-    const_convert,
-    const_result_drop,
-    const_option,
+    // const_trait_impl,
+    // const_fmt_arguments_new,
+    // const_option,
     const_try,
-    const_fn_floating_point_arithmetic,
-    const_for,
-    const_intoiterator_identity,
-    const_option_ext,
-    const_slice_index,
-    const_bool_to_option,
-    const_num_from_num,
-    const_refs_to_cell,
-    const_eval_limit,
+    // const_fn_floating_point_arithmetic,
+    // const_for,
+    // const_intoiterator_identity,
+    // const_option_ext,
+    // const_slice_index,
+    // const_refs_to_cell,
+    // const_eval_limit,
     generic_const_exprs,
+    rustdoc_missing_doc_code_examples,
 )]
-// other features#![feature(is_sorted, let_chains, rustdoc_missing_doc_code_examples)]
-#![cfg_attr(test, feature(test))]
-#![const_eval_limit = "0"]
+#![cfg_attr(test, feature(test, is_sorted))]
+// #![const_eval_limit = "0"]
 
 #![warn(missing_docs, clippy::pedantic, rustdoc::missing_doc_code_examples, clippy::nursery, clippy::cargo, clippy::style)]
-#![deny(clippy::all)]
+// #![deny(clippy::all)]
 
 #![allow(clippy::module_name_repetitions, clippy::debug_assert_with_mut_call, clippy::assertions_on_constants)]
 
@@ -58,10 +53,17 @@ pub mod move_type;
 pub mod piece_type;
 /// A player in the game, or one side of the board, represented by their piece's color.
 pub mod player;
+/// The combination of a player and piece type
+pub mod sided_piece;
 /// Piece types for distinguishing what type of a piece a pawn should promote to.
 pub mod promotion_piece_type;
 /// A single tile on an 8x8 chess board.
 pub mod square;
-/// Zobrist hashing for matching board transpositions, or positions with the same piece arrangement and game state (side to move, en-passant, castle rights).
-#[cfg(feature = "zobrist")]
-pub mod zobrist;
+/// Types and logic pertaining to the piece arrangement and game state (side to move, en-passant, etc).
+pub mod board;
+/// Quick incremental evaluation based on pre-computed positional bonuses (or penalties) for having a piece occupy a given square.
+#[cfg(feature = "piece_square_eval")]
+pub mod piece_square_eval;
+/// The evaluation result for how a position has been rated as favorable or not.
+#[cfg(feature = "score")]
+pub mod score;

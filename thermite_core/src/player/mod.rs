@@ -1,13 +1,14 @@
-mod by_player;
-
 use std::fmt::{Display, Formatter, Write};
+
 pub use by_player::ByPlayer;
+
+mod by_player;
 
 /// The number of players in a game
 pub const NUM_PLAYERS: usize = 2;
 
 /// The color of the pieces for the side (or player) moving.
-#[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialOrd, PartialEq)]
 #[repr(u8)]
 pub enum Player {
     /// The player controlling the white pieces.
@@ -48,16 +49,15 @@ impl Display for Player {
     }
 }
 
-impl const PartialEq for Player {
-    fn eq(&self, other: &Self) -> bool {
-        (*self) as u8 == (*other) as u8
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use crate::player::Player;
+    extern crate test;
+
+    use test::{Bencher, black_box};
+
     use test_case::test_case;
+
+    use super::*;
 
     #[test_case(Player::White, Player::Black)]
     #[test_case(Player::Black, Player::White)]
@@ -69,5 +69,11 @@ mod test {
     #[test_case(Player::Black)]
     fn switch_is_symmetric(input: Player) {
         assert_eq!(input.switch().switch(), input);
+    }
+
+    #[bench]
+    fn switch_bench(bencher: &mut Bencher) {
+        let input = black_box(Player::Black);
+        bencher.iter(|| assert_eq!(black_box(Player::switch(input)), black_box(Player::White)));
     }
 }

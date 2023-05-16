@@ -1,0 +1,20 @@
+[package]
+name = "search_trace"
+description = "TODO"
+categories = ["games", "algorithms"]
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thermite_search = { path = "../thermite_search", features = ["tracing", "transposition_table", "q_search", "move_ordering", "multipv"] }
+thermite_core = { path = "../thermite_core" }
+tracing-appender = "0.2"
+tracing-subscriber = "0.3.16"
+tracing = "0.1.37"

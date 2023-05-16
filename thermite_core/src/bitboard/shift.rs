@@ -23,7 +23,7 @@ impl Bitboard {
     }
 
     /// Shift all of the set bits in a bitboard in a certain direction
-    pub const fn shift(self, direction: Direction) -> Self {
+    pub fn shift(self, direction: Direction) -> Self {
         let direction_shift = direction as i32;
         let masked = self & Self::get_shift_mask(direction);
 
