@@ -114,9 +114,9 @@ fn get_sliding_attacks<const IS_ROOK: bool, const MAX_BLOCKERS: usize>(
             let blocker_count = blocker_counts[square];
             square_map[square] = (0..(1 << blocker_count)).fold(
                 [BoardMask::EMPTY; MAX_BLOCKERS],
-                |mut blocker_map, blocker_count| {
-                    let attacks_mask = get_sliding_attack::<{ IS_ROOK }>(square, blocker_count);
-                    blocker_map[blocker_count] = attacks_mask;
+                |mut blocker_map, blocker_index| {
+                    let attacks_mask = get_sliding_attack::<{ IS_ROOK }>(square, blocker_index);
+                    blocker_map[blocker_index] = attacks_mask;
                     blocker_map
                 },
             );
