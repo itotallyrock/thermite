@@ -104,7 +104,7 @@ fn get_sliding_attacks<const IS_ROOK: bool>() -> EnumMap<Square, Vec<BoardMask>>
     all::<Square>().fold(EnumMap::default(), |mut square_map, square| {
         let blocker_count = blocker_counts[square];
         // There are 2^blocker_count possible arrangements of blockers for this square
-        let max_blocker_combinations = (1 << blocker_count);
+        let max_blocker_combinations = 1 << blocker_count;
         square_map[square] = (0..max_blocker_combinations)
             .map(|blocker_index| get_sliding_attack::<{ IS_ROOK }>(square, blocker_index))
             .collect();
