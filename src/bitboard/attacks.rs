@@ -5,31 +5,31 @@ use crate::player_color::PlayerColor;
 use crate::square::Square;
 use enum_iterator::all;
 use enum_map::EnumMap;
-use once_cell::sync::OnceCell;
+use once_cell::sync::Lazy;
 
 /// Precomputed attack mask lookup for a piece on a square on an empty board
-static PSEUDO_ATTACKS: OnceCell<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
-    OnceCell::new();
+static PSEUDO_ATTACKS: Lazy<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
+    Lazy::new(|| {
+        let mut piece_mask_map: EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>> =
+            EnumMap::default();
+        for sq in all::<Square>() {
+            let mask = sq.to_mask();
+            let ordinal_attacks = mask.ordinal_sliding_attacks(mask);
+            let cardinal_attacks = mask.cardinal_sliding_attacks(mask);
+
+            piece_mask_map[NonPawnPieceType::Knight][sq] = mask.knight_attacks();
+            piece_mask_map[NonPawnPieceType::Bishop][sq] = ordinal_attacks;
+            piece_mask_map[NonPawnPieceType::Rook][sq] = cardinal_attacks;
+            piece_mask_map[NonPawnPieceType::Queen][sq] = ordinal_attacks | cardinal_attacks;
+            piece_mask_map[NonPawnPieceType::King][sq] = mask.king_attacks();
+        }
+        piece_mask_map
+    });
 
 impl BoardMask {
     /// Get the attack [mask](Self) for a [piece](NonPawnPieceType) on a [`Square`] on an empty board
     pub fn pseudo_attacks_for(piece: NonPawnPieceType, square: Square) -> Self {
-        PSEUDO_ATTACKS.get_or_init(|| {
-            let mut piece_mask_map: EnumMap<NonPawnPieceType, EnumMap<Square, Self>> =
-                EnumMap::default();
-            for sq in all::<Square>() {
-                let mask = sq.to_mask();
-                let ordinal_attacks = mask.ordinal_sliding_attacks(mask);
-                let cardinal_attacks = mask.cardinal_sliding_attacks(mask);
-
-                piece_mask_map[NonPawnPieceType::Knight][sq] = mask.knight_attacks();
-                piece_mask_map[NonPawnPieceType::Bishop][sq] = ordinal_attacks;
-                piece_mask_map[NonPawnPieceType::Rook][sq] = cardinal_attacks;
-                piece_mask_map[NonPawnPieceType::Queen][sq] = ordinal_attacks | cardinal_attacks;
-                piece_mask_map[NonPawnPieceType::King][sq] = mask.king_attacks();
-            }
-            piece_mask_map
-        })[piece][square]
+        PSEUDO_ATTACKS[piece][square]
     }
 
     /// Calculate the knight attacks mask for a given mask of knight attacker(s)
