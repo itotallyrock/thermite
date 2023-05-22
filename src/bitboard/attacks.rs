@@ -1,11 +1,139 @@
 use crate::bitboard::direction::Direction;
 use crate::bitboard::BoardMask;
-use crate::pieces::NonPawnPieceType;
+use crate::piece_count::PieceCount;
+use crate::pieces::{NonPawnPieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
+use bitintr::{Pdep, Pext};
 use enum_iterator::all;
-use enum_map::EnumMap;
+use enum_map::{Enum, EnumMap};
 use once_cell::sync::Lazy;
+
+/// Maximum number of blocker [square](Square)s (or the number of [piece](crate::pieces::PieceType)s that can be along the cardinals) for a [rook](crate::pieces::PieceType::Rook) on a given [square](Square)
+///
+/// For example: on [A1](Square::A1) count all the squares on the vertical file from [A2](Square::A2)-[A7](Square::A7) (6) and the horizontal rank from [B1](Square::B1)-[G1](Square::G1) (6) which total to 12
+#[rustfmt::skip]
+static ROOK_BLOCKER_COUNTS: EnumMap<Square, PieceCount> = EnumMap::from_array([
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12,
+]);
+
+/// Maximum value from [`ROOK_BLOCKER_COUNTS`]
+const ROOK_MAX_BLOCKER_COUNT: PieceCount = 12;
+
+/// Maximum number of blocker [square](Square)s (or the number of [piece](crate::pieces::PieceType)s that can be along the diagonals) for a [bishop](crate::pieces::PieceType::Bishop) on a given [square](Square)
+#[rustfmt::skip]
+static BISHOP_BLOCKER_COUNTS: EnumMap<Square, PieceCount> = EnumMap::from_array([
+    6, 5, 5, 5, 5, 5, 5, 6,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    6, 5, 5, 5, 5, 5, 5, 6,
+]);
+
+/// Maximum value from [`BISHOP_BLOCKER_COUNTS`]
+const BISHOP_MAX_BLOCKER_COUNT: PieceCount = 9;
+
+/// [Mask](BoardMask) of relevant squares that could block a [bishop](crate::piece_type::PieceType::Bishop) on a given [square](Square)
+#[rustfmt::skip]
+#[allow(clippy::unreadable_literal)]
+static BISHOP_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
+    BoardMask(0x40201008040200), BoardMask(0x402010080400),   BoardMask(0x4020100A00),     BoardMask(0x40221400),       BoardMask(0x2442800),        BoardMask(0x204085000),      BoardMask(0x20408102000),    BoardMask(0x2040810204000),
+    BoardMask(0x20100804020000), BoardMask(0x40201008040000), BoardMask(0x4020100A0000),   BoardMask(0x4022140000),     BoardMask(0x244280000),      BoardMask(0x20408500000),    BoardMask(0x2040810200000),  BoardMask(0x4081020400000),
+    BoardMask(0x10080402000200), BoardMask(0x20100804000400), BoardMask(0x4020100A000A00), BoardMask(0x402214001400),   BoardMask(0x24428002800),    BoardMask(0x2040850005000),  BoardMask(0x4081020002000),  BoardMask(0x8102040004000),
+    BoardMask(0x8040200020400),  BoardMask(0x10080400040800), BoardMask(0x20100A000A1000), BoardMask(0x40221400142200), BoardMask(0x2442800284400),  BoardMask(0x4085000500800),  BoardMask(0x8102000201000),  BoardMask(0x10204000402000),
+    BoardMask(0x4020002040800),  BoardMask(0x8040004081000),  BoardMask(0x100A000A102000), BoardMask(0x22140014224000), BoardMask(0x44280028440200), BoardMask(0x8500050080400),  BoardMask(0x10200020100800), BoardMask(0x20400040201000),
+    BoardMask(0x2000204081000),  BoardMask(0x4000408102000),  BoardMask(0xA000A10204000),  BoardMask(0x14001422400000), BoardMask(0x28002844020000), BoardMask(0x50005008040200), BoardMask(0x20002010080400), BoardMask(0x40004020100800),
+    BoardMask(0x20408102000),    BoardMask(0x40810204000),    BoardMask(0xA1020400000),    BoardMask(0x142240000000),   BoardMask(0x284402000000),   BoardMask(0x500804020000),   BoardMask(0x201008040200),   BoardMask(0x402010080400),
+    BoardMask(0x2040810204000),  BoardMask(0x4081020400000),  BoardMask(0xA102040000000),  BoardMask(0x14224000000000), BoardMask(0x28440200000000), BoardMask(0x50080402000000), BoardMask(0x20100804020000), BoardMask(0x40201008040200),
+]);
+
+/// [Mask](BoardMask) of relevant squares that could block a [rook](crate::piece_type::PieceType::Rook) on a given [square](Square)
+#[rustfmt::skip]
+#[allow(clippy::unreadable_literal)]
+static ROOK_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
+    BoardMask(0x101010101017E),    BoardMask(0x202020202027C),    BoardMask(0x404040404047A),    BoardMask(0x8080808080876),    BoardMask(0x1010101010106E),   BoardMask(0x2020202020205E),   BoardMask(0x4040404040403E),   BoardMask(0x8080808080807E),
+    BoardMask(0x1010101017E00),    BoardMask(0x2020202027C00),    BoardMask(0x4040404047A00),    BoardMask(0x8080808087600),    BoardMask(0x10101010106E00),   BoardMask(0x20202020205E00),   BoardMask(0x40404040403E00),   BoardMask(0x80808080807E00),
+    BoardMask(0x10101017E0100),    BoardMask(0x20202027C0200),    BoardMask(0x40404047A0400),    BoardMask(0x8080808760800),    BoardMask(0x101010106E1000),   BoardMask(0x202020205E2000),   BoardMask(0x404040403E4000),   BoardMask(0x808080807E8000),
+    BoardMask(0x101017E010100),    BoardMask(0x202027C020200),    BoardMask(0x404047A040400),    BoardMask(0x8080876080800),    BoardMask(0x1010106E101000),   BoardMask(0x2020205E202000),   BoardMask(0x4040403E404000),   BoardMask(0x8080807E808000),
+    BoardMask(0x1017E01010100),    BoardMask(0x2027C02020200),    BoardMask(0x4047A04040400),    BoardMask(0x8087608080800),    BoardMask(0x10106E10101000),   BoardMask(0x20205E20202000),   BoardMask(0x40403E40404000),   BoardMask(0x80807E80808000),
+    BoardMask(0x17E0101010100),    BoardMask(0x27C0202020200),    BoardMask(0x47A0404040400),    BoardMask(0x8760808080800),    BoardMask(0x106E1010101000),   BoardMask(0x205E2020202000),   BoardMask(0x403E4040404000),   BoardMask(0x807E8080808000),
+    BoardMask(0x7E010101010100),   BoardMask(0x7C020202020200),   BoardMask(0x7A040404040400),   BoardMask(0x76080808080800),   BoardMask(0x6E101010101000),   BoardMask(0x5E202020202000),   BoardMask(0x3E404040404000),   BoardMask(0x7E808080808000),
+    BoardMask(0x7E01010101010100), BoardMask(0x7C02020202020200), BoardMask(0x7A04040404040400), BoardMask(0x7608080808080800), BoardMask(0x6E10101010101000), BoardMask(0x5E20202020202000), BoardMask(0x3E40404040404000), BoardMask(0x7E80808080808000),
+]);
+
+impl Pdep for BoardMask {
+    fn pdep(self, occupancy_mask: Self) -> Self {
+        Self(Pdep::pdep(self.0, occupancy_mask.0))
+    }
+}
+
+impl Pext for BoardMask {
+    fn pext(self, occupancy_mask: Self) -> Self {
+        Self(Pext::pext(self.0, occupancy_mask.0))
+    }
+}
+
+fn get_sliding_attack<const IS_ROOK: bool>(square: Square, blocker_index: usize) -> BoardMask {
+    let square_mask = square.to_mask();
+    let occupancy_masks = if IS_ROOK {
+        ROOK_OCCUPANCY_MASK
+    } else {
+        BISHOP_OCCUPANCY_MASK
+    };
+    let occupancy_mask = occupancy_masks[square];
+    let occupied_mask = occupancy_mask.pdep(BoardMask::new(blocker_index as u64));
+    let occupied_mask = square_mask | occupied_mask;
+
+    if IS_ROOK {
+        BoardMask::cardinal_sliding_attacks(square_mask, occupied_mask)
+    } else {
+        BoardMask::ordinal_sliding_attacks(square_mask, occupied_mask)
+    }
+}
+
+fn get_sliding_attacks<const IS_ROOK: bool, const MAX_BLOCKERS: usize>(
+) -> EnumMap<Square, [BoardMask; MAX_BLOCKERS]> {
+    let blocker_counts = if IS_ROOK {
+        &ROOK_BLOCKER_COUNTS
+    } else {
+        &BISHOP_BLOCKER_COUNTS
+    };
+    all::<Square>().fold(
+        EnumMap::from_array([[BoardMask::EMPTY; MAX_BLOCKERS]; Square::LENGTH]),
+        |mut square_map, square| {
+            let blocker_count = blocker_counts[square];
+            square_map[square] = (0..(1 << blocker_count)).fold(
+                [BoardMask::EMPTY; MAX_BLOCKERS],
+                |mut blocker_map, blocker_count| {
+                    let attacks_mask = get_sliding_attack::<{ IS_ROOK }>(square, blocker_count);
+                    blocker_map[blocker_count] = attacks_mask;
+                    blocker_map
+                },
+            );
+            square_map
+        },
+    )
+}
+
+/// Precomputed attack mask lookup for a [Rook](crate::pieces::PieceType::Rook) on a [square](Square) on an [occupied board](BoardMask)
+/// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a rook).
+static ROOK_ATTACKS: Lazy<EnumMap<Square, [BoardMask; ROOK_MAX_BLOCKER_COUNT as usize]>> =
+    Lazy::new(get_sliding_attacks::<true, { ROOK_MAX_BLOCKER_COUNT as usize }>);
+
+/// Precomputed attack mask lookup for a [Bishop](crate::pieces::PieceType::Bishop) on a [square](Square) on an [occupied board](BoardMask)
+/// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a bishop).
+static BISHOP_ATTACKS: Lazy<EnumMap<Square, [BoardMask; BISHOP_MAX_BLOCKER_COUNT as usize]>> =
+    Lazy::new(get_sliding_attacks::<false, { BISHOP_MAX_BLOCKER_COUNT as usize }>);
 
 /// Precomputed attack mask lookup for a piece on a square on an empty board
 static PSEUDO_ATTACKS: Lazy<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
@@ -27,7 +155,25 @@ static PSEUDO_ATTACKS: Lazy<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>
     });
 
 impl BoardMask {
-    /// Get the attack [mask](Self) for a [piece](NonPawnPieceType) on a [`Square`] on an empty board
+    /// Get the attack [mask](Self) for a [sliding piece](SlidingPieceType) on a [`Square`] on an [occupied board](BoardMask)
+    pub fn sliding_attacks_for(piece: SlidingPieceType, square: Square, occupied: Self) -> Self {
+        match piece {
+            #[allow(clippy::cast_possible_truncation)]
+            SlidingPieceType::Bishop => {
+                BISHOP_ATTACKS[square][occupied.pext(BISHOP_OCCUPANCY_MASK[square]).0 as usize]
+            }
+            #[allow(clippy::cast_possible_truncation)]
+            SlidingPieceType::Rook => {
+                ROOK_ATTACKS[square][occupied.pext(ROOK_OCCUPANCY_MASK[square]).0 as usize]
+            }
+            SlidingPieceType::Queen => {
+                Self::sliding_attacks_for(SlidingPieceType::Rook, square, occupied)
+                    | Self::sliding_attacks_for(SlidingPieceType::Bishop, square, occupied)
+            }
+        }
+    }
+
+    /// Get the attack [mask](Self) for a [non-sliding piece](NonPawnPieceType) on a [`Square`] on an empty board
     pub fn pseudo_attacks_for(piece: NonPawnPieceType, square: Square) -> Self {
         PSEUDO_ATTACKS[piece][square]
     }
