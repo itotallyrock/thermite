@@ -100,7 +100,7 @@ impl Square {
         // ALLOW: truncation is not possible when Rank::LENGTH is under 255 and 8 is well under
         #[allow(clippy::cast_possible_truncation)]
         unsafe {
-            std::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8)
+            core::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8)
         }
     }
 
@@ -119,7 +119,7 @@ impl Square {
         // ALLOW: truncation is not possible when File::LENGTH is under 255 and 8 is well under
         #[allow(clippy::cast_possible_truncation)]
         unsafe {
-            std::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8)
+            core::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8)
         }
     }
 

@@ -4,6 +4,7 @@ use crate::piece_count::PieceCount;
 use crate::pieces::{NonPawnPieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
+use alloc::vec::Vec;
 use bitintr::{Pdep, Pext};
 use enum_iterator::all;
 use enum_map::EnumMap;
@@ -286,7 +287,6 @@ impl BoardMask {
 mod test {
     use crate::square::Square::*;
     use crate::square::{File, Rank};
-    use enum_map::Enum;
     use test_case::test_case;
 
     use super::*;
