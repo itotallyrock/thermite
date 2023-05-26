@@ -4,6 +4,7 @@ use enum_iterator::Sequence;
 use enum_map::Enum;
 use subenum::subenum;
 
+/// Any type of standard chess piece (no [owned](OwnedPiece) or specific to a [`Player`])
 #[subenum(
     NonKingPieceType,
     NonPawnPieceType,
