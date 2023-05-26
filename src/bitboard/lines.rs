@@ -10,7 +10,7 @@ fn all_square_pairs() -> impl Iterator<Item = (Square, Square)> {
     all::<Square>().flat_map(|a_square| all::<Square>().map(move |b_square| (a_square, b_square)))
 }
 
-/// Get an iterator over all non-duplicate square combinations, where the pair will never have the same a_square as its b_square
+/// Get an iterator over all non-duplicate square combinations, where the pair will never have the same `a_square` as its `b_square`
 fn separate_square_pairs() -> impl Iterator<Item = (Square, Square)> {
     all_square_pairs().filter(|&(a_square, b_square)| a_square != b_square)
 }
