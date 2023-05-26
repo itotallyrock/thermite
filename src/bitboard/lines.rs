@@ -7,8 +7,7 @@ use once_cell::sync::Lazy;
 
 /// Get an iterator over all square combinations, including duplicate start & end pairs
 fn all_square_pairs() -> impl Iterator<Item = (Square, Square)> {
-    all::<Square>()
-        .flat_map(|a_square| all::<Square>().map(move |b_square| (a_square, b_square)))
+    all::<Square>().flat_map(|a_square| all::<Square>().map(move |b_square| (a_square, b_square)))
 }
 
 /// Get an iterator over all non-duplicate square combinations, where the pair will never have the same a_square as its b_square
@@ -18,23 +17,20 @@ fn separate_square_pairs() -> impl Iterator<Item = (Square, Square)> {
 
 /// Get an iterator over squares that share a diagonal or cardinal line, the piece type that connected, and the attacks from that piece from the first square
 fn connectable_iter() -> impl Iterator<Item = (Square, Square, NonPawnPieceType, BoardMask)> {
-    separate_square_pairs()
-        .filter_map(|(a_square, b_square)| {
-            // Loop over the two types of sliding pieces and get their attacks and keep the piece that intersects, if any, and its attack mask
-            [NonPawnPieceType::Rook, NonPawnPieceType::Bishop]
-                .into_iter()
-                .map(|piece| {
-                    (
-                        a_square,
-                        b_square,
-                        piece,
-                        BoardMask::pseudo_attacks_for(piece, a_square),
-                    )
-                })
-                .find(|&(_, b_square, _, a_attacks)| {
-                    a_attacks & b_square.to_mask() != BoardMask::EMPTY
-                })
-        })
+    separate_square_pairs().filter_map(|(a_square, b_square)| {
+        // Loop over the two types of sliding pieces and get their attacks and keep the piece that intersects, if any, and its attack mask
+        [NonPawnPieceType::Rook, NonPawnPieceType::Bishop]
+            .into_iter()
+            .map(|piece| {
+                (
+                    a_square,
+                    b_square,
+                    piece,
+                    BoardMask::pseudo_attacks_for(piece, a_square),
+                )
+            })
+            .find(|&(_, b_square, _, a_attacks)| a_attacks & b_square.to_mask() != BoardMask::EMPTY)
+    })
 }
 
 /// The intersection between two aligned squares including the second (end) [`Square`]'s mask
@@ -89,10 +85,10 @@ impl BoardMask {
 
 #[cfg(test)]
 mod test {
-    use crate::square::Square::*;
-    use test_case::test_case;
     use crate::bitboard::BoardMask;
     use crate::square::Square;
+    use crate::square::Square::*;
+    use test_case::test_case;
 
     #[test_case(A2, A4, A6, true)]
     #[test_case(A2, A4, A8, true)]

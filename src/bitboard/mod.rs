@@ -8,11 +8,12 @@ pub use direction::{
     OrdinalDirectionConvertError,
 };
 
-use crate::square::Square;
+use crate::square::{File, Rank, Square};
 use derive_more::{
     AsRef, BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Constructor, LowerHex,
     Not, Shl, ShlAssign, Shr, ShrAssign, UpperHex,
 };
+use enum_map::EnumMap;
 
 /// Board mask with single bits representing squares on a 64 tile board
 #[derive(
@@ -50,6 +51,28 @@ impl BoardMask {
     pub const FULL: Self = Self(!Self::EMPTY.0);
     /// A single tile activated on A1 on an otherwise empty board
     pub const A1: Self = Self(1);
+    /// Mask of each rank
+    pub const RANKS: EnumMap<Rank, Self> = EnumMap::from_array([
+        Self(0xFF),
+        Self(0xFF00),
+        Self(0x00FF_0000),
+        Self(0xFF00_0000),
+        Self(0x00FF_0000_0000),
+        Self(0xFF00_0000_0000),
+        Self(0x00FF_0000_0000_0000),
+        Self(0xFF00_0000_0000_0000),
+    ]);
+    /// Mask of each file
+    pub const FILES: EnumMap<File, Self> = EnumMap::from_array([
+        Self(0x8080_8080_8080_8080),
+        Self(0x4040_4040_4040_4040),
+        Self(0x2020_2020_2020_2020),
+        Self(0x1010_1010_1010_1010),
+        Self(0x0808_0808_0808_0808),
+        Self(0x0404_0404_0404_0404),
+        Self(0x0202_0202_0202_0202),
+        Self(0x0101_0101_0101_0101),
+    ]);
 
     /// If a bit is set, return that [`Square`](Square) and unset the bit
     #[must_use]
