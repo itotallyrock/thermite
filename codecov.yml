@@ -1,0 +1,13 @@
+comment:
+  layout: files
+  require_changes: true
+coverage:
+  precision: 2
+  range:
+    - 85.0
+    - 95.0
+  round: down
+  status:
+    project:
+      default:
+        threshold: 1.0
