@@ -77,14 +77,32 @@ impl Pext for BoardMask {
     }
 }
 
-fn get_sliding_attack<const IS_ROOK: bool>(square: Square, blocker_index: usize) -> BoardMask {
-    let square_mask = square.to_mask();
+/// Get the squares that could block a sliding piece on a square
+fn get_occupancy_mask<const IS_ROOK: bool>(square: Square) -> BoardMask {
     let occupancy_masks = if IS_ROOK {
         ROOK_OCCUPANCY_MASK
     } else {
         BISHOP_OCCUPANCY_MASK
     };
-    let occupancy_mask = occupancy_masks[square];
+
+    occupancy_masks[square]
+}
+
+/// Get the number of potential squares that could block a specific sliding piece on a given square
+fn get_blocker_count<const IS_ROOK: bool>(square: Square) -> PieceCount {
+    let blocker_counts = if IS_ROOK {
+        &ROOK_BLOCKER_COUNTS
+    } else {
+        &BISHOP_BLOCKER_COUNTS
+    };
+
+    blocker_counts[square]
+}
+
+/// Get the sliding attack mask for a rook or bishop on a square given a blocker index
+fn get_sliding_attack<const IS_ROOK: bool>(square: Square, blocker_index: usize) -> BoardMask {
+    let square_mask = square.to_mask();
+    let occupancy_mask = get_occupancy_mask::<IS_ROOK>(square);
     let occupied_mask = BoardMask::new(blocker_index as u64).pdep(occupancy_mask);
     let occupied_mask = square_mask | occupied_mask;
 
@@ -95,14 +113,10 @@ fn get_sliding_attack<const IS_ROOK: bool>(square: Square, blocker_index: usize)
     }
 }
 
+/// Get a mask of sliding attacks (for rook or bishop) for all possible blocker combinations on a given square
 fn get_sliding_attacks<const IS_ROOK: bool>() -> EnumMap<Square, Vec<BoardMask>> {
-    let blocker_counts = if IS_ROOK {
-        &ROOK_BLOCKER_COUNTS
-    } else {
-        &BISHOP_BLOCKER_COUNTS
-    };
     all::<Square>().fold(EnumMap::default(), |mut square_map, square| {
-        let blocker_count = blocker_counts[square];
+        let blocker_count = get_blocker_count::<IS_ROOK>(square);
         // There are 2^blocker_count possible arrangements of blockers for this square
         let max_blocker_combinations = 1 << blocker_count;
         square_map[square] = (0..max_blocker_combinations)
@@ -271,6 +285,8 @@ impl BoardMask {
 #[cfg(test)]
 mod test {
     use crate::square::Square::*;
+    use crate::square::{File, Rank};
+    use enum_map::Enum;
     use test_case::test_case;
 
     use super::*;
@@ -715,5 +731,89 @@ mod test {
             BoardMask::sliding_attacks_for(piece, square, occupied),
             expected
         );
+    }
+
+    #[test_case(Square::A1, true, BoardMask(0x0001_0101_0101_017E))]
+    #[test_case(Square::A1, false, BoardMask(0x0040_2010_0804_0200))]
+    #[test_case(Square::C4, true, BoardMask(0x0004_0404_7a04_0400))]
+    #[test_case(Square::C4, false, BoardMask(0x0020_100A_000A_1000))]
+    #[test_case(Square::B4, true, BoardMask(0x0002_0202_7C02_0200))]
+    #[test_case(Square::B4, false, BoardMask(0x0010_0804_0004_0800))]
+    #[test_case(Square::H1, true, BoardMask(0x0080_8080_8080_807E))]
+    #[test_case(Square::H1, false, BoardMask(0x0002_0408_1020_4000))]
+    #[test_case(Square::C7, true, BoardMask(0x007A_0404_0404_0400))]
+    #[test_case(Square::C7, false, BoardMask(0x0A10_2040_0000))]
+    fn get_occupancy_mask_works(square: Square, cardinal: bool, expected: BoardMask) {
+        let occupancy_mask = if cardinal {
+            get_occupancy_mask::<true>(square)
+        } else {
+            get_occupancy_mask::<false>(square)
+        };
+        assert_eq!(occupancy_mask, expected);
+    }
+
+    #[test_case(&BISHOP_OCCUPANCY_MASK, &BISHOP_BLOCKER_COUNTS)]
+    #[test_case(&ROOK_OCCUPANCY_MASK, &ROOK_BLOCKER_COUNTS)]
+    fn board_mask_index_commutative_for_all_square_indices(
+        occupancy_masks: &EnumMap<Square, BoardMask>,
+        blocker_counts: &EnumMap<Square, PieceCount>,
+    ) {
+        for square in all::<Square>() {
+            let occupancy_mask: BoardMask = occupancy_masks[square];
+            let max_blockers = 1 << blocker_counts[square];
+            for index in 0..max_blockers {
+                assert_eq!(
+                    BoardMask::new(index)
+                        .pdep(occupancy_mask)
+                        .pext(occupancy_mask)
+                        .0 as u64,
+                    index,
+                    "{square} ({occupancy_mask:#?}) index: {index}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn bishop_occupancy_mask_contains_no_edges() {
+        const EDGES: BoardMask = BoardMask(0xFF81_8181_8181_81FF);
+        assert_eq!(
+            EDGES,
+            BoardMask::RANKS[Rank::First]
+                | BoardMask::RANKS[Rank::Eighth]
+                | BoardMask::FILES[File::A]
+                | BoardMask::FILES[File::H]
+        );
+
+        for square in all::<Square>() {
+            let occupancy_mask = BISHOP_OCCUPANCY_MASK[square];
+            assert_eq!(
+                occupancy_mask & EDGES,
+                BoardMask::EMPTY,
+                "{square} ({occupancy_mask:#?}) contains edges"
+            );
+        }
+    }
+
+    #[test_case(true)]
+    #[test_case(false)]
+    fn get_blocker_count_matches_num_squares_in_occupancy_mask_for_all_squares(is_rook: bool) {
+        for square in all::<Square>() {
+            let blocker_count = if is_rook {
+                get_blocker_count::<true>(square)
+            } else {
+                get_blocker_count::<false>(square)
+            };
+            let num_squares_blocker_count = if is_rook {
+                get_occupancy_mask::<true>(square)
+            } else {
+                get_occupancy_mask::<false>(square)
+            }
+            .num_squares();
+            assert_eq!(
+                blocker_count, num_squares_blocker_count,
+                "{square} doesn't have the correct number of blockers per occupancy_mask"
+            );
+        }
     }
 }
