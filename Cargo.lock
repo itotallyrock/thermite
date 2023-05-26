@@ -253,6 +253,7 @@ dependencies = [
  "arrayvec",
  "bitintr",
  "bitmask-enum",
+ "critical-section",
  "derive_more",
  "enum-iterator",
  "enum-map",
