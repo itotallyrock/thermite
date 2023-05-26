@@ -1,5 +1,6 @@
 mod attacks;
 mod direction;
+mod lines;
 mod shifts;
 
 pub use direction::{
