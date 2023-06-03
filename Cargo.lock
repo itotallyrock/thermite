@@ -180,8 +180,7 @@ checksum = "bebd363326d05ec3e2f532ab7660680f3b02130d780c299bca73469d521bc0ed"
 [[package]]
 name = "subenum"
 version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c16dc628e1a4a377b86b52a6df1d93879a6693d8bf568e3d5ac9c6787392753"
+source = "git+https://github.com/itotallyrock/subenum.git#11d874964212ca9ad922c4d5f06e41a9d5b7f23a"
 dependencies = [
  "heck",
  "proc-macro2",
