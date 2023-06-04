@@ -55,7 +55,7 @@ pub enum ChessMove {
     /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotionPieceType`]
     Promotion {
         /// The starting [`square`](Square) the piece is moving `from`
-        from: Square,
+        from: PromotableSquare,
         /// The ending [`promotion-square`](PromotionSquare) the piece moving `to`
         to: PromotionSquare,
         /// The piece to promote the pawn to
@@ -64,7 +64,7 @@ pub enum ChessMove {
     /// Capture on the last rank for promoting a pawn
     PromotingCapture {
         /// The starting [`square`](Square) the piece is moving `from`
-        from: Square,
+        from: PromotableSquare,
         /// The ending [`promotion-square`](PromotionSquare) the piece moving `to` and capturing on
         to: PromotionSquare,
         /// The piece to promote the pawn to
@@ -106,6 +106,7 @@ impl Display for ChessMove {
                 promotion,
             } => {
                 let promotion = PieceType::from(promotion).get_lower_char();
+                let from = Square::from(from);
                 let to = Square::from(to);
                 write!(f, "{from}{to}{promotion}")
             }
@@ -193,12 +194,12 @@ impl ChessMove {
     /// Create a new pawn promotion [move](ChessMove)
     #[must_use]
     pub fn new_promotion(
-        from: Square,
+        from: PromotableSquare,
         to: PromotionSquare,
         promotion: PromotablePieceType,
     ) -> Self {
-        debug_assert_eq!((from.rank() as u8).abs_diff(Square::from(to).rank() as u8), 1, "attempting to create `Promotion` with `from` `Square` that is not one `Rank` off the `to` `PromotionSquare`");
-        debug_assert_eq!((from.file() as u8).abs_diff(Square::from(to).file() as u8), 0, "attempting to create `Promotion` with `from` `Square` that is not the same `File` of the `to` `PromotionSquare`");
+        debug_assert_eq!((Square::from(from).rank() as u8).abs_diff(Square::from(to).rank() as u8), 1, "attempting to create `Promotion` with `from` `Square` that is not one `Rank` off the `to` `PromotionSquare`");
+        debug_assert_eq!((Square::from(from).file() as u8).abs_diff(Square::from(to).file() as u8), 0, "attempting to create `Promotion` with `from` `Square` that is not the same `File` of the `to` `PromotionSquare`");
         Self::Promotion {
             from,
             to,
@@ -209,14 +210,18 @@ impl ChessMove {
     /// Create a new pawn promoting capture [move](ChessMove)
     #[must_use]
     pub fn new_promoting_capture(
-        from: Square,
+        from: PromotableSquare,
         to: PromotionSquare,
         promotion: PromotablePieceType,
         captured_piece: PieceType,
     ) -> Self {
-        debug_assert_ne!(captured_piece, PieceType::King, "attempting to create `PromotingCapture` targeting `King`");
-        debug_assert_eq!((from.rank() as u8).abs_diff(Square::from(to).rank() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `Rank` off the `to` `PromotionSquare`");
-        debug_assert_eq!((from.file() as u8).abs_diff(Square::from(to).file() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `File` off the `to` `PromotionSquare`");
+        debug_assert_ne!(
+            captured_piece,
+            PieceType::King,
+            "attempting to create `PromotingCapture` targeting `King`"
+        );
+        debug_assert_eq!((Square::from(from).rank() as u8).abs_diff(Square::from(to).rank() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `Rank` off the `to` `PromotionSquare`");
+        debug_assert_eq!((Square::from(from).file() as u8).abs_diff(Square::from(to).file() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `File` off the `to` `PromotionSquare`");
         Self::PromotingCapture {
             from,
             to,
@@ -233,7 +238,7 @@ mod test {
     use crate::pieces::PieceType::*;
     use crate::pieces::PromotablePieceType;
     use crate::player_color::PlayerColor::*;
-    use crate::square::{EnPassantSquare, PromotionSquare, Square::*};
+    use crate::square::{EnPassantSquare, PromotableSquare, PromotionSquare, Square::*};
     use test_case::test_case;
 
     #[test_case(ChessMove::new_quiet(E4, E5, Pawn), "e4e5")]
@@ -249,24 +254,40 @@ mod test {
     #[test_case(ChessMove::new_castle(KingSide, Black), "e8g8")]
     #[test_case(ChessMove::new_castle(QueenSide, Black), "e8c8")]
     #[test_case(
-        ChessMove::new_promotion(E7, PromotionSquare::E8, PromotablePieceType::Queen),
+        ChessMove::new_promotion(
+            PromotableSquare::E7,
+            PromotionSquare::E8,
+            PromotablePieceType::Queen
+        ),
         "e7e8q"
     )]
     #[test_case(
-        ChessMove::new_promotion(F2, PromotionSquare::F1, PromotablePieceType::Rook),
+        ChessMove::new_promotion(
+            PromotableSquare::F2,
+            PromotionSquare::F1,
+            PromotablePieceType::Rook
+        ),
         "f2f1r"
     )]
     #[test_case(
-        ChessMove::new_promotion(H2, PromotionSquare::H1, PromotablePieceType::Bishop),
+        ChessMove::new_promotion(
+            PromotableSquare::H2,
+            PromotionSquare::H1,
+            PromotablePieceType::Bishop
+        ),
         "h2h1b"
     )]
     #[test_case(
-        ChessMove::new_promotion(C7, PromotionSquare::C8, PromotablePieceType::Knight),
+        ChessMove::new_promotion(
+            PromotableSquare::C7,
+            PromotionSquare::C8,
+            PromotablePieceType::Knight
+        ),
         "c7c8n"
     )]
     #[test_case(
         ChessMove::new_promoting_capture(
-            F7,
+            PromotableSquare::F7,
             PromotionSquare::G8,
             PromotablePieceType::Queen,
             Rook
@@ -275,7 +296,7 @@ mod test {
     )]
     #[test_case(
         ChessMove::new_promoting_capture(
-            D7,
+            PromotableSquare::D7,
             PromotionSquare::C8,
             PromotablePieceType::Knight,
             Bishop
@@ -284,7 +305,7 @@ mod test {
     )]
     #[test_case(
         ChessMove::new_promoting_capture(
-            D2,
+            PromotableSquare::D2,
             PromotionSquare::E1,
             PromotablePieceType::Rook,
             Knight
@@ -293,7 +314,7 @@ mod test {
     )]
     #[test_case(
         ChessMove::new_promoting_capture(
-            G2,
+            PromotableSquare::G2,
             PromotionSquare::H1,
             PromotablePieceType::Bishop,
             Bishop

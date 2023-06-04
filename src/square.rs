@@ -9,17 +9,17 @@ use subenum::subenum;
 /// A single tile on a chess board
 #[allow(missing_docs)]
 #[rustfmt::skip]
-#[subenum(EnPassantSquare, WhiteEnPassantSquare, BlackEnPassantSquare, PromotionSquare, WhitePromotionSquare, BlackPromotionSquare)]
+#[subenum(EnPassantSquare, WhiteEnPassantSquare, BlackEnPassantSquare, PromotionSquare, WhitePromotionSquare, BlackPromotionSquare, DoublePawnToSquare, BlackDoublePawnToSquare, WhiteDoublePawnToSquare, WhitePromotableSquare, BlackPromotableSquare, PromotableSquare)]
 #[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 #[repr(u8)]
 pub enum Square {
     #[subenum(PromotionSquare, BlackPromotionSquare)] A1, #[subenum(PromotionSquare, BlackPromotionSquare)] B1, #[subenum(PromotionSquare, BlackPromotionSquare)] C1, #[subenum(PromotionSquare, BlackPromotionSquare)] D1, #[subenum(PromotionSquare, BlackPromotionSquare)] E1, #[subenum(PromotionSquare, BlackPromotionSquare)] F1, #[subenum(PromotionSquare, BlackPromotionSquare)] G1, #[subenum(PromotionSquare, BlackPromotionSquare)] H1,
-    A2, B2, C2, D2, E2, F2, G2, H2,
+    #[subenum(PromotableSquare, WhitePromotableSquare)] A2, #[subenum(PromotableSquare, WhitePromotableSquare)] B2, #[subenum(PromotableSquare, WhitePromotableSquare)] C2, #[subenum(PromotableSquare, WhitePromotableSquare)] D2, #[subenum(PromotableSquare, WhitePromotableSquare)] E2, #[subenum(PromotableSquare, WhitePromotableSquare)] F2, #[subenum(PromotableSquare, WhitePromotableSquare)] G2, #[subenum(PromotableSquare, WhitePromotableSquare)] H2,
     #[subenum(EnPassantSquare, WhiteEnPassantSquare)] A3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] B3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] C3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] D3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] E3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] F3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] G3, #[subenum(EnPassantSquare, WhiteEnPassantSquare)] H3,
-    A4, B4, C4, D4, E4, F4, G4, H4,
-    A5, B5, C5, D5, E5, F5, G5, H5,
+    #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] A4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] B4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] C4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] D4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] E4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] F4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] G4, #[subenum(BlackDoublePawnToSquare, DoublePawnToSquare)] H4,
+    #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] A5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] B5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] C5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] D5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] E5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] F5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] G5, #[subenum(WhiteDoublePawnToSquare, DoublePawnToSquare)] H5,
     #[subenum(EnPassantSquare, BlackEnPassantSquare)] A6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] B6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] C6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] D6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] E6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] F6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] G6, #[subenum(EnPassantSquare, BlackEnPassantSquare)] H6,
-    A7, B7, C7, D7, E7, F7, G7, H7,
+    #[subenum(PromotableSquare, BlackPromotableSquare)] A7, #[subenum(PromotableSquare, BlackPromotableSquare)] B7, #[subenum(PromotableSquare, BlackPromotableSquare)] C7, #[subenum(PromotableSquare, BlackPromotableSquare)] D7, #[subenum(PromotableSquare, BlackPromotableSquare)] E7, #[subenum(PromotableSquare, BlackPromotableSquare)] F7, #[subenum(PromotableSquare, BlackPromotableSquare)] G7, #[subenum(PromotableSquare, BlackPromotableSquare)] H7,
     #[subenum(PromotionSquare, WhitePromotionSquare)] A8, #[subenum(PromotionSquare, WhitePromotionSquare)] B8, #[subenum(PromotionSquare, WhitePromotionSquare)] C8, #[subenum(PromotionSquare, WhitePromotionSquare)] D8, #[subenum(PromotionSquare, WhitePromotionSquare)] E8, #[subenum(PromotionSquare, WhitePromotionSquare)] F8, #[subenum(PromotionSquare, WhitePromotionSquare)] G8, #[subenum(PromotionSquare, WhitePromotionSquare)] H8,
 }
 
