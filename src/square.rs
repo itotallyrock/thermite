@@ -1,4 +1,5 @@
 use crate::bitboard::BoardMask;
+use crate::direction::Direction;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use enum_iterator::Sequence;
@@ -136,6 +137,27 @@ impl Square {
     #[must_use]
     pub fn checked_add(self, rhs: u8) -> Option<Self> {
         Self::try_from((self as u8).saturating_add(rhs)).ok()
+    }
+
+    /// Try to move a square one tile in a given direction, [`None`] if shifted off the edge
+    ///
+    /// ```
+    /// use thermite::direction::Direction;
+    /// use thermite::square::Square;
+    /// assert_eq!(Square::A1.shift(Direction::North), Some(Square::A2));
+    /// assert_eq!(Square::H8.shift(Direction::South), Some(Square::H7));
+    /// assert_eq!(Square::F5.shift(Direction::SouthWest), Some(Square::E4));
+    /// // Symmetrical
+    /// assert_eq!(Square::E2.shift(Direction::NorthWest), Some(Square::D3));
+    /// assert_eq!(Square::D3.shift(Direction::SouthEast), Some(Square::E2));
+    /// // Shifted off the board
+    /// assert_eq!(Square::D1.shift(Direction::South), None);
+    /// assert_eq!(Square::A4.shift(Direction::West), None);
+    /// assert_eq!(Square::H7.shift(Direction::East), None);
+    /// assert_eq!(Square::H8.shift(Direction::North), None);
+    /// ```
+    pub fn shift(self, direction: Direction) -> Option<Self> {
+        self.to_mask().shift(direction).pop_square()
     }
 
     /// Try to subtract an offset from a square
