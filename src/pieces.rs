@@ -92,6 +92,52 @@ impl PieceType {
             player,
         }
     }
+
+    /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given piece)
+    ///
+    /// ```
+    /// use thermite::pieces::PieceType;
+    /// assert_eq!(PieceType::Bishop.get_lower_char(), 'b');
+    /// assert_eq!(PieceType::Pawn.get_lower_char(), 'p');
+    /// assert_eq!(PieceType::King.get_lower_char(), 'k');
+    /// assert_eq!(PieceType::Knight.get_lower_char(), 'n');
+    /// assert_eq!(PieceType::Queen.get_lower_char(), 'q');
+    /// assert_eq!(PieceType::Rook.get_lower_char(), 'r');
+    /// ```
+    #[must_use]
+    pub const fn get_lower_char(self) -> char {
+        match self {
+            Self::Pawn => 'p',
+            Self::Knight => 'n',
+            Self::Bishop => 'b',
+            Self::Rook => 'r',
+            Self::Queen => 'q',
+            Self::King => 'k',
+        }
+    }
+
+    /// Get the upper-case (or [black](PlayerColor::Black) FEN char representation of a given piece)
+    ///
+    /// ```
+    /// use thermite::pieces::PieceType;
+    /// assert_eq!(PieceType::King.get_upper_char(), 'K');
+    /// assert_eq!(PieceType::Rook.get_upper_char(), 'R');
+    /// assert_eq!(PieceType::Pawn.get_upper_char(), 'P');
+    /// assert_eq!(PieceType::Queen.get_upper_char(), 'Q');
+    /// assert_eq!(PieceType::Knight.get_upper_char(), 'N');
+    /// assert_eq!(PieceType::Bishop.get_upper_char(), 'B');
+    /// ```
+    #[must_use]
+    pub const fn get_upper_char(self) -> char {
+        match self {
+            Self::Pawn => 'P',
+            Self::Knight => 'N',
+            Self::Bishop => 'B',
+            Self::Rook => 'R',
+            Self::Queen => 'Q',
+            Self::King => 'K',
+        }
+    }
 }
 
 impl OwnedPiece {
