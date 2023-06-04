@@ -68,6 +68,12 @@ pub enum File {
 }
 
 impl Square {
+
+    /// Create a [`Square`] given a [`File`] and [`Rank`]
+    pub fn new(file: File, rank: Rank) -> Self {
+        Self::try_from((rank as u8) * (File::LENGTH as u8) + (file as u8)).unwrap()
+    }
+
     /// Convert a square to a single bit set `BoardMask`
     ///
     /// ```
