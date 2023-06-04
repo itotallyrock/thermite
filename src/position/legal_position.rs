@@ -9,6 +9,7 @@ use crate::zobrist::{HistoryHash, ZobristHash};
 use alloc::boxed::Box;
 use arrayvec::ArrayVec;
 use derive_more::{AsMut, AsRef};
+use enum_iterator::all;
 use enum_map::EnumMap;
 
 /// Invalid standard chess position (violates rules)
@@ -154,5 +155,32 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         // TODO: Check legality (ie. back rank pawns)
 
         Ok(pseudo_legal_position)
+    }
+}
+
+impl LegalPosition {
+
+    /// Get the [`PieceType`] on a given [`Square`] if any
+    #[must_use]
+    pub fn piece_type_on(&self, square: Square) -> Option<PieceType> {
+        // Check if either side's king square takes this space
+        if all::<PlayerColor>().any(|side| self.king_squares[side] == square) {
+            return Some(PieceType::King);
+        }
+
+        // Loop through all non-king pieces and see if there's a piece on the given square
+        all::<NonKingPieceType>()
+            .find(|&piece| self.pieces_masks[piece] & square.to_mask() != BoardMask::EMPTY)
+            .map(PieceType::from)
+    }
+
+    /// Get the [`PlayerColor`] on a given [`Square`] if any
+    #[must_use]
+    pub fn player_color_on(&self, square: Square) -> Option<PlayerColor> {
+        // Loop through all side masks and see if there's a piece on the given square
+        all::<PlayerColor>().find(|&side| {
+            self.king_squares[side] == square
+                || self.side_masks[side] & square.to_mask() != BoardMask::EMPTY
+        })
     }
 }
