@@ -214,6 +214,7 @@ impl ChessMove {
         promotion: PromotablePieceType,
         captured_piece: PieceType,
     ) -> Self {
+        debug_assert_ne!(captured_piece, PieceType::King, "attempting to create `PromotingCapture` targeting `King`");
         debug_assert_eq!((from.rank() as u8).abs_diff(Square::from(to).rank() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `Rank` off the `to` `PromotionSquare`");
         debug_assert_eq!((from.file() as u8).abs_diff(Square::from(to).file() as u8), 1, "attempting to create `PromotingCapture` with `from` `Square` that is not one `File` off the `to` `PromotionSquare`");
         Self::PromotingCapture {
