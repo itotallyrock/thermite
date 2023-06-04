@@ -1,5 +1,5 @@
-use crate::bitboard::direction::Direction;
 use crate::bitboard::BoardMask;
+use crate::direction::Direction;
 use crate::piece_count::PieceCount;
 use crate::pieces::{NonPawnPieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;

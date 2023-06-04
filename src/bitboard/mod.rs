@@ -1,12 +1,6 @@
 mod attacks;
-mod direction;
 mod lines;
 mod shifts;
-
-pub use direction::{
-    CardinalDirection, CardinalDirectionConvertError, Direction, OrdinalDirection,
-    OrdinalDirectionConvertError,
-};
 
 use crate::square::{File, Rank, Square};
 use derive_more::{

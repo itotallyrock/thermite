@@ -18,6 +18,8 @@ pub mod bitboard;
 pub mod castles;
 /// A generated or parsed legal-move that can be performed on a specific [`LegalPosition`](position::LegalPosition)
 pub mod chess_move;
+/// Generalized directional movement on the board
+pub mod direction;
 /// A clock for keeping track of half moves without a capture or pawn push before a draw
 pub mod half_move_clock;
 /// A counter for the sum of the number of a piece on a board
