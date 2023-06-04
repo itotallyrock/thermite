@@ -1,7 +1,8 @@
+use enum_iterator::Sequence;
 use enum_map::Enum;
 
 /// The color of the pieces for the side (or player) moving.
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
+#[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
 pub enum PlayerColor {
     /// The player controlling the white pieces.
     /// Typically the first side to move in a standard game.
