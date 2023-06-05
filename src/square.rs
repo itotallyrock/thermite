@@ -23,54 +23,82 @@ pub enum Square {
     #[subenum(PromotionSquare, WhitePromotionSquare)] A8, #[subenum(PromotionSquare, WhitePromotionSquare)] B8, #[subenum(PromotionSquare, WhitePromotionSquare)] C8, #[subenum(PromotionSquare, WhitePromotionSquare)] D8, #[subenum(PromotionSquare, WhitePromotionSquare)] E8, #[subenum(PromotionSquare, WhitePromotionSquare)] F8, #[subenum(PromotionSquare, WhitePromotionSquare)] G8, #[subenum(PromotionSquare, WhitePromotionSquare)] H8,
 }
 
-/// A single row on the board
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-#[repr(u8)]
-pub enum Rank {
-    /// The first rank, the lower most rank from white's pov, white's back rank
-    First,
-    /// The second rank, white's pawn rank
-    Second,
-    /// The third rank
-    Third,
-    /// The fourth rank
-    Fourth,
-    /// The fifth rank
-    Fifth,
-    /// The sixth rank
-    Sixth,
-    /// The seventh rank, black's pawn rank
-    Seventh,
-    /// The eighth and upper-most rank from whites pov, black's back rank
-    Eighth,
-}
-
 /// A single column on the board
+#[subenum(EastShiftableFile, WestShiftableFile)]
 #[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 #[repr(u8)]
 pub enum File {
     /// The A or first file
+    #[subenum(EastShiftableFile)]
     A,
     /// The B or second file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     B,
     /// The C or third file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     C,
     /// The D or fourth file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     D,
     /// The E or fifth file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     E,
     /// The F or sixth file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     F,
     /// The G or seventh file
+    #[subenum(EastShiftableFile, WestShiftableFile)]
     G,
     /// The H or eighth file
+    #[subenum(WestShiftableFile)]
     H,
 }
 
-impl Square {
+/// A single row on the board
+#[subenum(NorthShiftableRank, SouthShiftableRank)]
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum Rank {
+    /// The first rank, the lower most rank from white's pov, white's back rank
+    #[subenum(NorthShiftableRank)]
+    First,
+    /// The second rank, white's pawn rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Second,
+    /// The third rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Third,
+    /// The fourth rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Fourth,
+    /// The fifth rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Fifth,
+    /// The sixth rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Sixth,
+    /// The seventh rank, black's pawn rank
+    #[subenum(NorthShiftableRank, SouthShiftableRank)]
+    Seventh,
+    /// The eighth and upper-most rank from whites pov, black's back rank
+    #[subenum(SouthShiftableRank)]
+    Eighth,
+}
 
+impl Square {
     /// Create a [`Square`] given a [`File`] and [`Rank`]
+    ///
+    /// ```
+    /// use thermite::square::{File, Rank, Square};
+    /// assert_eq!(Square::new(File::A, Rank::First), Square::A1);
+    /// assert_eq!(Square::new(File::B, Rank::Fifth), Square::B5);
+    /// assert_eq!(Square::new(File::C, Rank::Seventh), Square::C7);
+    /// assert_eq!(Square::new(File::H, Rank::Second), Square::H2);
+    /// ```
+    #[allow(clippy::missing_panics_doc)]
+    #[must_use]
     pub fn new(file: File, rank: Rank) -> Self {
+        #[allow(clippy::cast_possible_truncation)]
         Self::try_from((rank as u8) * (File::LENGTH as u8) + (file as u8)).unwrap()
     }
 
