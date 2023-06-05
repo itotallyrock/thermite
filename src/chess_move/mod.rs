@@ -64,7 +64,7 @@ pub enum ChessMove {
 }
 
 impl Display for ChessMove {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match *self {
             Self::Quiet { quiet } | Self::Capture { quiet, .. } => {
                 let from = quiet.from();
@@ -229,6 +229,7 @@ mod test {
         "g2h1b"
     )]
     fn display_works(chess_move: ChessMove, expected: &str) {
-        assert_eq!(chess_move.to_string().as_str(), expected);
+        use alloc::format;
+        assert_eq!(format!("{chess_move}").as_str(), expected);
     }
 }

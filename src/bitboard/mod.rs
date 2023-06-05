@@ -132,8 +132,6 @@ impl ExactSizeIterator for MaskSquareIterator {}
 mod test {
     use crate::bitboard::BoardMask;
     use crate::square::{Square, Square::*};
-    #[cfg(not(feature = "std"))]
-    use alloc::vec;
     use alloc::vec::Vec;
     use core::ops::Not;
 
