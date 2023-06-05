@@ -159,7 +159,6 @@ impl TryFrom<PositionBuilder> for LegalPosition {
 }
 
 impl LegalPosition {
-
     /// Get the [`PieceType`] on a given [`Square`] if any
     #[must_use]
     pub fn piece_type_on(&self, square: Square) -> Option<PieceType> {

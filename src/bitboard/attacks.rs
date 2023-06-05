@@ -766,7 +766,7 @@ mod test {
                     BoardMask::new(index)
                         .pdep(occupancy_mask)
                         .pext(occupancy_mask)
-                        .0 as u64,
+                        .0,
                     index,
                     "{square} ({occupancy_mask:#?}) index: {index}"
                 );

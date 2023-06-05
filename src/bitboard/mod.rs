@@ -157,11 +157,11 @@ mod test {
         assert_eq!(BoardMask::new(0x22000812).num_squares(), 5);
     }
 
-    #[test_case(0x0, vec![])]
-    #[test_case(0x400400000, vec![G3, C5])]
-    #[test_case(0x22000812, vec![B1, E1, D2, B4, F4])]
-    #[test_case(0x8400400004000, vec![G2, C5, G6, D7])]
-    fn into_iter_works(mask: u64, expected: Vec<Square>) {
+    #[test_case(0x0, &[])]
+    #[test_case(0x400400000, &[G3, C5])]
+    #[test_case(0x22000812, &[B1, E1, D2, B4, F4])]
+    #[test_case(0x8400400004000, &[G2, C5, G6, D7])]
+    fn into_iter_works(mask: u64, expected: &[Square]) {
         assert_eq!(
             BoardMask::new(mask).into_iter().collect::<Vec<_>>(),
             expected

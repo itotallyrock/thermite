@@ -274,7 +274,7 @@ mod test {
     #[test_case(PieceType::Rook, PlayerColor::Black, Square::F5)]
     fn toggle_piece_square_symmetric(piece: PieceType, player: PlayerColor, square: Square) {
         let mut hasher = ZobristHash::default();
-        let hasher_original = hasher.clone();
+        let hasher_original = hasher;
         hasher.toggle_piece_square(piece.owned_by(player).placed_on(square));
         assert_ne!(hasher_original, hasher);
         hasher.toggle_piece_square(piece.owned_by(player).placed_on(square));
@@ -284,7 +284,7 @@ mod test {
     #[test]
     fn switch_sides_symmetric() {
         let mut hasher = ZobristHash::default();
-        let hasher_original = hasher.clone();
+        let hasher_original = hasher;
         hasher.switch_sides();
         assert_ne!(hasher_original, hasher);
         hasher.switch_sides();
@@ -310,7 +310,7 @@ mod test {
     fn toggle_en_passant_square_symmetric(input: Square) {
         let input = input.try_into().expect("invalid test setup");
         let mut hasher = ZobristHash::default();
-        let hasher_original = hasher.clone();
+        let hasher_original = hasher;
         hasher.toggle_en_passant_square(input);
         assert_ne!(hasher_original, hasher);
         hasher.toggle_en_passant_square(input);
@@ -323,7 +323,7 @@ mod test {
     #[test_case(PlayerColor::Black, CastleDirection::QueenSide)]
     fn toggle_castle_ability_symmetric(player: PlayerColor, castle_direction: CastleDirection) {
         let mut hasher = ZobristHash::default();
-        let hasher_original = hasher.clone();
+        let hasher_original = hasher;
         hasher.toggle_castle_ability(player, castle_direction);
         assert_ne!(hasher_original, hasher);
         hasher.toggle_castle_ability(player, castle_direction);

@@ -162,6 +162,7 @@ impl Square {
     /// assert_eq!(Square::H7.shift(Direction::East), None);
     /// assert_eq!(Square::H8.shift(Direction::North), None);
     /// ```
+    #[must_use]
     pub fn shift(self, direction: Direction) -> Option<Self> {
         self.to_mask().shift(direction).pop_square()
     }
