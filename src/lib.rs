@@ -11,6 +11,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
+extern crate core;
 
 /// A on-off (0/1) mask of an 8x8 chess board (bitboard)
 pub mod bitboard;
