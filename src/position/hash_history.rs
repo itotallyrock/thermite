@@ -58,3 +58,61 @@ impl Default for HashHistory {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::position::hash_history::HashHistory;
+    use crate::zobrist::{random_hash, ZobristHash};
+
+    #[test]
+    fn repetitions_works() {
+        let a = random_hash();
+        let b = random_hash();
+
+        let mut history = HashHistory::new();
+        assert_eq!(history.repetitions::<1>().count(), 0);
+
+        history.push(a);
+        assert_eq!(history.repetitions::<1>().count(), 1);
+        assert_eq!(history.repetitions::<2>().count(), 0);
+
+        history.push(b);
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 0);
+
+        history.push(a);
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 1);
+        assert_eq!(history.repetitions::<3>().count(), 0);
+
+        history.push(b);
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 2);
+        assert_eq!(history.repetitions::<3>().count(), 0);
+
+        history.push(a);
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 2);
+        assert_eq!(history.repetitions::<3>().count(), 1);
+
+        history.push(b);
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 2);
+        assert_eq!(history.repetitions::<3>().count(), 2);
+
+        history.pop();
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 2);
+        assert_eq!(history.repetitions::<3>().count(), 1);
+
+        history.pop();
+        assert_eq!(history.repetitions::<1>().count(), 2);
+        assert_eq!(history.repetitions::<2>().count(), 2);
+        assert_eq!(history.repetitions::<3>().count(), 0);
+
+        history.clear();
+        assert_eq!(history.repetitions::<1>().count(), 0);
+        assert_eq!(history.repetitions::<2>().count(), 0);
+        assert_eq!(history.repetitions::<3>().count(), 0);
+    }
+}

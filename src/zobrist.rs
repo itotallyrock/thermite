@@ -254,6 +254,11 @@ const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap
 ]);
 
 #[cfg(test)]
+pub(crate) fn random_hash() -> ZobristHash {
+    ZobristHash(fastrand::u64(..))
+}
+
+#[cfg(test)]
 mod test {
     use crate::castles::CastleDirection;
     use crate::pieces::{Piece, PieceType};
