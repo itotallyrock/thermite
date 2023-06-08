@@ -42,8 +42,8 @@ impl HashHistory {
                 |mut repetitions, hash| {
                     repetitions
                         .entry(*hash)
-                        .and_modify(|repetitions| repetitions.increment())
-                        .or_insert(PlyCount::new(1));
+                        .and_modify(PlyCount::increment)
+                        .or_insert_with(|| PlyCount::new(1));
 
                     repetitions
                 },

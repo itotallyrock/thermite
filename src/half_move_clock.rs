@@ -46,7 +46,7 @@ impl HalfMoveClock {
 }
 
 /// How many half-moves until a draw
-/// https://en.wikipedia.org/wiki/Fifty-move_rule
+/// <https://en.wikipedia.org/wiki/Fifty-move_rule>
 pub const HALF_MOVE_LIMIT: usize = 100;
 
 #[cfg(test)]

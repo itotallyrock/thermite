@@ -88,11 +88,11 @@ impl Piece for NonKingPieceType {
     /// ```
     fn get_lower_char(self) -> char {
         match self {
-            NonKingPieceType::Pawn => 'p',
-            NonKingPieceType::Knight => 'n',
-            NonKingPieceType::Bishop => 'b',
-            NonKingPieceType::Rook => 'r',
-            NonKingPieceType::Queen => 'q',
+            Self::Pawn => 'p',
+            Self::Knight => 'n',
+            Self::Bishop => 'b',
+            Self::Rook => 'r',
+            Self::Queen => 'q',
         }
     }
 }
@@ -110,11 +110,11 @@ impl Piece for NonPawnPieceType {
     /// ```
     fn get_lower_char(self) -> char {
         match self {
-            NonPawnPieceType::Knight => 'n',
-            NonPawnPieceType::Bishop => 'b',
-            NonPawnPieceType::Rook => 'r',
-            NonPawnPieceType::Queen => 'q',
-            NonPawnPieceType::King => 'k',
+            Self::Knight => 'n',
+            Self::Bishop => 'b',
+            Self::Rook => 'r',
+            Self::Queen => 'q',
+            Self::King => 'k',
         }
     }
 }
@@ -130,9 +130,9 @@ impl Piece for SlidingPieceType {
     /// ```
     fn get_lower_char(self) -> char {
         match self {
-            SlidingPieceType::Bishop => 'b',
-            SlidingPieceType::Rook => 'r',
-            SlidingPieceType::Queen => 'q',
+            Self::Bishop => 'b',
+            Self::Rook => 'r',
+            Self::Queen => 'q',
         }
     }
 }
@@ -149,10 +149,10 @@ impl Piece for PromotablePieceType {
     /// ```
     fn get_lower_char(self) -> char {
         match self {
-            PromotablePieceType::Knight => 'n',
-            PromotablePieceType::Bishop => 'b',
-            PromotablePieceType::Rook => 'r',
-            PromotablePieceType::Queen => 'q',
+            Self::Knight => 'n',
+            Self::Bishop => 'b',
+            Self::Rook => 'r',
+            Self::Queen => 'q',
         }
     }
 }

@@ -1,8 +1,6 @@
 use crate::castles::{CastleDirection, KING_FROM_SQUARES, KING_TO_SQUARES};
 use crate::chess_move::promotion::Promotion;
-use crate::pieces::{
-    NonKingPieceType, NonPawnPieceType, Piece, PieceType, PromotablePieceType, SlidingPieceType,
-};
+use crate::pieces::{NonKingPieceType, Piece};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use core::fmt::{Display, Formatter};
