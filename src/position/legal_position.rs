@@ -3,13 +3,13 @@ use crate::castles::{CastleDirection, CastleRights};
 use crate::half_move_clock::HalfMoveClock;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
+use crate::position::hash_history::HashHistory;
 use crate::position::position_builder::PositionBuilder;
 use crate::square::Square;
 use crate::zobrist::ZobristHash;
 use derive_more::{AsMut, AsRef};
 use enum_iterator::all;
 use enum_map::EnumMap;
-use crate::position::hash_history::HashHistory;
 
 /// Invalid standard chess position (violates rules)
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
