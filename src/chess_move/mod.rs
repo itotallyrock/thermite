@@ -1,6 +1,5 @@
 use crate::castles::{CastleDirection, KING_FROM_SQUARES, KING_TO_SQUARES};
 use crate::chess_move::promotion::Promotion;
-use crate::direction::{Direction, PawnPushDirection};
 use crate::pieces::{
     NonKingPieceType, NonPawnPieceType, Piece, PieceType, PromotablePieceType, SlidingPieceType,
 };
