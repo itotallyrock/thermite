@@ -39,6 +39,11 @@ impl HalfMoveClock {
         }
     }
 
+    /// Decrement the half-move clock
+    pub fn decrement(&mut self) {
+        self.0.decrement();
+    }
+
     /// Reset the clock back to zero
     pub fn reset(&mut self) {
         *self = Self::default();
