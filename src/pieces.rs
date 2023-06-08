@@ -55,18 +55,18 @@ pub enum PieceType {
 
 /// A colored piece that a specific player owns
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct OwnedPiece {
+pub struct OwnedPiece<P = PieceType> {
     /// The type of piece
-    pub piece: PieceType,
+    pub piece: P,
     /// The piece's owner
     pub player: PlayerColor,
 }
 
 /// A piece that is owned by a player placed on a square
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct PlacedPiece {
+pub struct PlacedPiece<P = PieceType> {
     /// The piece and its owner
-    pub owned_piece: OwnedPiece,
+    pub owned_piece: OwnedPiece<P>,
     /// The square the piece is placed on
     pub square: Square,
 }
@@ -140,7 +140,7 @@ impl PieceType {
     }
 }
 
-impl OwnedPiece {
+impl<P> OwnedPiece<P> {
     /// Associate this [player's piece](OwnedPiece) with a specific [`Square`] on the board
     ///
     /// ```
@@ -153,7 +153,7 @@ impl OwnedPiece {
     /// assert_eq!(PieceType::Rook.owned_by(PlayerColor::Black).placed_on(Square::A1), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Rook, player: PlayerColor::Black}, square: Square::A1 });
     /// ```
     #[must_use]
-    pub const fn placed_on(self, square: Square) -> PlacedPiece {
+    pub const fn placed_on(self, square: Square) -> PlacedPiece<P> {
         PlacedPiece {
             owned_piece: self,
             square,
