@@ -7,7 +7,7 @@ use derive_more::AsRef;
 use enum_map::EnumMap;
 
 /// The truncated Zobrist hash for a specific position to save memory when collisions are less likely
-#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, AsRef, Hash)]
 pub struct HistoryHash(u8);
 
 /// The Zobrist hash for a specific position

@@ -1,16 +1,15 @@
 use crate::bitboard::BoardMask;
 use crate::castles::{CastleDirection, CastleRights};
-use crate::half_move_clock::{HalfMoveClock, HALF_MOVE_LIMIT};
-use crate::pieces::{NonKingPieceType, OwnedPiece, PieceType, PlacedPiece};
+use crate::half_move_clock::HalfMoveClock;
+use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::position::position_builder::PositionBuilder;
 use crate::square::Square;
-use crate::zobrist::{HistoryHash, ZobristHash};
-use alloc::boxed::Box;
-use arrayvec::ArrayVec;
+use crate::zobrist::ZobristHash;
 use derive_more::{AsMut, AsRef};
 use enum_iterator::all;
 use enum_map::EnumMap;
+use crate::position::hash_history::HashHistory;
 
 /// Invalid standard chess position (violates rules)
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Ord, PartialOrd, Hash)]
@@ -37,13 +36,13 @@ pub struct State {
 /// Keeps track of [`state`](State) to maintain legality as the board is mutated.
 #[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
 pub struct LegalPosition {
-    hash: ZobristHash,
-    player_to_move: PlayerColor,
-    pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
-    side_masks: EnumMap<PlayerColor, BoardMask>,
-    king_squares: EnumMap<PlayerColor, Square>,
-    state: State,
-    hash_history: Box<ArrayVec<HistoryHash, { HALF_MOVE_LIMIT }>>,
+    pub(super) hash: ZobristHash,
+    pub(super) player_to_move: PlayerColor,
+    pub(super) pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
+    pub(super) side_masks: EnumMap<PlayerColor, BoardMask>,
+    pub(super) king_squares: EnumMap<PlayerColor, Square>,
+    pub(super) state: State,
+    pub(super) hash_history: HashHistory,
 }
 
 impl TryFrom<PositionBuilder> for LegalPosition {
@@ -129,7 +128,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         };
 
         // TODO: Get this from builder (when we have starting moves implemented)
-        let hash_history = Box::default();
+        let hash_history = HashHistory::new();
         // Make sure we have two kings
         let king_squares = king_squares.into_iter().try_fold(
             EnumMap::<PlayerColor, Square>::from_array([Square::E1, Square::E8]),
