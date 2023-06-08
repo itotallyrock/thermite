@@ -8,13 +8,13 @@ use double_pawn_push::DoublePawnPush;
 use en_passant_capture::EnPassantCapture;
 use quiet::QuietMove;
 
-/// A valid double pushing pawn for a [chess move](chess_move::ChessMove)
+/// A valid double pushing pawn for a [chess move](ChessMove)
 pub mod double_pawn_push;
 /// A valid capture of a pawn on its skipped square for a pawn that *just* [double jumped](DoublePawnPush)
 pub mod en_passant_capture;
-/// A valid pawn promotion for a [chess move](chess_move::ChessMove)
+/// A valid pawn promotion for a [chess move](ChessMove)
 pub mod promotion;
-/// A valid plain chess move, take a piece from a square and move it to another square for a [chess move](chess_move::ChessMove)
+/// A valid plain chess move, take a piece from a square and move it to another square for a [chess move](ChessMove)
 pub mod quiet;
 
 /// The different types of chess moves and the relevant metadata to make (or undo) them
@@ -49,7 +49,7 @@ pub enum ChessMove {
         /// The player doing the castling
         player: PlayerColor,
     },
-    /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotionPieceType`]
+    /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotablePieceType`](crate::pieces::PromotablePieceType)
     Promotion {
         /// The inner promotion
         promotion: Promotion,

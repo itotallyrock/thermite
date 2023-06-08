@@ -207,17 +207,17 @@ impl LegalPosition {
         self.player_to_move
     }
 
-    /// Get a [`BoardMask`] of the pieces for the [`Player`] moving
+    /// Get a [`BoardMask`] of the pieces for the [`PlayerColor`] moving
     pub fn player_to_move_mask(&self) -> BoardMask {
         self.side_masks[self.player_to_move]
     }
 
-    /// Get a [`BoardMask`] of the pieces for the [`Player`] **not** moving
+    /// Get a [`BoardMask`] of the pieces for the [`PlayerColor`] **not** moving
     pub fn opposite_player_mask(&self) -> BoardMask {
         self.side_masks[self.player_to_move.switch()]
     }
 
-    /// Get a [`BoardMask`] of the attack-able squares (empty or opposite side) of the [`Player`] moving
+    /// Get a [`BoardMask`] of the attack-able squares (empty or opposite side) of the [`PlayerColor`] moving
     pub fn attackable_mask(&self) -> BoardMask {
         !self.player_to_move_mask()
     }

@@ -7,7 +7,7 @@ use crate::square::{EnPassantSquare, Square};
 use enum_map::EnumMap;
 
 /// Allows setting up a board and performing pseudo-legal moves without checking legality.
-/// With the end goal being to [`convert`](std::convert) this into a [`LegalPosition`]
+/// With the end goal being to [`convert`](std::convert) this into a [`LegalPosition`](crate::position::LegalPosition)
 #[must_use]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct PositionBuilder {

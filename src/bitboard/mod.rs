@@ -81,7 +81,7 @@ impl BoardMask {
         Some(square)
     }
 
-    /// How many set [`Square`](squares) the mask contains
+    /// How many set [`Square`](Square) the mask contains
     #[must_use]
     pub const fn num_squares(&self) -> u8 {
         // ALLOW: Count ones for u64 can at most be 64 which is always within u8's 255 max

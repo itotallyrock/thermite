@@ -2,7 +2,6 @@
 #![warn(
     missing_docs,
     clippy::pedantic,
-    rustdoc::missing_doc_code_examples,
     clippy::nursery,
     clippy::cargo,
     clippy::style
@@ -31,7 +30,7 @@ pub mod pieces;
 pub mod player_color;
 /// The depth or number of single moves deep into a game
 pub mod ply_count;
-/// The total representation of a single frozen state of a [`game`](Game) and its internal logic
+/// The total representation of a single legal state of a game of chess and its internal logic
 pub mod position;
 /// A single tile on a board where a piece can be placed
 pub mod square;

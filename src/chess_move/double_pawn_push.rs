@@ -14,7 +14,7 @@ pub struct DoublePawnPush {
 }
 
 impl DoublePawnPush {
-    /// The starting [`square`](Square) the pawn is moving `from`
+    /// The starting [`square`](crate::square::Square) the pawn is moving `from`
     #[must_use]
     pub fn from(&self) -> PromotableSquare {
         #[allow(clippy::enum_glob_use)]

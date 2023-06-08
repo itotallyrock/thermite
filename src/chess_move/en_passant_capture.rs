@@ -4,7 +4,7 @@ use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::{DoublePawnToSquare, EnPassantSquare, Square};
 
-/// A valid capture of a pawn on its skipped square for a pawn that *just* [double jumped](DoublePawnPush)
+/// A valid capture of a pawn on its skipped square for a pawn that *just* [double jumped](crate::chess_move::DoublePawnPush)
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct EnPassantCapture {
     /// The starting [`square`](Square) the piece is moving `from`
