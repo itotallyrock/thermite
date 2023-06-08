@@ -167,7 +167,7 @@ mod test {
     use crate::chess_move::quiet::QuietMove;
     use crate::chess_move::ChessMove;
     use crate::direction::PawnCaptureDirection;
-    use crate::pieces::PromotablePieceType;
+    use crate::pieces::{Piece, PromotablePieceType};
     use crate::pieces::{NonKingPieceType, PieceType::*};
     use crate::player_color::PlayerColor::*;
     use crate::square::{
@@ -175,12 +175,12 @@ mod test {
     };
     use test_case::test_case;
 
-    #[test_case(ChessMove::new_quiet(QuietMove::new(E4, E5, Pawn).unwrap()), "e4e5")]
-    #[test_case(ChessMove::new_quiet(QuietMove::new(F1, G3, Knight).unwrap()), "f1g3")]
+    #[test_case(ChessMove::new_quiet(QuietMove::new(E4, E5, Pawn.owned_by(White)).unwrap()), "e4e5")]
+    #[test_case(ChessMove::new_quiet(QuietMove::new(F1, G3, Knight.owned_by(White)).unwrap()), "f1g3")]
     #[test_case(ChessMove::new_double_pawn_push(DoublePawnPush { player: White, file: File::B }), "b2b4")]
     #[test_case(ChessMove::new_double_pawn_push(DoublePawnPush { player: Black, file: File::H }), "h7h5")]
-    #[test_case(ChessMove::new_capture(QuietMove::new(E2, F3, Pawn).unwrap(), NonKingPieceType::Pawn), "e2f3")]
-    #[test_case(ChessMove::new_capture(QuietMove::new(D7, C6, Pawn).unwrap(), NonKingPieceType::Pawn), "d7c6")]
+    #[test_case(ChessMove::new_capture(QuietMove::new(E2, F3, Pawn.owned_by(White)).unwrap(), NonKingPieceType::Pawn), "e2f3")]
+    #[test_case(ChessMove::new_capture(QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), NonKingPieceType::Pawn), "d7c6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::G5, PawnCaptureDirection::West, White).unwrap()), "g5f6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::A4, PawnCaptureDirection::East, Black).unwrap()), "a4b3")]
     #[test_case(ChessMove::new_castle(KingSide, White), "e1g1")]

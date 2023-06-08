@@ -45,7 +45,7 @@ impl Direction {
     #[must_use]
     pub fn opposite(self) -> Self {
         // SAFETY: Every positive variant of Direction has a negative counter-part and vice-versa
-        unsafe { std::mem::transmute(-(self as i8)) }
+        unsafe { core::mem::transmute(-(self as i8)) }
     }
 }
 
