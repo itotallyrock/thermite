@@ -62,7 +62,7 @@ impl Default for HashHistory {
 #[cfg(test)]
 mod test {
     use crate::position::hash_history::HashHistory;
-    use crate::zobrist::{random_hash, ZobristHash};
+    use crate::zobrist::random_hash;
 
     #[test]
     fn repetitions_works() {
