@@ -267,8 +267,11 @@ impl<P: Piece> OwnedPiece<P> {
 
 #[cfg(test)]
 mod test {
+    use crate::pieces::{
+        NonKingPieceType, NonPawnPieceType, Piece, PieceType, PlacedPiece, PromotablePieceType,
+        SlidingPieceType,
+    };
     use enum_iterator::all;
-    use crate::pieces::{NonKingPieceType, NonPawnPieceType, Piece, PieceType, PlacedPiece, PromotablePieceType, SlidingPieceType};
 
     #[test]
     fn get_lower_char_consistent_between_types() {
@@ -292,18 +295,33 @@ mod test {
     #[test]
     fn get_upper_char_to_lower_matches_get_lower_char() {
         for piece_type in all::<PieceType>() {
-            assert_eq!(piece_type.get_upper_char().to_ascii_lowercase(), piece_type.get_lower_char());
+            assert_eq!(
+                piece_type.get_upper_char().to_ascii_lowercase(),
+                piece_type.get_lower_char()
+            );
             if let Ok(sub_piece_type) = NonKingPieceType::try_from(piece_type) {
-                assert_eq!(sub_piece_type.get_upper_char().to_ascii_lowercase(), sub_piece_type.get_lower_char());
+                assert_eq!(
+                    sub_piece_type.get_upper_char().to_ascii_lowercase(),
+                    sub_piece_type.get_lower_char()
+                );
             }
             if let Ok(sub_piece_type) = NonPawnPieceType::try_from(piece_type) {
-                assert_eq!(sub_piece_type.get_upper_char().to_ascii_lowercase(), sub_piece_type.get_lower_char());
+                assert_eq!(
+                    sub_piece_type.get_upper_char().to_ascii_lowercase(),
+                    sub_piece_type.get_lower_char()
+                );
             }
             if let Ok(sub_piece_type) = SlidingPieceType::try_from(piece_type) {
-                assert_eq!(sub_piece_type.get_upper_char().to_ascii_lowercase(), sub_piece_type.get_lower_char());
+                assert_eq!(
+                    sub_piece_type.get_upper_char().to_ascii_lowercase(),
+                    sub_piece_type.get_lower_char()
+                );
             }
             if let Ok(sub_piece_type) = PromotablePieceType::try_from(piece_type) {
-                assert_eq!(sub_piece_type.get_upper_char().to_ascii_lowercase(), sub_piece_type.get_lower_char());
+                assert_eq!(
+                    sub_piece_type.get_upper_char().to_ascii_lowercase(),
+                    sub_piece_type.get_lower_char()
+                );
             }
         }
     }
