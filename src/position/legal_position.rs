@@ -181,4 +181,54 @@ impl LegalPosition {
                 || self.side_masks[side] & square.to_mask() != BoardMask::EMPTY
         })
     }
+
+    /// Get the [`OwnedPiece`] on a given [`Square`] if any
+    #[must_use]
+    pub fn owned_piece_on(&self, square: Square) -> Option<OwnedPiece> {
+        self.piece_type_on(square)
+            .zip(self.player_color_on(square))
+            .map(|(piece, player)| piece.owned_by(player))
+    }
+
+    /// Whether or not the current player is in check
+    #[must_use]
+    pub const fn in_check(&self) -> bool {
+        !(self.state.checkers).is_empty()
+    }
+
+    /// Get a mask for given piece (both players).
+    pub fn piece_mask(&self, piece: NonKingPieceType) -> BoardMask {
+        self.pieces_masks[piece]
+    }
+
+    /// Get the player whose turn it is to move
+    #[must_use]
+    pub const fn player_to_move(&self) -> PlayerColor {
+        self.player_to_move
+    }
+
+    /// Get a [`BoardMask`] of the pieces for the [`Player`] moving
+    pub fn player_to_move_mask(&self) -> BoardMask {
+        self.side_masks[self.player_to_move]
+    }
+
+    /// Get a [`BoardMask`] of the pieces for the [`Player`] **not** moving
+    pub fn opposite_player_mask(&self) -> BoardMask {
+        self.side_masks[self.player_to_move.switch()]
+    }
+
+    /// Get a [`BoardMask`] of the attack-able squares (empty or opposite side) of the [`Player`] moving
+    pub fn attackable_mask(&self) -> BoardMask {
+        !self.player_to_move_mask()
+    }
+
+    /// Get a [`BoardMask`] of all of the pieces on the board
+    pub fn occupied_mask(&self) -> BoardMask {
+        self.side_masks[PlayerColor::White] | self.side_masks[PlayerColor::Black]
+    }
+
+    /// Get a [`BoardMask`] of all the empty squares on the board
+    pub fn empty_mask(&self) -> BoardMask {
+        !self.occupied_mask()
+    }
 }
