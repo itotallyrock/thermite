@@ -1,6 +1,9 @@
 use crate::castles::{CastleDirection, KING_FROM_SQUARES, KING_TO_SQUARES};
 use crate::chess_move::promotion::Promotion;
-use crate::pieces::{NonKingPieceType, PieceType};
+use crate::direction::{Direction, PawnPushDirection};
+use crate::pieces::{
+    NonKingPieceType, NonPawnPieceType, Piece, PieceType, PromotablePieceType, SlidingPieceType,
+};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use core::fmt::{Display, Formatter};
@@ -92,7 +95,7 @@ impl Display for ChessMove {
             Self::Promotion { promotion } | Self::PromotingCapture { promotion, .. } => {
                 let from = Square::from(promotion.from());
                 let to = Square::from(promotion.to());
-                let piece = PieceType::from(promotion.piece).get_lower_char();
+                let piece = promotion.piece.get_lower_char();
                 write!(f, "{from}{to}{piece}")
             }
         }

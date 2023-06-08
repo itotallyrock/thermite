@@ -256,7 +256,7 @@ const CASTLE_KEYS: EnumMap<CastleDirection, EnumMap<PlayerColor, u64>> = EnumMap
 #[cfg(test)]
 mod test {
     use crate::castles::CastleDirection;
-    use crate::pieces::PieceType;
+    use crate::pieces::{Piece, PieceType};
     use crate::player_color::PlayerColor;
     use crate::square::Square;
     use crate::zobrist::ZobristHash;

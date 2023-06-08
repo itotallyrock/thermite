@@ -78,7 +78,7 @@ impl Default for PositionBuilder {
 mod test {
     use crate::castles::CastleRights;
     use crate::half_move_clock::HalfMoveClock;
-    use crate::pieces::PieceType;
+    use crate::pieces::{Piece, PieceType};
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
     use crate::position::PositionBuilder;
