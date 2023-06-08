@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use alloc::collections::{BTreeMap, VecDeque};
 use crate::half_move_clock::HALF_MOVE_LIMIT;
 use crate::ply_count::PlyCount;
 use crate::zobrist::{HistoryHash, ZobristHash};
@@ -37,7 +37,7 @@ impl HashHistory {
     pub fn repetitions<const N: u8>(&self) -> impl Iterator<Item=HistoryHash> {
         self.0
             .iter()
-            .fold(HashMap::<HistoryHash, PlyCount>::with_capacity(HALF_MOVE_LIMIT), |mut repetitions, hash| {
+            .fold(BTreeMap::<HistoryHash, PlyCount>::new(), |mut repetitions, hash| {
                 repetitions.entry(*hash).and_modify(|repetitions| repetitions.increment()).or_insert(PlyCount::new(1));
 
                 repetitions
