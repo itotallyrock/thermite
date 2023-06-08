@@ -14,6 +14,8 @@ pub struct Promotion {
     from: PromotableSquare,
     /// The ending square
     to: PromotionSquare,
+    /// The player doing the promotion
+    player: PlayerColor,
     /// The piece the pawn is promoting to
     pub piece: PromotablePieceType,
 }
@@ -31,7 +33,12 @@ impl Promotion {
             .unwrap();
         let to = Square::new(file, Self::TO_RANK[player]).try_into().unwrap();
 
-        Self { from, to, piece }
+        Self {
+            from,
+            to,
+            player,
+            piece,
+        }
     }
 
     /// Create a new east capture promotion
@@ -50,7 +57,12 @@ impl Promotion {
             .try_into()
             .unwrap();
 
-        Self { from, to, piece }
+        Self {
+            from,
+            to,
+            player,
+            piece,
+        }
     }
 
     /// Create a new west capture promotion
@@ -69,7 +81,12 @@ impl Promotion {
             .try_into()
             .unwrap();
 
-        Self { from, to, piece }
+        Self {
+            from,
+            to,
+            player,
+            piece,
+        }
     }
 
     /// Get the _ [square](PromotableSquare)
@@ -82,5 +99,11 @@ impl Promotion {
     #[must_use]
     pub const fn to(&self) -> PromotionSquare {
         self.to
+    }
+
+    /// Get the [player](PlayerColor) making the promotion
+    #[must_use]
+    pub const fn player(&self) -> PlayerColor {
+        self.player
     }
 }
