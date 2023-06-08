@@ -1,7 +1,7 @@
-use alloc::collections::{BTreeMap, VecDeque};
 use crate::half_move_clock::HALF_MOVE_LIMIT;
 use crate::ply_count::PlyCount;
 use crate::zobrist::{HistoryHash, ZobristHash};
+use alloc::collections::{BTreeMap, VecDeque};
 
 /// A hash container for keeping track of previously visited positions (for repetition checks)
 #[derive(Clone, Eq, PartialEq, Debug)]
@@ -34,14 +34,20 @@ impl HashHistory {
     }
 
     /// Get an iterator over all hashes with >= `N` repetitions (order is not preserved)
-    pub fn repetitions<const N: u8>(&self) -> impl Iterator<Item=HistoryHash> {
+    pub fn repetitions<const N: u8>(&self) -> impl Iterator<Item = HistoryHash> {
         self.0
             .iter()
-            .fold(BTreeMap::<HistoryHash, PlyCount>::new(), |mut repetitions, hash| {
-                repetitions.entry(*hash).and_modify(|repetitions| repetitions.increment()).or_insert(PlyCount::new(1));
+            .fold(
+                BTreeMap::<HistoryHash, PlyCount>::new(),
+                |mut repetitions, hash| {
+                    repetitions
+                        .entry(*hash)
+                        .and_modify(|repetitions| repetitions.increment())
+                        .or_insert(PlyCount::new(1));
 
-                repetitions
-            })
+                    repetitions
+                },
+            )
             .into_iter()
             .filter_map(|(hash, repetitions)| (repetitions >= PlyCount::new(N)).then_some(hash))
     }

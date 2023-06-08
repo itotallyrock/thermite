@@ -167,8 +167,8 @@ mod test {
     use crate::chess_move::quiet::QuietMove;
     use crate::chess_move::ChessMove;
     use crate::direction::PawnCaptureDirection;
-    use crate::pieces::{Piece, PromotablePieceType};
     use crate::pieces::{NonKingPieceType, PieceType::*};
+    use crate::pieces::{Piece, PromotablePieceType};
     use crate::player_color::PlayerColor::*;
     use crate::square::{
         DoublePawnToSquare, EastShiftableFile, File, Square::*, WestShiftableFile,
