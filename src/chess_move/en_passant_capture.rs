@@ -1,4 +1,6 @@
+use crate::chess_move::quiet::QuietMove;
 use crate::direction::PawnCaptureDirection;
+use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::{DoublePawnToSquare, EnPassantSquare, Square};
 
@@ -11,6 +13,8 @@ pub struct EnPassantCapture {
     to: EnPassantSquare,
     /// The square of the pawn that double-jumped
     captured_pawn_square: DoublePawnToSquare,
+    /// The player doing the en-passant-capture
+    player: PlayerColor,
 }
 
 impl EnPassantCapture {
@@ -33,6 +37,7 @@ impl EnPassantCapture {
             from,
             to,
             captured_pawn_square,
+            player,
         })
     }
 
@@ -46,5 +51,28 @@ impl EnPassantCapture {
     #[must_use]
     pub const fn to(&self) -> EnPassantSquare {
         self.to
+    }
+
+    /// Get the player doing the en-passant-capture
+    #[must_use]
+    pub const fn player(&self) -> PlayerColor {
+        self.player
+    }
+
+    /// Get the captured pawn's square (the en-passant-square)
+    #[must_use]
+    pub const fn captured_square(&self) -> DoublePawnToSquare {
+        self.captured_pawn_square
+    }
+}
+
+impl From<EnPassantCapture> for QuietMove {
+    fn from(value: EnPassantCapture) -> Self {
+        Self::new(
+            value.from().into(),
+            value.to().into(),
+            PieceType::Pawn.owned_by(value.player()),
+        )
+        .expect("EnPassantCapture shouldn't have the same from and to squares")
     }
 }

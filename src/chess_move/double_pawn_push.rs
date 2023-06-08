@@ -1,3 +1,5 @@
+use crate::chess_move::quiet::QuietMove;
+use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::{DoublePawnToSquare, EnPassantSquare, File, PromotableSquare};
 use enum_map::EnumMap;
@@ -52,5 +54,16 @@ impl DoublePawnPush {
             ]);
 
         EP_SQUARES[self.player][self.file]
+    }
+}
+
+impl From<DoublePawnPush> for QuietMove {
+    fn from(value: DoublePawnPush) -> Self {
+        Self::new(
+            value.from().into(),
+            value.to().into(),
+            PieceType::Pawn.owned_by(value.player),
+        )
+        .expect("DoublePawnPush shouldn't have same from and to squares")
     }
 }
