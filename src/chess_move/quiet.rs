@@ -1,4 +1,4 @@
-use crate::pieces::PieceType;
+use crate::pieces::OwnedPiece;
 use crate::square::Square;
 
 /// Plain chess move, take a piece from a square and move it to another square
@@ -8,15 +8,15 @@ pub struct QuietMove {
     from: Square,
     /// The ending [`square`](Square) the piece moving `to`
     to: Square,
-    /// The piece moving
-    piece_type: PieceType,
+    /// The [`OwnedPiece`] moving
+    owned_piece: OwnedPiece,
 }
 
 impl QuietMove {
     /// Create a new valid [`QuietMove`]
     /// Returns [`None`] if `from` and `to` are the same
     #[must_use]
-    pub fn new(from: Square, to: Square, piece_type: PieceType) -> Option<Self> {
+    pub fn new(from: Square, to: Square, owned_piece: OwnedPiece) -> Option<Self> {
         // If moving to the same starting square this invalid
         if from == to {
             return None;
@@ -25,7 +25,7 @@ impl QuietMove {
         Some(Self {
             from,
             to,
-            piece_type,
+            owned_piece,
         })
     }
 
@@ -39,5 +39,11 @@ impl QuietMove {
     #[must_use]
     pub const fn to(&self) -> Square {
         self.to
+    }
+
+    /// Get the [piece](OwnedPiece) being moves
+    #[must_use]
+    pub const fn piece(&self) -> OwnedPiece {
+        self.owned_piece
     }
 }
