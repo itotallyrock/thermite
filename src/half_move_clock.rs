@@ -46,7 +46,8 @@ impl HalfMoveClock {
 }
 
 /// How many half-moves until a draw
-pub const HALF_MOVE_LIMIT: usize = 50;
+/// https://en.wikipedia.org/wiki/Fifty-move_rule
+pub const HALF_MOVE_LIMIT: usize = 100;
 
 #[cfg(test)]
 mod test {
@@ -67,7 +68,9 @@ mod test {
     #[test_case(10, Ok(10))]
     #[test_case(25, Ok(25))]
     #[test_case(50, Ok(50))]
-    #[test_case(51, Err(InvalidHalfMoveClock))]
+    #[test_case(51, Ok(51))]
+    #[test_case(99, Ok(99))]
+    #[test_case(100, Ok(100))]
     #[test_case(120, Err(InvalidHalfMoveClock))]
     #[test_case(250, Err(InvalidHalfMoveClock))]
     fn new_works(input: u8, expected: Result<u8, InvalidHalfMoveClock>) {
@@ -87,7 +90,9 @@ mod test {
     #[test_case(7, Ok(8))]
     #[test_case(8, Ok(9))]
     #[test_case(49, Ok(50))]
-    #[test_case(50, Err(InvalidHalfMoveClock))]
+    #[test_case(50, Ok(51))]
+    #[test_case(99, Ok(100))]
+    #[test_case(100, Err(InvalidHalfMoveClock))]
     fn increment_works(input: u8, expected: Result<u8, InvalidHalfMoveClock>) {
         let mut input = HalfMoveClock::new(PlyCount::new(input)).expect("invalid test input");
         let expected =
