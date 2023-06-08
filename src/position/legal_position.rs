@@ -5,7 +5,7 @@ use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece}
 use crate::player_color::PlayerColor;
 use crate::position::hash_history::HashHistory;
 use crate::position::position_builder::PositionBuilder;
-use crate::square::Square;
+use crate::square::{EnPassantSquare, Square};
 use crate::zobrist::ZobristHash;
 use derive_more::{AsMut, AsRef};
 use enum_iterator::all;
@@ -23,7 +23,7 @@ pub enum IllegalPosition {
 pub struct State {
     // Irrecoverable state
     pub(super) halfmove_clock: HalfMoveClock,
-    pub(super) en_passant_square: Option<Square>,
+    pub(super) en_passant_square: Option<EnPassantSquare>,
     pub(super) castles: CastleRights,
     // Move generation state
     pub(super) checkers: BoardMask,
