@@ -6,6 +6,7 @@ use subenum::subenum;
 #[subenum(
     CardinalDirection,
     OrdinalDirection,
+    PawnPushDirection,
     PawnCaptureDirection,
     WhitePawnCaptureDirection,
     BlackPawnCaptureDirection
@@ -14,10 +15,10 @@ use subenum::subenum;
 #[repr(i8)]
 pub enum Direction {
     /// Up on the board from white's perspective (towards black's back rank)
-    #[subenum(CardinalDirection)]
+    #[subenum(CardinalDirection, PawnPushDirection)]
     North = 8,
     /// Down on the board from white's perspective (towards white's back rank)
-    #[subenum(CardinalDirection)]
+    #[subenum(CardinalDirection, PawnPushDirection)]
     South = -8,
     /// Right on the board from white's perspective
     #[subenum(CardinalDirection, PawnCaptureDirection)]
@@ -37,6 +38,26 @@ pub enum Direction {
     /// Down-Right on the board from white's perspective
     #[subenum(OrdinalDirection, BlackPawnCaptureDirection)]
     SouthWest = -9,
+}
+
+impl Direction {
+    /// Flip the direction to point the opposite
+    #[must_use]
+    pub fn opposite(self) -> Self {
+        // SAFETY: Every positive variant of Direction has a negative counter-part and vice-versa
+        unsafe { std::mem::transmute(-(self as i8)) }
+    }
+}
+
+impl PawnPushDirection {
+    /// Get the [`PawnPushDirection`] for a given player
+    #[must_use]
+    pub const fn for_player(player: PlayerColor) -> Self {
+        match player {
+            PlayerColor::White => Self::North,
+            PlayerColor::Black => Self::South,
+        }
+    }
 }
 
 impl PawnCaptureDirection {
