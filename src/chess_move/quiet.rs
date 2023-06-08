@@ -46,4 +46,25 @@ impl QuietMove {
     pub const fn piece(&self) -> OwnedPiece {
         self.owned_piece
     }
+
+    /// Get a new [`QuietMove`] with the `from` and `to` [`Square`]s switched
+    /// Useful for undoing a move.
+    ///
+    /// ```
+    /// use thermite::chess_move::quiet::QuietMove;
+    /// use thermite::pieces::{Piece, PieceType};
+    /// use thermite::player_color::PlayerColor;
+    /// use thermite::square::Square::*;
+    ///
+    /// let piece = PieceType::Pawn.owned_by(PlayerColor::White);
+    /// assert_eq!(QuietMove::new(A4, A6, piece).unwrap().reverse(), QuietMove::new(A6, A4, piece).unwrap());
+    /// ```
+    #[must_use]
+    pub const fn reverse(self) -> Self {
+        Self {
+            from: self.to,
+            to: self.from,
+            owned_piece: self.owned_piece,
+        }
+    }
 }
