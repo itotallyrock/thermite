@@ -132,6 +132,24 @@ impl CastleRights {
 
         truthy_mask & *self != Self::None
     }
+
+    /// Clear the available rights (if any) for a given [player](PlayerColor)
+    ///
+    /// ```
+    /// use thermite::castles::CastleRights;
+    /// use thermite::player_color::PlayerColor;
+    ///
+    /// let mut rights = CastleRights::All;
+    ///
+    /// rights.remove_rights_for(PlayerColor::White);
+    /// assert_eq!(rights, CastleRights::BlackBoth);
+    ///
+    /// rights.remove_rights_for(PlayerColor::Black);
+    /// assert_eq!(rights, CastleRights::None);
+    /// ```
+    pub fn remove_rights_for(&mut self, player: PlayerColor) {
+        *self &= !Self::for_player(player);
+    }
 }
 
 /// Invalid string input value was provided to `CastleRights::parse`.
