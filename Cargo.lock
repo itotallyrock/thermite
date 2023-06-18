@@ -185,8 +185,8 @@ checksum = "bebd363326d05ec3e2f532ab7660680f3b02130d780c299bca73469d521bc0ed"
 
 [[package]]
 name = "subenum"
-version = "1.0.1"
-source = "git+https://github.com/itotallyrock/subenum.git#11d874964212ca9ad922c4d5f06e41a9d5b7f23a"
+version = "1.1.1"
+source = "git+https://github.com/itotallyrock/subenum.git?rev=4301f92fc3b73389a4d2904b31fbb6207af8246d#4301f92fc3b73389a4d2904b31fbb6207af8246d"
 dependencies = [
  "heck",
  "proc-macro2",
