@@ -49,7 +49,7 @@ impl Castle {
 
     /// The [rook](PieceType::Rook)'s [move](QuietMove)
     #[must_use]
-    pub(crate) fn rook_quiet(&self) -> QuietMove {
+    pub(crate) fn rook_quiet(self) -> QuietMove {
         QuietMove::new(
             self.rook_from(),
             self.rook_to(),
@@ -60,7 +60,7 @@ impl Castle {
 
     /// The [king](PieceType::King)'s [move](QuietMove)
     #[must_use]
-    pub(crate) fn king_quiet(&self) -> QuietMove {
+    pub(crate) fn king_quiet(self) -> QuietMove {
         QuietMove::new(
             self.king_from(),
             self.king_to(),
