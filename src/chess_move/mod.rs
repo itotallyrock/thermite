@@ -1,12 +1,15 @@
 use crate::chess_move::promotion::Promotion;
 use crate::pieces::{NonKingPieceType, Piece};
 use crate::square::Square;
+use capture::Capture;
 use castle::Castle;
 use core::fmt::{Display, Formatter};
 use double_pawn_push::DoublePawnPush;
 use en_passant_capture::EnPassantCapture;
 use quiet::QuietMove;
 
+/// A valid capturing chess move, a move that goes to another player's square and *captures* their [piece](crate::pieces::NonKingPieceType)
+pub mod capture;
 /// A valid castle move
 pub mod castle;
 /// A valid double pushing pawn for a [chess move](ChessMove)
@@ -33,10 +36,8 @@ pub enum ChessMove {
     },
     /// Simple capturing chess move, capture a piece on the target square moving the piece from the to square to the target square
     Capture {
-        /// The inner quiet move
-        quiet: QuietMove,
-        /// The piece being captured
-        captured_piece: NonKingPieceType,
+        /// The inner capture
+        capture: Capture,
     },
     /// Capture a pawn on its skipped square for a pawn that just double jumped
     EnPassantCapture {
@@ -65,9 +66,14 @@ pub enum ChessMove {
 impl Display for ChessMove {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         match *self {
-            Self::Quiet { quiet } | Self::Capture { quiet, .. } => {
+            Self::Quiet { quiet } => {
                 let from = quiet.from();
                 let to = quiet.to();
+                write!(f, "{from}{to}")
+            }
+            Self::Capture { capture } => {
+                let from = capture.from();
+                let to = capture.to();
                 write!(f, "{from}{to}")
             }
             Self::DoublePawnPush { pawn_push } => {
@@ -104,11 +110,8 @@ impl ChessMove {
 
     /// Create a new capture [move](ChessMove)
     #[must_use]
-    pub const fn new_capture(quiet: QuietMove, captured_piece: NonKingPieceType) -> Self {
-        Self::Capture {
-            quiet,
-            captured_piece,
-        }
+    pub const fn new_capture(capture: Capture) -> Self {
+        Self::Capture { capture }
     }
 
     /// Create a new double pawn push [move](ChessMove)
@@ -151,6 +154,7 @@ impl ChessMove {
 #[cfg(test)]
 mod test {
     use crate::castles::CastleDirection::*;
+    use crate::chess_move::capture::Capture;
     use crate::chess_move::castle::Castle;
     use crate::chess_move::double_pawn_push::DoublePawnPush;
     use crate::chess_move::en_passant_capture::EnPassantCapture;
@@ -169,8 +173,8 @@ mod test {
     #[test_case(ChessMove::new_quiet(QuietMove::new(F1, G3, Knight.owned_by(White)).unwrap()), "f1g3")]
     #[test_case(ChessMove::new_double_pawn_push(DoublePawnPush { player: White, file: File::B }), "b2b4")]
     #[test_case(ChessMove::new_double_pawn_push(DoublePawnPush { player: Black, file: File::H }), "h7h5")]
-    #[test_case(ChessMove::new_capture(QuietMove::new(E2, F3, Pawn.owned_by(White)).unwrap(), NonKingPieceType::Pawn), "e2f3")]
-    #[test_case(ChessMove::new_capture(QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), NonKingPieceType::Pawn), "d7c6")]
+    #[test_case(ChessMove::new_capture(Capture { quiet: QuietMove::new(E2, F3, Pawn.owned_by(White)).unwrap(), captured_piece: NonKingPieceType::Pawn }), "e2f3")]
+    #[test_case(ChessMove::new_capture(Capture { quiet: QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), captured_piece: NonKingPieceType::Pawn }), "d7c6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::G5, PawnCaptureDirection::West, White).unwrap()), "g5f6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::A4, PawnCaptureDirection::East, Black).unwrap()), "a4b3")]
     #[test_case(ChessMove::new_castle(Castle { direction: KingSide, player: White }), "e1g1")]
