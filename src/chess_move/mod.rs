@@ -177,10 +177,10 @@ mod test {
     #[test_case(ChessMove::new_capture(Capture { quiet: QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), captured_piece: NonKingPieceType::Pawn }), "d7c6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::G5, PawnCaptureDirection::West, White).unwrap()), "g5f6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::A4, PawnCaptureDirection::East, Black).unwrap()), "a4b3")]
-    #[test_case(ChessMove::new_castle(Castle { direction: KingSide, player: White }), "e1g1")]
-    #[test_case(ChessMove::new_castle(Castle { direction: QueenSide, player: White }), "e1c1")]
-    #[test_case(ChessMove::new_castle(Castle { direction: KingSide, player: Black }), "e8g8")]
-    #[test_case(ChessMove::new_castle(Castle { direction: QueenSide, player: Black }), "e8c8")]
+    #[test_case(ChessMove::new_castle(Castle::new(White, KingSide)), "e1g1")]
+    #[test_case(ChessMove::new_castle(Castle::new(White, QueenSide)), "e1c1")]
+    #[test_case(ChessMove::new_castle(Castle::new(Black, KingSide)), "e8g8")]
+    #[test_case(ChessMove::new_castle(Castle::new(Black, QueenSide)), "e8c8")]
     #[test_case(
         ChessMove::new_promotion(Promotion::new(PromotablePieceType::Queen, File::E, White),),
         "e7e8q"

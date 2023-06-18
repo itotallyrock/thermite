@@ -320,10 +320,10 @@ mod test {
         assert_eq!(hasher_original, hasher);
     }
 
-    #[test_case(Castle { player: PlayerColor::White, direction: CastleDirection::KingSide })]
-    #[test_case(Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide })]
-    #[test_case(Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide })]
-    #[test_case(Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide })]
+    #[test_case(Castle::new(PlayerColor::White, CastleDirection::KingSide))]
+    #[test_case(Castle::new(PlayerColor::White, CastleDirection::QueenSide))]
+    #[test_case(Castle::new(PlayerColor::Black, CastleDirection::KingSide))]
+    #[test_case(Castle::new(PlayerColor::Black, CastleDirection::QueenSide))]
     fn toggle_castle_ability_symmetric(castle: Castle) {
         let mut hasher = ZobristHash::default();
         let hasher_original = hasher;

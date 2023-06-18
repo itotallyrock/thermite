@@ -14,16 +14,19 @@ pub struct Capture {
 
 impl Capture {
     /// Get the starting square for the piece doing the capturing
+    #[must_use]
     pub const fn from(&self) -> Square {
         self.quiet.from()
     }
 
     /// Get the destination [`Square`], occupied by the [captured piece](NonKingPieceType)
+    #[must_use]
     pub const fn to(&self) -> Square {
         self.quiet.to()
     }
 
     /// Get the [piece](NonKingPieceType) being captured
+    #[must_use]
     pub const fn captured_piece(&self) -> NonKingPieceType {
         self.captured_piece
     }
