@@ -1,4 +1,5 @@
 use crate::castles::CastleDirection;
+use crate::chess_move::castle::Castle;
 use crate::pieces::{PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::square::{EnPassantSquare, Square};
@@ -53,12 +54,8 @@ impl ZobristHash {
     }
 
     /// Toggle the castle rights for a side to castle in one direction
-    pub fn toggle_castle_ability(
-        &mut self,
-        player: PlayerColor,
-        castle_direction: CastleDirection,
-    ) {
-        self.toggle(CASTLE_KEYS[castle_direction][player]);
+    pub fn toggle_castle_ability(&mut self, castle: Castle) {
+        self.toggle(CASTLE_KEYS[castle.direction()][castle.player()]);
     }
 }
 
@@ -266,6 +263,7 @@ mod test {
     use crate::square::Square;
     use crate::zobrist::ZobristHash;
 
+    use crate::chess_move::castle::Castle;
     use test_case::test_case;
 
     #[test_case(PieceType::Pawn, PlayerColor::White, Square::E2)]
@@ -322,16 +320,16 @@ mod test {
         assert_eq!(hasher_original, hasher);
     }
 
-    #[test_case(PlayerColor::White, CastleDirection::KingSide)]
-    #[test_case(PlayerColor::White, CastleDirection::QueenSide)]
-    #[test_case(PlayerColor::Black, CastleDirection::KingSide)]
-    #[test_case(PlayerColor::Black, CastleDirection::QueenSide)]
-    fn toggle_castle_ability_symmetric(player: PlayerColor, castle_direction: CastleDirection) {
+    #[test_case(Castle { player: PlayerColor::White, direction: CastleDirection::KingSide })]
+    #[test_case(Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide })]
+    #[test_case(Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide })]
+    #[test_case(Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide })]
+    fn toggle_castle_ability_symmetric(castle: Castle) {
         let mut hasher = ZobristHash::default();
         let hasher_original = hasher;
-        hasher.toggle_castle_ability(player, castle_direction);
+        hasher.toggle_castle_ability(castle);
         assert_ne!(hasher_original, hasher);
-        hasher.toggle_castle_ability(player, castle_direction);
+        hasher.toggle_castle_ability(castle);
         assert_eq!(hasher_original, hasher);
     }
 }

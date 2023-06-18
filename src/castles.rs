@@ -1,7 +1,9 @@
+use crate::chess_move::castle::Castle;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use bitmask_enum::bitmask;
 use core::str::FromStr;
+use enum_iterator::Sequence;
 use enum_map::{Enum, EnumMap};
 
 /// The square that the king for a given side moves from when castling in a given direction
@@ -30,7 +32,7 @@ pub const ROOK_TO_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, Square>
     ]);
 
 /// The direction to castle in for either side
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug, Hash)]
+#[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum CastleDirection {
     /// Castle with the rook on the same side as the king
     KingSide,
@@ -95,39 +97,26 @@ impl CastleRights {
 
     /// If the castle rights specify the ability for a side to castle in a given direction.
     ///
-    /// ```
-    /// use thermite::castles::{CastleDirection, CastleRights};
-    /// use thermite::player_color::PlayerColor;
-    /// // Test if white can king-side castle
-    /// assert_eq!(CastleRights::WhiteKing.can_castle(PlayerColor::White, CastleDirection::KingSide), true);
-    /// // Test if black can queen-side castle
-    /// assert_eq!(CastleRights::BlackQueen.can_castle(PlayerColor::Black, CastleDirection::QueenSide), true);
-    /// ```
-    ///
     /// Combination `CastleRights` such as `None` or `All` are supported as well.
-    /// ```
-    /// use thermite::castles::{CastleDirection, CastleRights};
-    /// use thermite::player_color::PlayerColor;
-    ///
-    /// // CastleRights::None is always false
-    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::White, CastleDirection::KingSide), false);
-    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::White, CastleDirection::QueenSide), false);
-    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::Black, CastleDirection::KingSide), false);
-    /// assert_eq!(CastleRights::None.can_castle(PlayerColor::Black, CastleDirection::QueenSide), false);
-    ///
-    /// // CastleRights::All is always true
-    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::White, CastleDirection::KingSide), true);
-    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::White, CastleDirection::QueenSide), true);
-    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::Black, CastleDirection::KingSide), true);
-    /// assert_eq!(CastleRights::All.can_castle(PlayerColor::Black, CastleDirection::QueenSide), true);
-    /// ```
     #[must_use]
-    pub fn can_castle(&self, side: PlayerColor, direction: CastleDirection) -> bool {
-        let truthy_mask = match (side, direction) {
-            (PlayerColor::White, CastleDirection::KingSide) => Self::WhiteKing,
-            (PlayerColor::White, CastleDirection::QueenSide) => Self::WhiteQueen,
-            (PlayerColor::Black, CastleDirection::KingSide) => Self::BlackKing,
-            (PlayerColor::Black, CastleDirection::QueenSide) => Self::BlackQueen,
+    pub fn can_castle(&self, castle: Castle) -> bool {
+        let truthy_mask = match castle {
+            Castle {
+                player: PlayerColor::White,
+                direction: CastleDirection::KingSide,
+            } => Self::WhiteKing,
+            Castle {
+                player: PlayerColor::White,
+                direction: CastleDirection::QueenSide,
+            } => Self::WhiteQueen,
+            Castle {
+                player: PlayerColor::Black,
+                direction: CastleDirection::KingSide,
+            } => Self::BlackKing,
+            Castle {
+                player: PlayerColor::Black,
+                direction: CastleDirection::QueenSide,
+            } => Self::BlackQueen,
         };
 
         truthy_mask & *self != Self::None
@@ -298,99 +287,84 @@ mod test {
         assert_eq!(castle_rights.bits, expected_repr);
     }
 
-    #[test_case(CastleRights::All, PlayerColor::White, CastleDirection::KingSide, true)]
     #[test_case(
         CastleRights::All,
-        PlayerColor::White,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::KingSide },
         true
     )]
-    #[test_case(CastleRights::All, PlayerColor::Black, CastleDirection::KingSide, true)]
     #[test_case(
         CastleRights::All,
-        PlayerColor::Black,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide },
+        true
+    )]
+    #[test_case(CastleRights::All, Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide }, true)]
+    #[test_case(
+        CastleRights::All,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide },
         true
     )]
     #[test_case(
         CastleRights::WhiteBoth,
-        PlayerColor::White,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::KingSide },
         true
     )]
     #[test_case(
         CastleRights::WhiteBoth,
-        PlayerColor::White,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide },
         true
     )]
     #[test_case(
         CastleRights::WhiteBoth,
-        PlayerColor::Black,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide },
         false
     )]
     #[test_case(
         CastleRights::WhiteBoth,
-        PlayerColor::Black,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide },
         false
     )]
     #[test_case(
         CastleRights::BlackBoth,
-        PlayerColor::White,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::KingSide },
         false
     )]
     #[test_case(
         CastleRights::BlackBoth,
-        PlayerColor::White,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide },
         false
     )]
     #[test_case(
         CastleRights::BlackBoth,
-        PlayerColor::Black,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide },
         true
     )]
     #[test_case(
         CastleRights::BlackBoth,
-        PlayerColor::Black,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide },
         true
     )]
     #[test_case(
         CastleRights::None,
-        PlayerColor::White,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::KingSide },
         false
     )]
     #[test_case(
         CastleRights::None,
-        PlayerColor::White,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::White, direction: CastleDirection::QueenSide },
         false
     )]
     #[test_case(
         CastleRights::None,
-        PlayerColor::Black,
-        CastleDirection::KingSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::KingSide },
         false
     )]
     #[test_case(
         CastleRights::None,
-        PlayerColor::Black,
-        CastleDirection::QueenSide,
+        Castle { player: PlayerColor::Black, direction: CastleDirection::QueenSide },
         false
     )]
-    fn can_castle_works(
-        rights: CastleRights,
-        player: PlayerColor,
-        direction: CastleDirection,
-        expected: bool,
-    ) {
-        assert_eq!(rights.can_castle(player, direction), expected);
+    fn can_castle_works(rights: CastleRights, castle: Castle, expected: bool) {
+        assert_eq!(rights.can_castle(castle), expected);
     }
 
     #[test_case("-", Ok(CastleRights::None))]

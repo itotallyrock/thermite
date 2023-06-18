@@ -1,5 +1,6 @@
 use crate::bitboard::BoardMask;
-use crate::castles::{CastleDirection, CastleRights};
+use crate::castles::CastleRights;
+use crate::chess_move::castle::Castle;
 use crate::half_move_clock::HalfMoveClock;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
@@ -103,11 +104,9 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             hash.toggle_en_passant_square(en_passant_square);
         }
 
-        for player in [PlayerColor::White, PlayerColor::Black] {
-            for direction in [CastleDirection::KingSide, CastleDirection::QueenSide] {
-                if castles.can_castle(player, direction) {
-                    hash.toggle_castle_ability(player, direction);
-                }
+        for castle in Castle::all() {
+            if castles.can_castle(castle) {
+                hash.toggle_castle_ability(castle);
             }
         }
 

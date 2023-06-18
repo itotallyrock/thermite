@@ -1,13 +1,14 @@
-use crate::castles::{CastleDirection, KING_FROM_SQUARES, KING_TO_SQUARES};
 use crate::chess_move::promotion::Promotion;
 use crate::pieces::{NonKingPieceType, Piece};
-use crate::player_color::PlayerColor;
 use crate::square::Square;
+use castle::Castle;
 use core::fmt::{Display, Formatter};
 use double_pawn_push::DoublePawnPush;
 use en_passant_capture::EnPassantCapture;
 use quiet::QuietMove;
 
+/// A valid castle move
+pub mod castle;
 /// A valid double pushing pawn for a [chess move](ChessMove)
 pub mod double_pawn_push;
 /// A valid capture of a pawn on its skipped square for a pawn that *just* [double jumped](DoublePawnPush)
@@ -44,10 +45,8 @@ pub enum ChessMove {
     },
     /// Castle, or swap the rook and king shifting the king towards the center if both have not been moved yet
     Castle {
-        /// The direction the king is castling towards
-        castle_direction: CastleDirection,
-        /// The player doing the castling
-        player: PlayerColor,
+        /// The inner castle
+        castle: Castle,
     },
     /// Push a pawn to the opposite side's back rank to upgrade the pawn to a [`PromotablePieceType`](crate::pieces::PromotablePieceType)
     Promotion {
@@ -81,12 +80,9 @@ impl Display for ChessMove {
                 let to = Square::from(capture.to());
                 write!(f, "{from}{to}")
             }
-            Self::Castle {
-                castle_direction,
-                player,
-            } => {
-                let from = KING_FROM_SQUARES[player];
-                let to = KING_TO_SQUARES[castle_direction][player];
+            Self::Castle { castle } => {
+                let from = castle.king_from();
+                let to = castle.king_to();
                 write!(f, "{from}{to}")
             }
             Self::Promotion { promotion } | Self::PromotingCapture { promotion, .. } => {
@@ -129,11 +125,8 @@ impl ChessMove {
 
     /// Create a new king/rook castling [move](ChessMove)
     #[must_use]
-    pub const fn new_castle(castle_direction: CastleDirection, player: PlayerColor) -> Self {
-        Self::Castle {
-            castle_direction,
-            player,
-        }
+    pub const fn new_castle(castle: Castle) -> Self {
+        Self::Castle { castle }
     }
 
     /// Create a new pawn promotion [move](ChessMove)
@@ -158,14 +151,14 @@ impl ChessMove {
 #[cfg(test)]
 mod test {
     use crate::castles::CastleDirection::*;
+    use crate::chess_move::castle::Castle;
     use crate::chess_move::double_pawn_push::DoublePawnPush;
     use crate::chess_move::en_passant_capture::EnPassantCapture;
     use crate::chess_move::promotion::Promotion;
     use crate::chess_move::quiet::QuietMove;
     use crate::chess_move::ChessMove;
     use crate::direction::PawnCaptureDirection;
-    use crate::pieces::{NonKingPieceType, PieceType::*};
-    use crate::pieces::{Piece, PromotablePieceType};
+    use crate::pieces::{NonKingPieceType, Piece, PieceType::*, PromotablePieceType};
     use crate::player_color::PlayerColor::*;
     use crate::square::{
         DoublePawnToSquare, EastShiftableFile, File, Square::*, WestShiftableFile,
@@ -180,10 +173,10 @@ mod test {
     #[test_case(ChessMove::new_capture(QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), NonKingPieceType::Pawn), "d7c6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::G5, PawnCaptureDirection::West, White).unwrap()), "g5f6")]
     #[test_case(ChessMove::new_en_passant_capture(EnPassantCapture::new(DoublePawnToSquare::A4, PawnCaptureDirection::East, Black).unwrap()), "a4b3")]
-    #[test_case(ChessMove::new_castle(KingSide, White), "e1g1")]
-    #[test_case(ChessMove::new_castle(QueenSide, White), "e1c1")]
-    #[test_case(ChessMove::new_castle(KingSide, Black), "e8g8")]
-    #[test_case(ChessMove::new_castle(QueenSide, Black), "e8c8")]
+    #[test_case(ChessMove::new_castle(Castle { direction: KingSide, player: White }), "e1g1")]
+    #[test_case(ChessMove::new_castle(Castle { direction: QueenSide, player: White }), "e1c1")]
+    #[test_case(ChessMove::new_castle(Castle { direction: KingSide, player: Black }), "e8g8")]
+    #[test_case(ChessMove::new_castle(Castle { direction: QueenSide, player: Black }), "e8c8")]
     #[test_case(
         ChessMove::new_promotion(Promotion::new(PromotablePieceType::Queen, File::E, White),),
         "e7e8q"
