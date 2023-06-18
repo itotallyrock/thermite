@@ -268,8 +268,7 @@ impl<P: Piece> OwnedPiece<P> {
 #[cfg(test)]
 mod test {
     use crate::pieces::{
-        NonKingPieceType, NonPawnPieceType, Piece, PieceType, PromotablePieceType,
-        SlidingPieceType,
+        NonKingPieceType, NonPawnPieceType, Piece, PieceType, PromotablePieceType, SlidingPieceType,
     };
     use enum_iterator::all;
 
