@@ -71,8 +71,6 @@ impl BoardMask {
     /// If a bit is set, return that [`Square`](Square) and unset the bit
     #[must_use]
     pub fn pop_square(&mut self) -> Option<Square> {
-        // ALLOW: Trailing zeros for u64 can at most be 64 which is always within u8's 255 max
-        #[allow(clippy::cast_possible_truncation)]
         let square_offset = self.0.trailing_zeros() as u8;
         let square = Square::try_from(square_offset).ok()?;
         // Remove bit

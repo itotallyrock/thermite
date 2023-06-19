@@ -186,3 +186,18 @@ impl LegalPosition {
         // TODO: Update piece square evaluation
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::fen;
+    use test_case::test_case;
+
+    #[test_case("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4")]
+    fn switch_sides_is_symmetrical(fen: &str) {
+        let original_position = fen!(fen);
+        let mut position = original_position.clone();
+        position.switch_player_to_move();
+        position.switch_player_to_move();
+        assert_eq!(position, original_position);
+    }
+}

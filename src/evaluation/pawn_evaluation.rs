@@ -29,10 +29,7 @@ impl PawnEvaluation {
     /// Get the rounded centi-pawn (1/100th of a pawn is 1 centi-pawn) representation
     #[must_use]
     pub fn centipawns(&self) -> i32 {
-        #[allow(clippy::cast_possible_truncation)]
-        {
-            (self.0 * 100.0) as i32
-        }
+        (self.0 * 100.0) as i32
     }
 }
 

@@ -159,11 +159,9 @@ impl BoardMask {
     /// Get the attack [mask](Self) for a [sliding piece](SlidingPieceType) on a [`Square`] on an [occupied board](BoardMask)
     pub fn sliding_attacks_for(piece: SlidingPieceType, square: Square, occupied: Self) -> Self {
         match piece {
-            #[allow(clippy::cast_possible_truncation)]
             SlidingPieceType::Bishop => {
                 BISHOP_ATTACKS[square][occupied.pext(BISHOP_OCCUPANCY_MASK[square]).0 as usize]
             }
-            #[allow(clippy::cast_possible_truncation)]
             SlidingPieceType::Rook => {
                 ROOK_ATTACKS[square][occupied.pext(ROOK_OCCUPANCY_MASK[square]).0 as usize]
             }

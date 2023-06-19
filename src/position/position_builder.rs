@@ -1,10 +1,11 @@
 use crate::castles::CastleRights;
 use crate::half_move_clock::HalfMoveClock;
-use crate::pieces::{OwnedPiece, PlacedPiece};
+use crate::pieces::{OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::ply_count::PlyCount;
-use crate::square::{EnPassantSquare, Square};
-use enum_map::EnumMap;
+use crate::square::{EnPassantSquare, File, Square};
+use core::str::FromStr;
+use enum_map::{Enum, EnumMap};
 
 /// Allows setting up a board and performing pseudo-legal moves without checking legality.
 /// With the end goal being to [`convert`](std::convert) this into a [`LegalPosition`](crate::position::LegalPosition)
@@ -71,6 +72,167 @@ impl Default for PositionBuilder {
             castle_rights: CastleRights::None,
             en_passant_square: None,
         }
+    }
+}
+
+/// Errors that can occur while parsing a FEN string.  Typically if unable to parse or it represents an invalid chess position.
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum FenParseError {
+    /// Contains an illegal or unexpected characater
+    InvalidChar,
+    /// If the FEN string is missing the position (an empty string)
+    MissingPosition,
+    /// Missing the side to move, 'w' or 'b' after the position.
+    MissingSide,
+    /// Missing castle rights, 'KQkq', 'Kq', etc, '-' after side to move.
+    MissingCastleRights,
+    /// Missing the en-passant square after the castle rights
+    MissingEnPassant,
+    /// Position segment contained more rows or columns than expected
+    InvalidBoardDimensions,
+    /// Side to move segment wasn't a valid side to move 'w' or 'b'
+    IllegalSideChar,
+    /// If the en-passant square is not a valid en-passant square (ranks 3 and 6) or cannot be parsed.
+    IllegalEnPassant,
+    /// If the castle rights are not a valid UCI representation (`-`, `KQkq`, `KQk`, `k`, etc)
+    IllegalCastleRights,
+    /// If the halfmove clock isn't a valid number or is out of bounds
+    IllegalHalfmoveClock,
+    /// If the full move counter isn't a valid number or is out of bounds
+    IllegalFullmoveCounter,
+}
+
+/// A parsed positional char from a FEN string
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+enum FenPositionChar {
+    /// A number of squares within a rank to skip before the next piece
+    RankOffset(u8),
+    /// A slash indicating the end of the current rank
+    NextRank,
+    /// A [player](PlayerColor)s [piece](PlacedPiece) on the board
+    Piece(OwnedPiece),
+}
+
+impl TryFrom<char> for FenPositionChar {
+    type Error = FenParseError;
+
+    fn try_from(fen_char: char) -> Result<Self, Self::Error> {
+        match fen_char {
+            '0'..='9' => Ok(Self::RankOffset(fen_char.to_digit(10).unwrap() as u8)),
+            '/' => Ok(Self::NextRank),
+            'p' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::White))),
+            'P' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::Black))),
+            'n' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::White))),
+            'N' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::Black))),
+            'b' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::White))),
+            'B' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::Black))),
+            'r' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::White))),
+            'R' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::Black))),
+            'q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::White))),
+            'Q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::Black))),
+            'k' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::White))),
+            'K' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::Black))),
+            _ => Err(FenParseError::InvalidChar),
+        }
+    }
+}
+
+/// Parse a known legal FEN into a [`LegalPosition`], panicking otherwise
+#[macro_export]
+macro_rules! fen {
+    ($fen:expr) => {{
+        use $crate::position::{LegalPosition, PositionBuilder};
+        let position_builder = $fen.parse::<PositionBuilder>().unwrap();
+
+        LegalPosition::try_from(position_builder).unwrap()
+    }};
+}
+
+impl FromStr for PositionBuilder {
+    type Err = FenParseError;
+
+    fn from_str(fen: &str) -> Result<Self, Self::Err> {
+        let mut fen_chunks = fen.split_ascii_whitespace().fuse();
+        let builder = fen_chunks
+            .next()
+            .ok_or(FenParseError::MissingPosition)?
+            .chars()
+            .map_while(|c| FenPositionChar::try_from(c).ok())
+            .try_fold(
+                (Self::default(), Square::A8 as u8),
+                |(mut builder, mut square_offset), fen_char| {
+                    const RANK_OFFSET: u8 = 2 * (File::LENGTH as u8);
+                    match fen_char {
+                        FenPositionChar::RankOffset(offset) => {
+                            square_offset += offset;
+                        }
+                        FenPositionChar::NextRank => {
+                            square_offset -= RANK_OFFSET;
+                        }
+                        FenPositionChar::Piece(piece) => {
+                            let placed_piece = piece.placed_on(
+                                Square::try_from(square_offset)
+                                    .ok()
+                                    .ok_or(FenParseError::InvalidBoardDimensions)?,
+                            );
+                            builder = builder.with_piece(placed_piece);
+                            square_offset += 1;
+                        }
+                    }
+
+                    Ok((builder, square_offset))
+                },
+            )
+            .map(|(builder, _)| builder)?;
+
+        // Read side to move
+        let starting_player = fen_chunks.next().map_or_else(
+            || Err(FenParseError::MissingSide),
+            |s| match s {
+                "w" | "W" => Ok(PlayerColor::White),
+                "b" | "B" => Ok(PlayerColor::Black),
+                _ => Err(FenParseError::IllegalSideChar),
+            },
+        )?;
+        let mut builder = builder.with_starting_player(starting_player);
+
+        // Read castle rights
+        if let Some(castle_rights) = fen_chunks
+            .next()
+            .and_then(|s| s.parse::<CastleRights>().ok())
+        {
+            builder = builder.with_castle_rights(castle_rights);
+        }
+
+        // Read en passant square
+        if let Some(en_passant_square) = fen_chunks
+            .next()
+            .and_then(|s| s.parse::<Square>().ok())
+            .and_then(|s| EnPassantSquare::try_from(s).ok())
+        {
+            builder = builder.with_en_passant_square(en_passant_square);
+        }
+
+        // Read half move clock
+        if let Some(halfmove_clock) = fen_chunks
+            .next()
+            .and_then(|s| s.parse::<u8>().ok())
+            .map(PlyCount::new)
+            .and_then(|s| HalfMoveClock::new(s).ok())
+        {
+            builder = builder.with_halfmove_clock(halfmove_clock);
+        }
+
+        // Read full move counter
+        if let Some(fullmove_count) = fen_chunks
+            .next()
+            .and_then(|s| s.parse::<u8>().ok())
+            .map(PlyCount::new)
+        {
+            builder = builder.with_fullmove_count(fullmove_count);
+        }
+
+        Ok(builder)
     }
 }
 

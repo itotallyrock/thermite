@@ -98,7 +98,6 @@ impl Square {
     #[allow(clippy::missing_panics_doc)]
     #[must_use]
     pub fn new(file: File, rank: Rank) -> Self {
-        #[allow(clippy::cast_possible_truncation)]
         Self::try_from((rank as u8) * (File::LENGTH as u8) + (file as u8)).unwrap()
     }
 
@@ -151,11 +150,7 @@ impl Square {
     #[must_use]
     pub const fn file(self) -> File {
         // SAFETY: Because this value is mod File::LENGTH it will always be a valid discriminant for it
-        // ALLOW: truncation is not possible when File::LENGTH is under 255 and 8 is well under
-        #[allow(clippy::cast_possible_truncation)]
-        unsafe {
-            core::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8)
-        }
+        unsafe { core::mem::transmute::<u8, File>((self as u8) % File::LENGTH as u8) }
     }
 
     /// Try to add an offset to a square

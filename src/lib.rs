@@ -6,7 +6,12 @@
     clippy::cargo,
     clippy::style
 )]
-#![allow(clippy::module_name_repetitions)]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
