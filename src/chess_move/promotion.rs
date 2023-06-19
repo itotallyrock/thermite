@@ -43,7 +43,7 @@ impl Promotion {
 
     /// Create a new east capture promotion
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_east_capture(
+    pub(crate) fn new_east_capture(
         piece: PromotablePieceType,
         starting_file: EastShiftableFile,
         player: PlayerColor,
@@ -67,7 +67,7 @@ impl Promotion {
 
     /// Create a new west capture promotion
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_west_capture(
+    pub(crate) fn new_west_capture(
         piece: PromotablePieceType,
         starting_file: WestShiftableFile,
         player: PlayerColor,
