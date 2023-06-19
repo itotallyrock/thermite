@@ -108,8 +108,11 @@ impl LegalPosition {
         self.update_move_gen_masks();
     }
 
-    /// TODO
+    /// Force re-updating all state masks from the current board arrangement
+    /// Used when importing a PositionBuilder after pieces have been added, before the legality check.
     pub(in crate::position) fn update_masks(&mut self) {
+        // All of the logic we want is inside switch_perspectives, but we don't want the added
+        // side-effect of changing the player to move so we do that first.
         self.switch_player_to_move();
         self.switch_perspectives();
     }
