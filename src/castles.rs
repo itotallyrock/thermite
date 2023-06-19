@@ -36,7 +36,10 @@ pub const ROOK_TO_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, Square>
 pub const UNATTACKED_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, BoardMask>> =
     EnumMap::from_array([
         EnumMap::from_array([BoardMask(0x6), BoardMask(0x70)]),
-        EnumMap::from_array([BoardMask(0x0600_0000_0000_0000), BoardMask(0x7000_0000_0000_0000)]),
+        EnumMap::from_array([
+            BoardMask(0x0600_0000_0000_0000),
+            BoardMask(0x7000_0000_0000_0000),
+        ]),
     ]);
 
 /// The direction to castle in for either side
