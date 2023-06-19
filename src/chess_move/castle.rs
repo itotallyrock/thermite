@@ -120,3 +120,20 @@ impl Castle {
         all::<CastleDirection>().map(move |direction| Self { player, direction })
     }
 }
+
+/// Container for the pair of quiet moves (king and rook) required to castle
+pub(crate) struct CastleQuietMoves {
+    pub(crate) rook_quiet: QuietMove,
+    pub(crate) king_quiet: QuietMove,
+}
+
+impl CastleQuietMoves {
+    /// Get the quiet moves for a [`Castle`] move
+    #[must_use]
+    pub fn new(castle: Castle) -> Self {
+        Self {
+            rook_quiet: castle.rook_quiet(),
+            king_quiet: castle.king_quiet(),
+        }
+    }
+}

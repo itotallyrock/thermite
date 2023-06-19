@@ -5,6 +5,7 @@ use crate::half_move_clock::HalfMoveClock;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::position::hash_history::HashHistory;
+use crate::position::material_evaluation::MaterialEvaluation;
 use crate::position::position_builder::PositionBuilder;
 use crate::square::{EnPassantSquare, Square};
 use crate::zobrist::ZobristHash;
@@ -35,9 +36,10 @@ pub struct State {
 
 /// A position known to be valid and legal in standard chess.
 /// Keeps track of [`state`](State) to maintain legality as the board is mutated.
-#[derive(Clone, Eq, PartialEq, Debug, AsRef, AsMut)]
+#[derive(Clone, PartialEq, Debug, AsRef, AsMut)]
 pub struct LegalPosition {
     pub(super) hash: ZobristHash,
+    pub(super) material_eval: MaterialEvaluation,
     pub(super) player_to_move: PlayerColor,
     pub(super) pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
     pub(super) side_masks: EnumMap<PlayerColor, BoardMask>,
@@ -59,7 +61,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             ..
         } = position;
         // Construct most of the position fields by iterating over all of the squares with pieces
-        let (pieces_masks, side_masks, king_squares, mut hash) = squares
+        let (pieces_masks, side_masks, king_squares, material_eval, mut hash) = squares
             .iter()
             .filter_map(|(square, piece)| piece.map(|owned_piece| owned_piece.placed_on(square)))
             .fold(
@@ -67,9 +69,17 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                     EnumMap::<NonKingPieceType, BoardMask>::default(),
                     EnumMap::<PlayerColor, BoardMask>::default(),
                     EnumMap::<PlayerColor, Option<Square>>::default(),
+                    MaterialEvaluation::new(),
                     ZobristHash::default(),
                 ),
-                |(mut pieces_masks, mut side_masks, mut king_squares, mut hash), placed_piece| {
+                |(
+                    mut pieces_masks,
+                    mut side_masks,
+                    mut king_squares,
+                    mut material_eval,
+                    mut hash,
+                ),
+                 placed_piece| {
                     let PlacedPiece {
                         square,
                         owned_piece: OwnedPiece { piece, player },
@@ -88,10 +98,11 @@ impl TryFrom<PositionBuilder> for LegalPosition {
                         },
                         |non_king_piece| {
                             pieces_masks[non_king_piece] |= square_mask;
+                            material_eval.add_piece(non_king_piece.owned_by(player));
                         },
                     );
 
-                    (pieces_masks, side_masks, king_squares, hash)
+                    (pieces_masks, side_masks, king_squares, material_eval, hash)
                 },
             );
 
@@ -139,8 +150,9 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         )?;
 
         // Create the position that might still have some invalid states
-        let pseudo_legal_position = Self {
+        let mut pseudo_legal_position = Self {
             hash,
+            material_eval,
             player_to_move,
             pieces_masks,
             side_masks,
@@ -149,7 +161,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
             hash_history,
         };
 
-        // TODO: Update state
+        pseudo_legal_position.update_masks();
         // TODO: Check legality (ie. back rank pawns)
 
         Ok(pseudo_legal_position)

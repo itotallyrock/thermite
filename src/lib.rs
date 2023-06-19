@@ -20,6 +20,8 @@ pub mod castles;
 pub mod chess_move;
 /// Generalized directional movement on the board
 pub mod direction;
+/// The checkmate/checkmated plies or the approximate material/positional advantage for a given side
+pub mod evaluation;
 /// A clock for keeping track of half moves without a capture or pawn push before a draw
 pub mod half_move_clock;
 /// A counter for the sum of the number of a piece on a board
