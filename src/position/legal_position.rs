@@ -230,4 +230,27 @@ impl LegalPosition {
     pub fn empty_mask(&self) -> BoardMask {
         !self.occupied_mask()
     }
+
+    /// Compute a [mask](BoardMask) of attackers for all [sides](PlayerColor) that can target a given [`Square`], given a set of [blockers](BoardMask)
+    pub fn attackers_to(&self, target: Square, occupied_mask: BoardMask) -> BoardMask {
+        let square_mask: BoardMask = target.to_mask();
+
+        let pawns = self.piece_mask(NonKingPieceType::Pawn);
+        let white_pawns = pawns & self.side_masks[PlayerColor::White];
+        let black_pawns = pawns & self.side_masks[PlayerColor::Black];
+        let knights = self.piece_mask(NonKingPieceType::Knight);
+        let queens = self.piece_mask(NonKingPieceType::Queen);
+        let rooks_and_queens = self.piece_mask(NonKingPieceType::Rook) | queens;
+        let bishops_and_queens = self.piece_mask(NonKingPieceType::Bishop) | queens;
+        let kings = self.king_squares.values().fold(BoardMask::EMPTY, |mask, king_square| mask | king_square.to_mask());
+
+        let white_pawn_attacks = square_mask.pawn_attacks(PlayerColor::Black) & white_pawns;
+        let black_pawn_attacks = square_mask.pawn_attacks(PlayerColor::White) & black_pawns;
+        let knight_attacks = square_mask.knight_attacks() & knights;
+        let rook_attacks = square_mask.cardinal_sliding_attacks(occupied_mask) & rooks_and_queens;
+        let bishop_attacks = square_mask.ordinal_sliding_attacks(occupied_mask) & bishops_and_queens;
+        let king_attacks = square_mask.king_attacks() & kings;
+
+        white_pawn_attacks | black_pawn_attacks | knight_attacks | rook_attacks | bishop_attacks | king_attacks
+    }
 }
