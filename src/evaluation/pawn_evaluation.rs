@@ -31,7 +31,7 @@ impl PawnEvaluation {
     pub fn centipawns(&self) -> i32 {
         #[allow(clippy::cast_possible_truncation)]
         {
-            (self.0 * 100.0).round() as i32
+            (self.0 * 100.0) as i32
         }
     }
 }
