@@ -13,7 +13,7 @@ pub struct PromotingCapture {
 impl PromotingCapture {
     /// Create a new promoting capture
     #[cfg(test)]
-    pub(crate) fn new(promotion: Promotion, captured_piece: NonKingPieceType) -> Self {
+    pub(crate) const fn new(promotion: Promotion, captured_piece: NonKingPieceType) -> Self {
         Self {
             promotion,
             captured_piece,

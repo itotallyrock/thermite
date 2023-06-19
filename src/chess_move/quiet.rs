@@ -3,7 +3,7 @@ use crate::square::Square;
 
 /// Plain chess move, take a piece from a square and move it to another square
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct QuietMove {
+pub struct Quiet {
     /// The starting [`square`](Square) the piece is moving `from`
     from: Square,
     /// The ending [`square`](Square) the piece moving `to`
@@ -12,11 +12,11 @@ pub struct QuietMove {
     owned_piece: OwnedPiece,
 }
 
-impl QuietMove {
-    /// Create a new valid [`QuietMove`]
+impl Quiet {
+    /// Create a new valid [`Quiet`]
     /// Returns [`None`] if `from` and `to` are the same
     #[must_use]
-    pub fn new(from: Square, to: Square, owned_piece: OwnedPiece) -> Option<Self> {
+    pub(crate) fn new(from: Square, to: Square, owned_piece: OwnedPiece) -> Option<Self> {
         // If moving to the same starting square this invalid
         if from == to {
             return None;
@@ -47,18 +47,8 @@ impl QuietMove {
         self.owned_piece
     }
 
-    /// Get a new [`QuietMove`] with the `from` and `to` [`Square`]s switched
+    /// Get a new [`Quiet`] with the `from` and `to` [`Square`]s switched
     /// Useful for undoing a move.
-    ///
-    /// ```
-    /// use thermite::chess_move::quiet::QuietMove;
-    /// use thermite::pieces::{Piece, PieceType};
-    /// use thermite::player_color::PlayerColor;
-    /// use thermite::square::Square::*;
-    ///
-    /// let piece = PieceType::Pawn.owned_by(PlayerColor::White);
-    /// assert_eq!(QuietMove::new(A4, A6, piece).unwrap().reverse(), QuietMove::new(A6, A4, piece).unwrap());
-    /// ```
     #[must_use]
     pub const fn reverse(self) -> Self {
         Self {
@@ -66,5 +56,23 @@ impl QuietMove {
             to: self.from,
             owned_piece: self.owned_piece,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::chess_move::quiet::Quiet;
+    use crate::pieces::{OwnedPiece, Piece, PieceType::*};
+    use crate::player_color::PlayerColor::{Black, White};
+    use crate::square::{Square, Square::*};
+    use test_case::test_case;
+
+    #[test_case(Pawn.owned_by(White), A4, A6)]
+    #[test_case(Pawn.owned_by(Black), B7, H1)]
+    fn reverse_works(piece: OwnedPiece, from: Square, to: Square) {
+        assert_eq!(
+            Quiet::new(from, to, piece).unwrap().reverse(),
+            Quiet::new(to, from, piece).unwrap()
+        );
     }
 }

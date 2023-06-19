@@ -1,4 +1,4 @@
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::direction::PawnCaptureDirection;
 use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
@@ -22,7 +22,7 @@ impl EnPassantCapture {
     /// Returns [`None`] if direction would shift off of the board.
     #[allow(clippy::missing_panics_doc)]
     #[must_use]
-    pub fn new(
+    pub(crate) fn new(
         from: DoublePawnToSquare,
         direction: PawnCaptureDirection,
         player: PlayerColor,
@@ -66,7 +66,7 @@ impl EnPassantCapture {
     }
 }
 
-impl From<EnPassantCapture> for QuietMove {
+impl From<EnPassantCapture> for Quiet {
     fn from(value: EnPassantCapture) -> Self {
         Self::new(
             value.from().into(),

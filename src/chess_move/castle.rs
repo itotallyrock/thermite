@@ -3,7 +3,7 @@ use crate::castles::{
     CastleDirection, CastleRights, KING_FROM_SQUARES, KING_TO_SQUARES, ROOK_FROM_SQUARES,
     ROOK_TO_SQUARES, UNATTACKED_SQUARES,
 };
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
@@ -48,10 +48,10 @@ impl Castle {
         ROOK_TO_SQUARES[self.direction][self.player]
     }
 
-    /// The [rook](PieceType::Rook)'s [move](QuietMove)
+    /// The [rook](PieceType::Rook)'s [move](Quiet)
     #[must_use]
-    pub(crate) fn rook_quiet(self) -> QuietMove {
-        QuietMove::new(
+    pub(crate) fn rook_quiet(self) -> Quiet {
+        Quiet::new(
             self.rook_from(),
             self.rook_to(),
             PieceType::Rook.owned_by(self.player()),
@@ -59,10 +59,10 @@ impl Castle {
         .expect("rook quiet from and to squares are different")
     }
 
-    /// The [king](PieceType::King)'s [move](QuietMove)
+    /// The [king](PieceType::King)'s [move](Quiet)
     #[must_use]
-    pub(crate) fn king_quiet(self) -> QuietMove {
-        QuietMove::new(
+    pub(crate) fn king_quiet(self) -> Quiet {
+        Quiet::new(
             self.king_from(),
             self.king_to(),
             PieceType::King.owned_by(self.player()),
@@ -123,8 +123,8 @@ impl Castle {
 
 /// Container for the pair of quiet moves (king and rook) required to castle
 pub(crate) struct CastleQuietMoves {
-    pub(crate) rook_quiet: QuietMove,
-    pub(crate) king_quiet: QuietMove,
+    pub(crate) rook_quiet: Quiet,
+    pub(crate) king_quiet: Quiet,
 }
 
 impl CastleQuietMoves {

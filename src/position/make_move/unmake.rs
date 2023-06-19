@@ -9,16 +9,16 @@ use crate::chess_move::double_pawn_push::DoublePawnPush;
 use crate::chess_move::en_passant_capture::EnPassantCapture;
 use crate::chess_move::promoting_capture::PromotingCapture;
 use crate::chess_move::promotion::Promotion;
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::chess_move::ChessMove;
 use crate::pieces::{NonKingPieceType, Piece, PieceType};
 use crate::position::{LegalPosition, LegalPositionState};
 use crate::square::EnPassantSquare;
 
 impl LegalPosition {
-    /// Undo a [`QuietMove`]
+    /// Undo a [`Quiet`]
     /// - Move the piece back to its starting [`Square`](square::Square)
-    fn unmake_quiet(&mut self, quiet: QuietMove) {
+    fn unmake_quiet(&mut self, quiet: Quiet) {
         self.move_piece(quiet.reverse());
     }
 
@@ -30,7 +30,7 @@ impl LegalPosition {
         pawn_push: DoublePawnPush,
         previous_en_passant: Option<EnPassantSquare>,
     ) {
-        let quiet: QuietMove = pawn_push.into();
+        let quiet: Quiet = pawn_push.into();
         self.unmake_quiet(quiet);
         if let Some(previous_en_passant) = previous_en_passant {
             self.set_en_passant(previous_en_passant);
@@ -42,7 +42,7 @@ impl LegalPosition {
     /// Undo a capture move
     /// - Move the piece doing the capturing back to its starting [`Square`](square::Square)
     fn unmake_capture(&mut self, capture: Capture) {
-        let quiet: QuietMove = capture.into();
+        let quiet: Quiet = capture.into();
         let opposite_player = quiet.piece().player.switch();
         let captured_piece = PieceType::from(capture.captured_piece())
             .owned_by(opposite_player)
@@ -55,7 +55,7 @@ impl LegalPosition {
     /// - Move the [`Pawn`](crate::pieces::PieceType::Pawn) back to its starting [`Square`](square::Square)
     /// - Add the captured [`Pawn`](crate::pieces::PieceType::Pawn) back
     fn unmake_en_passant_capture(&mut self, capture: EnPassantCapture) {
-        let quiet: QuietMove = capture.into();
+        let quiet: Quiet = capture.into();
         let opposite_player = quiet.piece().player.switch();
         let captured_pawn = PieceType::Pawn
             .owned_by(opposite_player)
@@ -128,5 +128,54 @@ impl LegalPosition {
         self.decrement_halfmove_clock();
         // Reset state from previous move
         self.state = previous_state;
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::chess_move::{
+        capture::Capture, double_pawn_push::DoublePawnPush, quiet::Quiet, ChessMove,
+    };
+    use crate::fen;
+    use crate::pieces::{
+        NonKingPieceType, Piece,
+        PieceType::{King, Knight, Pawn, Queen},
+    };
+    use crate::player_color::PlayerColor::{Black, White};
+    use crate::square::{
+        File,
+        Square::{B1, C3, E2, E3, F2, F3, G1, G3, G4, G7, H4, H5, H6},
+    };
+    use test_case::test_case;
+
+    const STARTPOS: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const POS_1_MATE_IN_THREE_W: &str = "r7/6Q1/2pp4/p6k/1qP1P3/6P1/P4PK1/8 w - - 0 1";
+    const POS_1_MATE_IN_THREE_B: &str = "r7/6Q1/2pp4/p6k/1qP1P1P1/8/P4PK1/8 b - - 0 1";
+    const POS_1_MATE_IN_TWO_W: &str = "r7/6Q1/2pp4/p7/1qP1P1Pk/8/P4PK1/8 w - - 1 2";
+    const POS_1_MATE_IN_TWO_B: &str = "r7/8/2pp3Q/p7/1qP1P1Pk/8/P4PK1/8 b - - 2 2";
+    const POS_1_MATE_IN_ONE_W: &str = "r7/8/2pp3Q/p7/1qP1P1k1/8/P4PK1/8 w - - 0 3";
+
+    #[test_case(
+        STARTPOS,
+        ChessMove::DoublePawnPush(DoublePawnPush::new(White, File::E))
+    )]
+    #[test_case(STARTPOS, ChessMove::Quiet(Quiet::new(E2, E3, Pawn.owned_by(White)).unwrap()))]
+    #[test_case(STARTPOS, ChessMove::Quiet(Quiet::new(B1, C3, Knight.owned_by(White)).unwrap()))]
+    #[test_case(STARTPOS, ChessMove::Quiet(Quiet::new(G1, F3, Knight.owned_by(White)).unwrap()))]
+    #[test_case(POS_1_MATE_IN_THREE_W, ChessMove::Quiet(Quiet::new(G3, G4, Pawn.owned_by(White)).unwrap()))]
+    #[test_case(POS_1_MATE_IN_THREE_B, ChessMove::Quiet(Quiet::new(H5, H4, King.owned_by(Black)).unwrap()))]
+    #[test_case(POS_1_MATE_IN_TWO_W, ChessMove::Quiet(Quiet::new(G7, H6, Queen.owned_by(White)).unwrap()))]
+    #[test_case(POS_1_MATE_IN_TWO_B, ChessMove::Capture(Capture::new(Quiet::new(H4, G4, King.owned_by(Black)).unwrap(), NonKingPieceType::Pawn)))]
+    #[test_case(POS_1_MATE_IN_ONE_W, ChessMove::Quiet(Quiet::new(F2, F3, Pawn.owned_by(White)).unwrap()))]
+    // TODO: Test castling
+    // TODO: Test en passant capture
+    // TODO: Test promotion
+    // TODO: Test promoting capture
+    fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
+        let expected = fen!(starting_fen);
+        let mut board = expected.clone();
+        let state = board.make_move(chess_move);
+        board.unmake_move(chess_move, state);
+        assert_eq!(board, expected, "{board:#?} != {expected:#?}");
     }
 }

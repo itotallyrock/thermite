@@ -7,7 +7,7 @@ use crate::chess_move::double_pawn_push::DoublePawnPush;
 use crate::chess_move::en_passant_capture::EnPassantCapture;
 use crate::chess_move::promoting_capture::PromotingCapture;
 use crate::chess_move::promotion::Promotion;
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::chess_move::ChessMove;
 use crate::pieces::{
     NonKingPieceType, NonPawnPieceType, Piece, PieceType, PlacedPiece, SlidingPieceType,
@@ -139,7 +139,7 @@ impl LegalPosition {
 
     /// Make a normal from-to move, that doesn't capture or promote or have any special state handling (ie. double-pawn-push)
     /// Also invalidates castle rights if the piece moving is a [king](PieceType::King) or [rook](PieceType::Rook)
-    fn make_quiet(&mut self, quiet: QuietMove) {
+    fn make_quiet(&mut self, quiet: Quiet) {
         // Move the piece
         self.move_piece(quiet);
 
@@ -169,7 +169,7 @@ impl LegalPosition {
     /// # Panics
     /// Will panic during debug mode when the original square doesn't have the expected piece or the target square doesn't have the expected captured-piece for the opposite side
     fn make_capture(&mut self, capture: Capture) {
-        let quiet: QuietMove = capture.into();
+        let quiet: Quiet = capture.into();
         let captured_piece = capture
             .captured_piece()
             .owned_by(quiet.piece().player.switch())

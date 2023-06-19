@@ -1,4 +1,4 @@
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::position::LegalPosition;
 use crate::square::EnPassantSquare;
@@ -141,7 +141,7 @@ impl LegalPosition {
     ///
     /// # Panics
     /// Will panic in debug mode if moving from a square not owned by the side or to an occupied square.
-    fn move_piece(&mut self, quiet: QuietMove) {
+    fn move_piece(&mut self, quiet: Quiet) {
         let from = quiet.from();
         let to = quiet.to();
         let owned_piece = quiet.piece();

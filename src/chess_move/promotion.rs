@@ -27,7 +27,7 @@ impl Promotion {
 
     /// Create a new push promotion
     #[allow(clippy::missing_panics_doc)]
-    pub fn new(piece: PromotablePieceType, file: File, player: PlayerColor) -> Self {
+    pub(crate) fn new(piece: PromotablePieceType, file: File, player: PlayerColor) -> Self {
         let from = Square::new(file, Self::FROM_RANK[player])
             .try_into()
             .unwrap();

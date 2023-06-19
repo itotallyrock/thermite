@@ -1,4 +1,4 @@
-use crate::chess_move::quiet::QuietMove;
+use crate::chess_move::quiet::Quiet;
 use crate::pieces::{Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::square::{DoublePawnToSquare, EnPassantSquare, File, PromotableSquare};
@@ -8,12 +8,17 @@ use enum_map::EnumMap;
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct DoublePawnPush {
     /// The player doing the pawn pushing, the owner of the piece
-    pub player: PlayerColor,
+    player: PlayerColor,
     /// The file the pawn is pushing along
-    pub file: File,
+    file: File,
 }
 
 impl DoublePawnPush {
+    /// Create a new [`DoublePawnPush`] for a given [player](PlayerColor) moving a [`Pawn`](pieces::PieceType::Pawn) on a [`File`]
+    #[must_use]
+    pub(crate) const fn new(player: PlayerColor, file: File) -> Self {
+        Self { player, file }
+    }
     /// The starting [`square`](crate::square::Square) the pawn is moving `from`
     #[must_use]
     pub fn from(&self) -> PromotableSquare {
@@ -57,7 +62,7 @@ impl DoublePawnPush {
     }
 }
 
-impl From<DoublePawnPush> for QuietMove {
+impl From<DoublePawnPush> for Quiet {
     fn from(value: DoublePawnPush) -> Self {
         Self::new(
             value.from().into(),

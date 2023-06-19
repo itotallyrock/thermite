@@ -7,7 +7,7 @@ use core::fmt::{Display, Formatter};
 use double_pawn_push::DoublePawnPush;
 use en_passant_capture::EnPassantCapture;
 use promoting_capture::PromotingCapture;
-use quiet::QuietMove;
+use quiet::Quiet;
 
 /// A valid capturing chess move, a move that goes to another player's square and *captures* their [piece](crate::pieces::NonKingPieceType)
 pub mod capture;
@@ -28,7 +28,7 @@ pub mod quiet;
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum ChessMove {
     /// Plain chess move, take a piece from a square and move it to another square
-    Quiet(QuietMove),
+    Quiet(Quiet),
     /// Special starting rank unobstructed two square pawn push
     DoublePawnPush(DoublePawnPush),
     /// Simple capturing chess move, capture a piece on the target square moving the piece from the to square to the target square
@@ -97,7 +97,7 @@ mod test {
     use crate::chess_move::en_passant_capture::EnPassantCapture;
     use crate::chess_move::promoting_capture::PromotingCapture;
     use crate::chess_move::promotion::Promotion;
-    use crate::chess_move::quiet::QuietMove;
+    use crate::chess_move::quiet::Quiet;
     use crate::chess_move::ChessMove;
     use crate::direction::PawnCaptureDirection;
     use crate::pieces::{NonKingPieceType, Piece, PieceType::*, PromotablePieceType};
@@ -107,12 +107,12 @@ mod test {
     };
     use test_case::test_case;
 
-    #[test_case(ChessMove::Quiet(QuietMove::new(E4, E5, Pawn.owned_by(White)).unwrap()), "e4e5")]
-    #[test_case(ChessMove::Quiet(QuietMove::new(F1, G3, Knight.owned_by(White)).unwrap()), "f1g3")]
-    #[test_case(ChessMove::DoublePawnPush(DoublePawnPush { player: White, file: File::B }), "b2b4")]
-    #[test_case(ChessMove::DoublePawnPush(DoublePawnPush { player: Black, file: File::H }), "h7h5")]
-    #[test_case(ChessMove::Capture(Capture { quiet: QuietMove::new(E2, F3, Pawn.owned_by(White)).unwrap(), captured_piece: NonKingPieceType::Pawn }), "e2f3")]
-    #[test_case(ChessMove::Capture(Capture { quiet: QuietMove::new(D7, C6, Pawn.owned_by(Black)).unwrap(), captured_piece: NonKingPieceType::Pawn }), "d7c6")]
+    #[test_case(ChessMove::Quiet(Quiet::new(E4, E5, Pawn.owned_by(White)).unwrap()), "e4e5")]
+    #[test_case(ChessMove::Quiet(Quiet::new(F1, G3, Knight.owned_by(White)).unwrap()), "f1g3")]
+    #[test_case(ChessMove::DoublePawnPush(DoublePawnPush::new(White, File::B)), "b2b4")]
+    #[test_case(ChessMove::DoublePawnPush(DoublePawnPush::new(Black, File::H)), "h7h5")]
+    #[test_case(ChessMove::Capture(Capture::new(Quiet::new(E2, F3, Pawn.owned_by(White)).unwrap(), NonKingPieceType::Pawn)), "e2f3")]
+    #[test_case(ChessMove::Capture(Capture::new(Quiet::new(D7, C6, Pawn.owned_by(Black)).unwrap(), NonKingPieceType::Pawn)), "d7c6")]
     #[test_case(ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::G5, PawnCaptureDirection::West, White).unwrap()), "g5f6")]
     #[test_case(ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::A4, PawnCaptureDirection::East, Black).unwrap()), "a4b3")]
     #[test_case(ChessMove::Castle(Castle::new(White, KingSide)), "e1g1")]
