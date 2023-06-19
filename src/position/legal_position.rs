@@ -242,15 +242,26 @@ impl LegalPosition {
         let queens = self.piece_mask(NonKingPieceType::Queen);
         let rooks_and_queens = self.piece_mask(NonKingPieceType::Rook) | queens;
         let bishops_and_queens = self.piece_mask(NonKingPieceType::Bishop) | queens;
-        let kings = self.king_squares.values().fold(BoardMask::EMPTY, |mask, king_square| mask | king_square.to_mask());
+        let kings = self
+            .king_squares
+            .values()
+            .fold(BoardMask::EMPTY, |mask, king_square| {
+                mask | king_square.to_mask()
+            });
 
         let white_pawn_attacks = square_mask.pawn_attacks(PlayerColor::Black) & white_pawns;
         let black_pawn_attacks = square_mask.pawn_attacks(PlayerColor::White) & black_pawns;
         let knight_attacks = square_mask.knight_attacks() & knights;
         let rook_attacks = square_mask.cardinal_sliding_attacks(occupied_mask) & rooks_and_queens;
-        let bishop_attacks = square_mask.ordinal_sliding_attacks(occupied_mask) & bishops_and_queens;
+        let bishop_attacks =
+            square_mask.ordinal_sliding_attacks(occupied_mask) & bishops_and_queens;
         let king_attacks = square_mask.king_attacks() & kings;
 
-        white_pawn_attacks | black_pawn_attacks | knight_attacks | rook_attacks | bishop_attacks | king_attacks
+        white_pawn_attacks
+            | black_pawn_attacks
+            | knight_attacks
+            | rook_attacks
+            | bishop_attacks
+            | king_attacks
     }
 }
