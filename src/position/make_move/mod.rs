@@ -36,7 +36,7 @@ impl LegalPosition {
         self.hash.toggle_en_passant_square(en_passant_square);
     }
 
-    /// clear the [`EnPassantSquare`] for future move generation and remove its key from the hash
+    /// Clear the [`EnPassantSquare`] for future move generation and remove its key from the hash
     fn clear_en_passant(&mut self) {
         if let Some(en_passant_square) = self.state.en_passant_square {
             self.hash.toggle_en_passant_square(en_passant_square);

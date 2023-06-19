@@ -13,6 +13,7 @@ use crate::chess_move::quiet::QuietMove;
 use crate::chess_move::ChessMove;
 use crate::pieces::{NonKingPieceType, Piece, PieceType};
 use crate::position::{LegalPosition, LegalPositionState};
+use crate::square::EnPassantSquare;
 
 impl LegalPosition {
     /// Undo a [`QuietMove`]
@@ -24,9 +25,18 @@ impl LegalPosition {
     /// Undo an [`DoublePawnPush`]
     /// - Move the [`Pawn`](crate::pieces::PieceType::Pawn) back to its starting [`Square`](square::Square)
     /// - Add the captured [`Pawn`](crate::pieces::PieceType::Pawn) back
-    fn unmake_double_pawn_push(&mut self, pawn_push: DoublePawnPush) {
+    fn unmake_double_pawn_push(
+        &mut self,
+        pawn_push: DoublePawnPush,
+        previous_en_passant: Option<EnPassantSquare>,
+    ) {
         let quiet: QuietMove = pawn_push.into();
         self.unmake_quiet(quiet);
+        if let Some(previous_en_passant) = previous_en_passant {
+            self.set_en_passant(previous_en_passant);
+        } else {
+            self.clear_en_passant();
+        }
     }
 
     /// Undo a capture move
@@ -103,7 +113,9 @@ impl LegalPosition {
 
         match chess_move {
             ChessMove::Quiet(quiet) => self.unmake_quiet(quiet),
-            ChessMove::DoublePawnPush(pawn_push) => self.unmake_double_pawn_push(pawn_push),
+            ChessMove::DoublePawnPush(pawn_push) => {
+                self.unmake_double_pawn_push(pawn_push, previous_state.en_passant_square);
+            }
             ChessMove::Capture(capture) => self.unmake_capture(capture),
             ChessMove::EnPassantCapture(capture) => self.unmake_en_passant_capture(capture),
             ChessMove::Castle(castle) => self.unmake_castle(castle),
