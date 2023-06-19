@@ -1,5 +1,6 @@
 use crate::chess_move::promotion::Promotion;
 use crate::pieces::NonKingPieceType;
+#[cfg(debug_assertions)]
 use crate::square::Square;
 
 /// A valid double-pawn push, or a special starting rank unobstructed two square pawn push
@@ -16,7 +17,6 @@ impl PromotingCapture {
     ///
     /// # Panics
     /// - In debug mode when trying to create a new promoting capture with a pawn that doesn't attack diagonally
-    #[cfg(test)]
     pub(crate) fn new(promotion: Promotion, captured_piece: NonKingPieceType) -> Self {
         debug_assert_ne!(
             Square::from(promotion.from()).file(),

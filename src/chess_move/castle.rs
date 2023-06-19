@@ -20,7 +20,7 @@ pub struct Castle {
 }
 
 impl Castle {
-    #[cfg(test)]
+    /// Create a new castle inner move for a [player](PlayerColor) in a given [`CastleDirection`]
     pub(crate) const fn new(player: PlayerColor, direction: CastleDirection) -> Self {
         Self { player, direction }
     }
