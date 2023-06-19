@@ -234,16 +234,43 @@ impl LegalPosition {
     }
 
     /// Get a [`BoardMask`] of all of the pieces on the board
+    ///
+    /// ```
+    ///
+    /// use thermite::bitboard::BoardMask;
+    /// use thermite::fen;
+    ///
+    /// assert_eq!(fen!("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4").occupied_mask(), BoardMask::new(0x42e1400000e0a77d));
+    /// assert_eq!(fen!("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").occupied_mask(), BoardMask::new(0xffff00000000ffff));
+    /// assert_eq!(fen!("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/1r5P/8 b - - 0 1").occupied_mask(), BoardMask::new(0xc4401820718200));
+    /// ```
     pub fn occupied_mask(&self) -> BoardMask {
         self.side_masks[PlayerColor::White] | self.side_masks[PlayerColor::Black]
     }
 
     /// Get a [`BoardMask`] of all the empty squares on the board
+    ///
+    /// ```
+    /// use thermite::bitboard::BoardMask;
+    /// use thermite::fen;
+    /// assert_eq!(fen!("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4").empty_mask(), BoardMask::new(0xbd1ebfffff1f5882));
+    /// assert_eq!(fen!("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1").empty_mask(), BoardMask::new(0xffffffff0000));
+    /// assert_eq!(fen!("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/1r5P/8 b - - 0 1").empty_mask(), BoardMask::new(0xff3bbfe7df8e7dff));
+    /// ```
     pub fn empty_mask(&self) -> BoardMask {
         !self.occupied_mask()
     }
 
     /// Compute a [mask](BoardMask) of attackers for all [sides](PlayerColor) that can target a given [`Square`], given a set of [blockers](BoardMask)
+    ///
+    /// ```
+    /// use thermite::bitboard::BoardMask;
+    /// use thermite::fen;
+    /// use thermite::square::Square;
+    ///
+    /// let position = fen!("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/6rP/8 w - - 1 2");
+    /// assert_eq!(position.attackers_to(Square::G3, position.occupied_mask()), BoardMask::new(0xc000));
+    /// ```
     pub fn attackers_to(&self, target: Square, occupied_mask: BoardMask) -> BoardMask {
         let square_mask: BoardMask = target.to_mask();
 

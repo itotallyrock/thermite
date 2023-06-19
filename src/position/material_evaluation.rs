@@ -52,3 +52,27 @@ impl Default for MaterialEvaluation {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::pieces::{NonKingPieceType, Piece};
+    use crate::player_color::PlayerColor;
+    use crate::position::material_evaluation::MaterialEvaluation;
+    use enum_iterator::all;
+
+    #[test]
+    fn add_remove_piece_is_symmetrical() {
+        let original_eval = MaterialEvaluation::new();
+        let mut eval = original_eval;
+        for piece in all::<PlayerColor>()
+            .flat_map(|player| all::<NonKingPieceType>().map(move |piece| piece.owned_by(player)))
+        {
+            for _ in 1..fastrand::usize(..32) {
+                eval.add_piece(piece);
+                eval.remove_piece(piece);
+            }
+        }
+
+        assert_eq!(eval, original_eval);
+    }
+}
