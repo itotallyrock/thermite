@@ -1,6 +1,7 @@
+use crate::bitboard::BoardMask;
 use crate::castles::{
     CastleDirection, CastleRights, KING_FROM_SQUARES, KING_TO_SQUARES, ROOK_FROM_SQUARES,
-    ROOK_TO_SQUARES,
+    ROOK_TO_SQUARES, UNATTACKED_SQUARES,
 };
 use crate::chess_move::quiet::QuietMove;
 use crate::pieces::{Piece, PieceType};
@@ -79,6 +80,11 @@ impl Castle {
     #[must_use]
     pub const fn direction(&self) -> CastleDirection {
         self.direction
+    }
+
+    /// Get the [mask](BoardMask) for [squares](Square) that cannot be attacked in order to [castle](Castle)
+    pub fn unattacked_mask(&self) -> BoardMask {
+        UNATTACKED_SQUARES[self.direction()][self.player()]
     }
 
     /// Get the [rights](CastleRights) required to do this castle move

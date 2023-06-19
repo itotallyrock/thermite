@@ -1,3 +1,4 @@
+use crate::bitboard::BoardMask;
 use crate::chess_move::castle::Castle;
 use crate::player_color::PlayerColor;
 use crate::square::Square;
@@ -29,6 +30,13 @@ pub const ROOK_TO_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, Square>
     EnumMap::from_array([
         EnumMap::from_array([Square::F1, Square::F8]),
         EnumMap::from_array([Square::D1, Square::D8]),
+    ]);
+
+/// The square that the rook for a given side moves to when castling in a given direction
+pub const UNATTACKED_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, BoardMask>> =
+    EnumMap::from_array([
+        EnumMap::from_array([BoardMask(0x6), BoardMask(0x70)]),
+        EnumMap::from_array([BoardMask(0x0600_0000_0000_0000), BoardMask(0x7000_0000_0000_0000)]),
     ]);
 
 /// The direction to castle in for either side

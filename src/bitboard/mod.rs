@@ -36,7 +36,7 @@ use enum_map::EnumMap;
     ShrAssign,
 )]
 #[must_use]
-pub struct BoardMask(u64);
+pub struct BoardMask(pub(crate) u64);
 
 impl BoardMask {
     /// An empty [`bitboard`](BoardMask)
