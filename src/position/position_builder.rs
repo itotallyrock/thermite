@@ -120,18 +120,18 @@ impl TryFrom<char> for FenPositionChar {
         match fen_char {
             '0'..='9' => Ok(Self::RankOffset(fen_char.to_digit(10).unwrap() as u8)),
             '/' => Ok(Self::NextRank),
-            'p' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::White))),
-            'P' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::Black))),
-            'n' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::White))),
-            'N' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::Black))),
-            'b' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::White))),
-            'B' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::Black))),
-            'r' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::White))),
-            'R' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::Black))),
-            'q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::White))),
-            'Q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::Black))),
-            'k' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::White))),
-            'K' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::Black))),
+            'P' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::White))),
+            'p' => Ok(Self::Piece(PieceType::Pawn.owned_by(PlayerColor::Black))),
+            'N' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::White))),
+            'n' => Ok(Self::Piece(PieceType::Knight.owned_by(PlayerColor::Black))),
+            'B' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::White))),
+            'b' => Ok(Self::Piece(PieceType::Bishop.owned_by(PlayerColor::Black))),
+            'R' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::White))),
+            'r' => Ok(Self::Piece(PieceType::Rook.owned_by(PlayerColor::Black))),
+            'Q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::White))),
+            'q' => Ok(Self::Piece(PieceType::Queen.owned_by(PlayerColor::Black))),
+            'K' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::White))),
+            'k' => Ok(Self::Piece(PieceType::King.owned_by(PlayerColor::Black))),
             _ => Err(FenParseError::InvalidChar),
         }
     }
@@ -342,5 +342,16 @@ mod test {
         let square = square.try_into().unwrap();
         let pos = PositionBuilder::default().with_en_passant_square(square);
         assert_eq!(pos.en_passant_square, Some(square));
+    }
+
+    #[test_case("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/6rP/8 w - - 1 2", G3, G7)]
+    fn from_fen_sets_king_squares_correctly(
+        fen: &str,
+        white_king_square: Square,
+        black_king_square: Square,
+    ) {
+        let position = fen!(fen);
+        assert_eq!(position.king_squares[PlayerColor::White], white_king_square);
+        assert_eq!(position.king_squares[PlayerColor::Black], black_king_square);
     }
 }
