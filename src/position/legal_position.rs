@@ -30,7 +30,7 @@ pub struct State {
     pub(super) checkers: BoardMask,
     pub(super) pinners_for: EnumMap<PlayerColor, BoardMask>,
     pub(super) blockers_for: EnumMap<PlayerColor, BoardMask>,
-    pub(super) check_squares: EnumMap<PieceType, BoardMask>,
+    pub(super) check_squares: EnumMap<NonKingPieceType, BoardMask>,
 }
 
 /// A position known to be valid and legal in standard chess.
