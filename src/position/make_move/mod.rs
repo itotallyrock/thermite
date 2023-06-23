@@ -27,19 +27,20 @@ impl LegalPosition {
     fn set_en_passant(&mut self, en_passant_square: EnPassantSquare) {
         // Remove any previously set en-passant square from the hash
         if let Some(previous_en_passant_square) = self.state.en_passant_square {
-            self.hash
+            self.state
+                .hash
                 .toggle_en_passant_square(previous_en_passant_square);
         }
 
         // Update the state and hash with the new square
         self.state.en_passant_square = Some(en_passant_square);
-        self.hash.toggle_en_passant_square(en_passant_square);
+        self.state.hash.toggle_en_passant_square(en_passant_square);
     }
 
     /// Clear the [`EnPassantSquare`] for future move generation and remove its key from the hash
     fn clear_en_passant(&mut self) {
         if let Some(en_passant_square) = self.state.en_passant_square {
-            self.hash.toggle_en_passant_square(en_passant_square);
+            self.state.hash.toggle_en_passant_square(en_passant_square);
             self.state.en_passant_square = None;
         }
     }
@@ -47,7 +48,7 @@ impl LegalPosition {
     /// Simply change the player to move and its key from the hash
     fn switch_player_to_move(&mut self) {
         self.player_to_move = self.player_to_move.switch();
-        self.hash.switch_sides();
+        self.state.hash.switch_sides();
     }
 
     /// Place [a piece](PlacedPiece) on the board
@@ -77,7 +78,7 @@ impl LegalPosition {
         );
 
         // Update the hash
-        self.hash.toggle_piece_square(placed_piece);
+        self.state.hash.toggle_piece_square(placed_piece);
         // Update the side mask
         let to_mask = to.to_mask();
         self.side_masks[player] |= to_mask;
@@ -120,7 +121,7 @@ impl LegalPosition {
         );
 
         // Update the hash
-        self.hash.toggle_piece_square(
+        self.state.hash.toggle_piece_square(
             PieceType::from(piece_type)
                 .owned_by(player)
                 .placed_on(square),
@@ -169,8 +170,12 @@ impl LegalPosition {
         );
 
         // Update the hash
-        self.hash.toggle_piece_square(owned_piece.placed_on(from));
-        self.hash.toggle_piece_square(owned_piece.placed_on(to));
+        self.state
+            .hash
+            .toggle_piece_square(owned_piece.placed_on(from));
+        self.state
+            .hash
+            .toggle_piece_square(owned_piece.placed_on(to));
         // Update side mask
         let to_mask = to.to_mask();
         let from_mask = from.to_mask();

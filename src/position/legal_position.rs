@@ -24,6 +24,7 @@ pub enum IllegalPosition {
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct State {
     // Irrecoverable state
+    pub(super) hash: ZobristHash,
     pub(super) halfmove_clock: HalfMoveClock,
     pub(super) en_passant_square: Option<EnPassantSquare>,
     pub(super) castles: CastleRights,
@@ -38,7 +39,6 @@ pub struct State {
 /// Keeps track of [`state`](State) to maintain legality as the board is mutated.
 #[derive(Clone, PartialEq, Debug, AsRef, AsMut)]
 pub struct LegalPosition {
-    pub(super) hash: ZobristHash,
     pub(super) material_eval: MaterialEvaluation,
     pub(super) player_to_move: PlayerColor,
     pub(super) pieces_masks: EnumMap<NonKingPieceType, BoardMask>,
@@ -128,6 +128,7 @@ impl TryFrom<PositionBuilder> for LegalPosition {
         let check_squares = EnumMap::default();
         let en_passant_square = en_passant_square.map(Into::into);
         let state = State {
+            hash,
             halfmove_clock,
             en_passant_square,
             castles,
@@ -151,7 +152,6 @@ impl TryFrom<PositionBuilder> for LegalPosition {
 
         // Create the position that might still have some invalid states
         let mut pseudo_legal_position = Self {
-            hash,
             material_eval,
             player_to_move,
             pieces_masks,

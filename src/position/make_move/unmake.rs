@@ -2,6 +2,7 @@
 //! We can do less work unmaking than making a move because the original state is passed to
 //! [`unmake_move`](LegalPosition::unmake_move) allowing us to skip any steps undoing the state.
 
+use crate::castles::CastleRights;
 use crate::chess_move::capture::Capture;
 use crate::chess_move::castle::Castle;
 use crate::chess_move::castle::CastleQuietMoves;
@@ -12,6 +13,7 @@ use crate::chess_move::promotion::Promotion;
 use crate::chess_move::quiet::Quiet;
 use crate::chess_move::ChessMove;
 use crate::pieces::{NonKingPieceType, Piece, PieceType};
+use crate::position::legal_position::State;
 use crate::position::{LegalPosition, LegalPositionState};
 use crate::square::EnPassantSquare;
 
@@ -62,7 +64,6 @@ impl LegalPosition {
             .placed_on(capture.captured_square().into());
         self.unmake_quiet(quiet);
         self.add_piece(captured_pawn);
-        self.set_en_passant(capture.to());
     }
 
     /// Undo a [`Castle`]
@@ -106,6 +107,11 @@ impl LegalPosition {
         self.add_piece(captured_piece);
     }
 
+    /// Reset state from a previous move
+    fn restore_state(&mut self, previous_state: State) {
+        self.state = previous_state;
+    }
+
     /// Undo a [chess move](ChessMove) on a board given the previous [`LegalPositionState`]
     /// from calling [`make_move`](LegalPosition::make_move)
     pub fn unmake_move(&mut self, chess_move: ChessMove, previous_state: LegalPositionState) {
@@ -127,8 +133,7 @@ impl LegalPosition {
         }
 
         self.decrement_halfmove_clock();
-        // Reset state from previous move
-        self.state = previous_state;
+        self.restore_state(previous_state);
     }
 }
 
@@ -137,13 +142,14 @@ mod test {
     use crate::castles::CastleDirection::{KingSide, QueenSide};
     use crate::chess_move::{
         capture::Capture, castle::Castle, double_pawn_push::DoublePawnPush,
-        en_passant_capture::EnPassantCapture, quiet::Quiet, ChessMove,
+        en_passant_capture::EnPassantCapture, promotion::Promotion, quiet::Quiet, ChessMove,
     };
     use crate::direction::PawnCaptureDirection::{East, West};
     use crate::fen;
     use crate::pieces::{
         NonKingPieceType, Piece,
         PieceType::{King, Knight, Pawn, Queen},
+        PromotablePieceType,
     };
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
@@ -163,6 +169,7 @@ mod test {
     const POS_2_CASTLES_B: &str =
         "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R b KQkq - 0 1";
     const POS_3_PINNED_W: &str = "8/2q3kp/6p1/3BpP2/8/Q3B1K1/1r5P/8 w - e6 0 1";
+    const POS_4_PROMO_W: &str = "4R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1";
 
     #[test_case(
         STARTPOS,
@@ -188,7 +195,26 @@ mod test {
         POS_3_PINNED_W,
         ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
     )]
-    // TODO: Test promotion
+    #[test_case(
+        POS_4_PROMO_W,
+        ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
+    )]
+    #[test_case(
+        POS_4_PROMO_W,
+        ChessMove::Promotion(Promotion::new(PromotablePieceType::Queen, File::A, White))
+    )]
+    #[test_case(
+        POS_4_PROMO_W,
+        ChessMove::Promotion(Promotion::new(PromotablePieceType::Knight, File::A, White))
+    )]
+    #[test_case(
+        POS_4_PROMO_W,
+        ChessMove::Promotion(Promotion::new(PromotablePieceType::Bishop, File::A, White))
+    )]
+    #[test_case(
+        POS_4_PROMO_W,
+        ChessMove::Promotion(Promotion::new(PromotablePieceType::Rook, File::A, White))
+    )]
     // TODO: Test promoting capture
     // TODO: Test capturing castle rook
     // TODO: Test moving king with castle rights
