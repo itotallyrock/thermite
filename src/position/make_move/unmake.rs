@@ -188,9 +188,10 @@ mod test {
         POS_3_PINNED_W,
         ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
     )]
-    // TODO: Test castling
     // TODO: Test promotion
     // TODO: Test promoting capture
+    // TODO: Test capturing castle rook
+    // TODO: Test moving king with castle rights
     fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
         let expected = fen!(starting_fen);
         let mut board = expected.clone();

@@ -200,4 +200,12 @@ mod test {
         position.switch_player_to_move();
         assert_eq!(position, original_position);
     }
+
+    // TODO: Test a quiet move actually moves the pieces and changes the side to move and such
+    // TODO: Test capturing a rook removes castle rights
+    // TODO: Test moving a rook removes castle rights
+    // TODO: Test en-passant capture removes en-passant square and pieces
+    // TODO: Test double-pawn-push sets en-passant square and moves pawn
+    // TODO: Test promotion
+    // TODO: Test promoting capture
 }
