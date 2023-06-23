@@ -109,7 +109,7 @@ impl LegalPosition {
     }
 
     /// Force re-updating all state masks from the current board arrangement
-    /// Used when importing a PositionBuilder after pieces have been added, before the legality check.
+    /// Used when importing a `PositionBuilder` after pieces have been added, before the legality check.
     pub(in crate::position) fn update_masks(&mut self) {
         // All of the logic we want is inside switch_perspectives, but we don't want the added
         // side-effect of changing the player to move so we do that first.
@@ -207,16 +207,7 @@ impl LegalPosition {
     }
 
     /// [`Pawn`](PieceType::Pawn) [en-passant capture](EnPassantCapture) opposing [player](player_color::PlayerColor)'s previously [double pushed pawn](DoublePawnPush).
-    ///
-    /// # Panics
-    /// Will panic during debug mode when there is no en-passant square in the state, when making an illegal pawn move, if the captured pawn's square isn't occupied.
     fn make_en_passant_capture(&mut self, en_passant_capture: EnPassantCapture) {
-        debug_assert_eq!(
-            self.state.en_passant_square,
-            Some(en_passant_capture.to()),
-            "attempting to `make_en_passant_capture` without set `en_passant_square`"
-        );
-
         // Move the pawn
         let quiet = From::from(en_passant_capture);
         self.move_piece(quiet);

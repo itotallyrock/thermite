@@ -244,7 +244,7 @@ mod test {
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
     use crate::position::PositionBuilder;
-    use crate::square::{Square, Square::*};
+    use crate::square::{EnPassantSquare, Square, Square::*};
     use test_case::test_case;
 
     #[test_case(CastleRights::None)]
@@ -353,5 +353,15 @@ mod test {
         let position = fen!(fen);
         assert_eq!(position.king_squares[PlayerColor::White], white_king_square);
         assert_eq!(position.king_squares[PlayerColor::Black], black_king_square);
+    }
+
+    #[test_case("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/6rP/8 w - - 1 2", None)]
+    #[test_case(
+        "8/2q3kp/6p1/3BpP2/8/Q3B1K1/1r5P/8 w - e6 0 1",
+        Some(EnPassantSquare::E6)
+    )]
+    fn from_fen_sets_en_passant_correctly(fen: &str, en_passant_square: Option<EnPassantSquare>) {
+        let position = fen!(fen);
+        assert_eq!(position.state.en_passant_square, en_passant_square);
     }
 }

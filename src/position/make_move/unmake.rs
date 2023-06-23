@@ -62,6 +62,7 @@ impl LegalPosition {
             .placed_on(capture.captured_square().into());
         self.unmake_quiet(quiet);
         self.add_piece(captured_pawn);
+        self.set_en_passant(capture.to());
     }
 
     /// Undo a [`Castle`]
@@ -135,8 +136,10 @@ impl LegalPosition {
 mod test {
     use crate::castles::CastleDirection::{KingSide, QueenSide};
     use crate::chess_move::{
-        capture::Capture, castle::Castle, double_pawn_push::DoublePawnPush, quiet::Quiet, ChessMove,
+        capture::Capture, castle::Castle, double_pawn_push::DoublePawnPush,
+        en_passant_capture::EnPassantCapture, quiet::Quiet, ChessMove,
     };
+    use crate::direction::PawnCaptureDirection::{East, West};
     use crate::fen;
     use crate::pieces::{
         NonKingPieceType, Piece,
@@ -144,8 +147,8 @@ mod test {
     };
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
-        File,
-        Square::{B1, C3, E2, E3, F2, F3, G1, G3, G4, G7, H4, H5, H6},
+        DoublePawnToSquare, File,
+        Square::{B1, C3, E2, E3, F2, F3, F5, G1, G3, G4, G7, H4, H5, H6},
     };
     use test_case::test_case;
 
@@ -159,10 +162,15 @@ mod test {
         "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R w KQkq - 0 1";
     const POS_2_CASTLES_B: &str =
         "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R b KQkq - 0 1";
+    const POS_3_PINNED_W: &str = "8/2q3kp/6p1/3BpP2/8/Q3B1K1/1r5P/8 w - e6 0 1";
 
     #[test_case(
         STARTPOS,
         ChessMove::DoublePawnPush(DoublePawnPush::new(White, File::E))
+    )]
+    #[test_case(
+        POS_3_PINNED_W,
+        ChessMove::DoublePawnPush(DoublePawnPush::new(White, File::H))
     )]
     #[test_case(STARTPOS, ChessMove::Quiet(Quiet::new(E2, E3, Pawn.owned_by(White)).unwrap()))]
     #[test_case(STARTPOS, ChessMove::Quiet(Quiet::new(B1, C3, Knight.owned_by(White)).unwrap()))]
@@ -176,8 +184,11 @@ mod test {
     #[test_case(POS_2_CASTLES_W, ChessMove::Castle(Castle::new(White, QueenSide)))]
     #[test_case(POS_2_CASTLES_B, ChessMove::Castle(Castle::new(Black, KingSide)))]
     #[test_case(POS_2_CASTLES_B, ChessMove::Castle(Castle::new(Black, QueenSide)))]
+    #[test_case(
+        POS_3_PINNED_W,
+        ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
+    )]
     // TODO: Test castling
-    // TODO: Test en passant capture
     // TODO: Test promotion
     // TODO: Test promoting capture
     fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
