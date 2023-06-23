@@ -2,7 +2,6 @@
 //! We can do less work unmaking than making a move because the original state is passed to
 //! [`unmake_move`](LegalPosition::unmake_move) allowing us to skip any steps undoing the state.
 
-use crate::castles::CastleRights;
 use crate::chess_move::capture::Capture;
 use crate::chess_move::castle::Castle;
 use crate::chess_move::castle::CastleQuietMoves;
