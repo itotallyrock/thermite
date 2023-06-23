@@ -133,8 +133,9 @@ impl LegalPosition {
 
 #[cfg(test)]
 mod test {
+    use crate::castles::CastleDirection::{KingSide, QueenSide};
     use crate::chess_move::{
-        capture::Capture, double_pawn_push::DoublePawnPush, quiet::Quiet, ChessMove,
+        capture::Capture, castle::Castle, double_pawn_push::DoublePawnPush, quiet::Quiet, ChessMove,
     };
     use crate::fen;
     use crate::pieces::{
@@ -154,6 +155,10 @@ mod test {
     const POS_1_MATE_IN_TWO_W: &str = "r7/6Q1/2pp4/p7/1qP1P1Pk/8/P4PK1/8 w - - 1 2";
     const POS_1_MATE_IN_TWO_B: &str = "r7/8/2pp3Q/p7/1qP1P1Pk/8/P4PK1/8 b - - 2 2";
     const POS_1_MATE_IN_ONE_W: &str = "r7/8/2pp3Q/p7/1qP1P1k1/8/P4PK1/8 w - - 0 3";
+    const POS_2_CASTLES_W: &str =
+        "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R w KQkq - 0 1";
+    const POS_2_CASTLES_B: &str =
+        "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R b KQkq - 0 1";
 
     #[test_case(
         STARTPOS,
@@ -167,6 +172,10 @@ mod test {
     #[test_case(POS_1_MATE_IN_TWO_W, ChessMove::Quiet(Quiet::new(G7, H6, Queen.owned_by(White)).unwrap()))]
     #[test_case(POS_1_MATE_IN_TWO_B, ChessMove::Capture(Capture::new(Quiet::new(H4, G4, King.owned_by(Black)).unwrap(), NonKingPieceType::Pawn)))]
     #[test_case(POS_1_MATE_IN_ONE_W, ChessMove::Quiet(Quiet::new(F2, F3, Pawn.owned_by(White)).unwrap()))]
+    #[test_case(POS_2_CASTLES_W, ChessMove::Castle(Castle::new(White, KingSide)))]
+    #[test_case(POS_2_CASTLES_W, ChessMove::Castle(Castle::new(White, QueenSide)))]
+    #[test_case(POS_2_CASTLES_B, ChessMove::Castle(Castle::new(Black, KingSide)))]
+    #[test_case(POS_2_CASTLES_B, ChessMove::Castle(Castle::new(Black, QueenSide)))]
     // TODO: Test castling
     // TODO: Test en passant capture
     // TODO: Test promotion

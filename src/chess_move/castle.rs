@@ -137,3 +137,21 @@ impl CastleQuietMoves {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::bitboard::BoardMask;
+    use crate::castles::CastleDirection::{KingSide, QueenSide};
+    use crate::chess_move::castle::Castle;
+    use crate::player_color::PlayerColor::{Black, White};
+
+    use test_case::test_case;
+
+    #[test_case(Castle::new(White, KingSide), BoardMask::new(0x6))]
+    #[test_case(Castle::new(White, QueenSide), BoardMask::new(0x70))]
+    #[test_case(Castle::new(Black, KingSide), BoardMask::new(0x0600_0000_0000_0000))]
+    #[test_case(Castle::new(Black, QueenSide), BoardMask::new(0x7000_0000_0000_0000))]
+    fn unattacked_mask_works(castle: Castle, expected_mask: BoardMask) {
+        assert_eq!(castle.unattacked_mask(), expected_mask);
+    }
+}
