@@ -25,6 +25,26 @@ use derive_more::{
 pub struct PawnEvaluation(pub(crate) f32);
 
 impl PawnEvaluation {
+    /// Get the absolute value of the evaluation
+    ///
+    /// ```
+    /// use thermite::evaluation::PawnEvaluation;
+    /// assert_eq!(PawnEvaluation::new(1.0).abs(), PawnEvaluation::new(1.0));
+    /// assert_eq!(PawnEvaluation::new(-0.01).abs(), PawnEvaluation::new(0.01));
+    /// assert_eq!(PawnEvaluation::new(12.3).abs(), PawnEvaluation::new(12.3));
+    /// assert_eq!(PawnEvaluation::new(-15.09).abs(), PawnEvaluation::new(15.09));
+    /// assert_eq!(PawnEvaluation::new(0.05).abs(), PawnEvaluation::new(0.05));
+    /// assert_eq!(PawnEvaluation::new(0.0).abs(), PawnEvaluation::new(0.0));
+    /// ```
+    #[must_use]
+    pub fn abs(self) -> Self {
+        if self.0.is_sign_positive() {
+            self
+        } else {
+            -self
+        }
+    }
+
     /// Get the rounded centi-pawn (1/100th of a pawn is 1 centi-pawn) representation
     #[must_use]
     pub fn centipawns(&self) -> i32 {
@@ -34,14 +54,9 @@ impl PawnEvaluation {
 
 impl PartialEq for PawnEvaluation {
     fn eq(&self, other: &Self) -> bool {
-        const EPSILON: PawnEvaluation = Self(0.00001);
-        let abs_diff = if self > other {
-            *self - *other
-        } else {
-            *other - *self
-        };
-
-        abs_diff <= EPSILON
+        // f32::EPSILON.sqrt()
+        const EPSILON: PawnEvaluation = Self(0.000_345_266_98);
+        (*self - *other).abs() <= EPSILON
     }
 }
 
