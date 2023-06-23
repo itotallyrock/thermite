@@ -7,7 +7,6 @@ use derive_more::{
 #[derive(
     Copy,
     Clone,
-    PartialEq,
     Debug,
     PartialOrd,
     Constructor,
@@ -30,6 +29,13 @@ impl PawnEvaluation {
     #[must_use]
     pub fn centipawns(&self) -> i32 {
         (self.0 * 100.0) as i32
+    }
+}
+
+impl PartialEq for PawnEvaluation {
+    fn eq(&self, other: &Self) -> bool {
+        const EPSILON: f32 = 0.00001;
+        (self.0 - other.0).abs() <= EPSILON
     }
 }
 
