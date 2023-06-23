@@ -34,8 +34,14 @@ impl PawnEvaluation {
 
 impl PartialEq for PawnEvaluation {
     fn eq(&self, other: &Self) -> bool {
-        const EPSILON: f32 = 0.00001;
-        (self.0 - other.0).abs() <= EPSILON
+        const EPSILON: PawnEvaluation = Self(0.00001);
+        let abs_diff = if self > other {
+            *self - *other
+        } else {
+            *other - *self
+        };
+
+        abs_diff <= EPSILON
     }
 }
 
