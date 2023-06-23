@@ -3,6 +3,7 @@ use crate::half_move_clock::HalfMoveClock;
 use crate::pieces::{OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::ply_count::PlyCount;
+use crate::position;
 use crate::square::{EnPassantSquare, File, Square};
 use core::str::FromStr;
 use enum_map::{Enum, EnumMap};
@@ -137,7 +138,7 @@ impl TryFrom<char> for FenPositionChar {
     }
 }
 
-/// Parse a known legal FEN into a [`LegalPosition`], panicking otherwise
+/// Parse a known legal FEN into a [`LegalPosition`](position::LegalPosition), panicking otherwise
 #[macro_export]
 macro_rules! fen {
     ($fen:expr) => {{
