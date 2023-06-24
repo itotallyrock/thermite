@@ -154,7 +154,7 @@ mod test {
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
         DoublePawnToSquare, EastShiftableFile, File,
-        Square::{B1, C3, E2, E3, F2, F3, F5, G1, G3, G4, G7, H1, H4, H5, H6, H8},
+        Square::{B1, C3, E1, E2, E3, E8, F1, F2, F3, F5, F8, G1, G3, G4, G7, H1, H4, H5, H6, H8},
         WestShiftableFile,
     };
     use test_case::test_case;
@@ -240,7 +240,14 @@ mod test {
         POS_5_CASTLE_CAPTURE_B,
         ChessMove::Capture(Capture::new(Quiet::new(H8, H1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook))
     )]
-    // TODO: Test moving king with castle rights
+    #[test_case(
+        POS_5_CASTLE_CAPTURE_W,
+        ChessMove::Quiet(Quiet::new(E1, F1, King.owned_by(White)).unwrap())
+    )]
+    #[test_case(
+        POS_5_CASTLE_CAPTURE_B,
+        ChessMove::Quiet(Quiet::new(E8, F8, King.owned_by(Black)).unwrap())
+    )]
     fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
         let expected = fen!(starting_fen);
         let mut board = expected.clone();
