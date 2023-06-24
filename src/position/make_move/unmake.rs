@@ -148,13 +148,13 @@ mod test {
     use crate::fen;
     use crate::pieces::{
         NonKingPieceType, Piece,
-        PieceType::{King, Knight, Pawn, Queen},
+        PieceType::{King, Knight, Pawn, Queen, Rook},
         PromotablePieceType,
     };
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
         DoublePawnToSquare, EastShiftableFile, File,
-        Square::{B1, C3, E2, E3, F2, F3, F5, G1, G3, G4, G7, H4, H5, H6},
+        Square::{B1, C3, E2, E3, F2, F3, F5, G1, G3, G4, G7, H1, H4, H5, H6, H8},
         WestShiftableFile,
     };
     use test_case::test_case;
@@ -171,6 +171,8 @@ mod test {
         "r3k2r/2nb1ppp/2ppqn2/1pP3b1/p2PP3/2N1NPP1/PPBBQ2P/R3K2R b KQkq - 0 1";
     const POS_3_PINNED_W: &str = "8/2q3kp/6p1/3BpP2/8/Q3B1K1/1r5P/8 w - e6 0 1";
     const POS_4_PROMO_W: &str = "4R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1";
+    const POS_5_CASTLE_CAPTURE_W: &str = "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1";
+    const POS_5_CASTLE_CAPTURE_B: &str = "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1";
 
     #[test_case(
         STARTPOS,
@@ -230,7 +232,14 @@ mod test {
             NonKingPieceType::Knight
         ))
     )]
-    // TODO: Test capturing castle rook
+    #[test_case(
+        POS_5_CASTLE_CAPTURE_W,
+        ChessMove::Capture(Capture::new(Quiet::new(H1, H8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook))
+    )]
+    #[test_case(
+        POS_5_CASTLE_CAPTURE_B,
+        ChessMove::Capture(Capture::new(Quiet::new(H8, H1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook))
+    )]
     // TODO: Test moving king with castle rights
     fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
         let expected = fen!(starting_fen);
