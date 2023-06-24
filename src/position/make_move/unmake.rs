@@ -141,7 +141,8 @@ mod test {
     use crate::castles::CastleDirection::{KingSide, QueenSide};
     use crate::chess_move::{
         capture::Capture, castle::Castle, double_pawn_push::DoublePawnPush,
-        en_passant_capture::EnPassantCapture, promotion::Promotion, quiet::Quiet, ChessMove,
+        en_passant_capture::EnPassantCapture, promoting_capture::PromotingCapture,
+        promotion::Promotion, quiet::Quiet, ChessMove,
     };
     use crate::direction::PawnCaptureDirection::{East, West};
     use crate::fen;
@@ -152,8 +153,9 @@ mod test {
     };
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
-        DoublePawnToSquare, File,
+        DoublePawnToSquare, EastShiftableFile, File,
         Square::{B1, C3, E2, E3, F2, F3, F5, G1, G3, G4, G7, H4, H5, H6},
+        WestShiftableFile,
     };
     use test_case::test_case;
 
@@ -214,7 +216,20 @@ mod test {
         POS_4_PROMO_W,
         ChessMove::Promotion(Promotion::new(PromotablePieceType::Rook, File::A, White))
     )]
-    // TODO: Test promoting capture
+    #[test_case(
+        "1n2R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1",
+        ChessMove::PromotingCapture(PromotingCapture::new(
+            Promotion::new_east_capture(PromotablePieceType::Rook, EastShiftableFile::A, White),
+            NonKingPieceType::Knight
+        ))
+    )]
+    #[test_case(
+        "1n2R3/2P3kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1",
+        ChessMove::PromotingCapture(PromotingCapture::new(
+            Promotion::new_west_capture(PromotablePieceType::Queen, WestShiftableFile::C, White),
+            NonKingPieceType::Knight
+        ))
+    )]
     // TODO: Test capturing castle rook
     // TODO: Test moving king with castle rights
     fn unmake_move_gives_previous_board(starting_fen: &str, chess_move: ChessMove) {
