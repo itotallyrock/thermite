@@ -167,6 +167,9 @@ impl LegalPosition {
                     self.try_remove_castle_rights(invalidated_rights);
                 }
             }
+            PieceType::Pawn => {
+                self.reset_halfmove_clock();
+            }
             _ => {}
         }
     }
