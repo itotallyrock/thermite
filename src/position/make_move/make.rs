@@ -121,6 +121,10 @@ impl LegalPosition {
     fn try_remove_castle_rights(&mut self, rights: CastleRights) {
         if self.state.castles.has_rights(rights) {
             self.state.castles.remove_rights(rights);
+            // Remove any rights from the hash
+            Castle::all()
+                .filter(|castle| rights.has_rights(castle.required_rights()))
+                .for_each(|castle| self.state.hash.toggle_castle_ability(castle));
         }
     }
 
@@ -248,8 +252,9 @@ impl LegalPosition {
         self.move_piece(king_quiet);
         self.move_piece(rook_quiet);
 
-        // Remove castle rights
-        self.state.castles.remove_rights_for(castle.player());
+        // Remove both queen/king castle rights once a player has castled
+        let both_castle_rights = CastleRights::for_player(castle.player());
+        self.try_remove_castle_rights(both_castle_rights);
     }
 
     /// Perform a legal [`Promotion`]

@@ -3,13 +3,12 @@ use crate::half_move_clock::HalfMoveClock;
 use crate::pieces::{OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::player_color::PlayerColor;
 use crate::ply_count::PlyCount;
-use crate::position;
 use crate::square::{EnPassantSquare, File, Square};
 use core::str::FromStr;
 use enum_map::{Enum, EnumMap};
 
 /// Allows setting up a board and performing pseudo-legal moves without checking legality.
-/// With the end goal being to [`convert`](std::convert) this into a [`LegalPosition`](crate::position::LegalPosition)
+/// With the end goal being to [`convert`](std::convert) this into a [`LegalPosition`](position::LegalPosition)
 #[must_use]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct PositionBuilder {
