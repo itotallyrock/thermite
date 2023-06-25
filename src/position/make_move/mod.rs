@@ -18,20 +18,12 @@ impl LegalPosition {
         let _ = self.state.halfmove_clock.increment();
     }
 
-    /// Decrement the [`HalfMoveClock`](crate::half_move_clock::HalfMoveClock) for undoing a [player](player_color::PlayerColor)'s move
-    fn decrement_halfmove_clock(&mut self) {
-        self.state.halfmove_clock.decrement();
-    }
-
     /// Set the [`EnPassantSquare`] for move generation and maintain its associated hash
     fn set_en_passant(&mut self, en_passant_square: EnPassantSquare) {
-        // Remove any previously set en-passant square from the hash
-        if let Some(previous_en_passant_square) = self.state.en_passant_square {
-            self.state
-                .hash
-                .toggle_en_passant_square(previous_en_passant_square);
-        }
-
+        debug_assert_eq!(
+            self.state.en_passant_square, None,
+            "attempting to `set_en_passant` when it's already set"
+        );
         // Update the state and hash with the new square
         self.state.en_passant_square = Some(en_passant_square);
         self.state.hash.toggle_en_passant_square(en_passant_square);
@@ -195,6 +187,13 @@ impl LegalPosition {
 #[cfg(test)]
 mod test {
     use crate::fen;
+    use crate::pieces::PlacedPiece;
+    use crate::pieces::{
+        NonKingPieceType, Piece,
+        PieceType::{Knight, Queen},
+    };
+    use crate::player_color::PlayerColor::{Black, White};
+    use crate::square::Square::{A6, E4};
     use test_case::test_case;
 
     #[test_case("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4")]
@@ -206,11 +205,21 @@ mod test {
         assert_eq!(position, original_position);
     }
 
-    // TODO: Test a quiet move actually moves the pieces and changes the side to move and such
-    // TODO: Test capturing a rook removes castle rights
-    // TODO: Test moving a rook removes castle rights
-    // TODO: Test en-passant capture removes en-passant square and pieces
-    // TODO: Test double-pawn-push sets en-passant square and moves pawn
-    // TODO: Test promotion
-    // TODO: Test promoting capture
+    #[test_case("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4", Knight.owned_by(White).placed_on(E4))]
+    #[test_case("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/1r5P/8 b - - 4 8", Queen.owned_by(Black).placed_on(A6))]
+    fn add_piece_remove_piece_is_symmetrical(fen: &str, piece: PlacedPiece) {
+        let original_position = fen!(fen);
+        let mut position = original_position.clone();
+        position.add_piece(piece);
+        assert_eq!(
+            position.owned_piece_on(piece.square),
+            Some(piece.owned_piece)
+        );
+        let placed_piece = NonKingPieceType::try_from(piece.owned_piece.piece)
+            .unwrap()
+            .owned_by(piece.owned_piece.player)
+            .placed_on(piece.square);
+        position.remove_piece(placed_piece);
+        assert_eq!(position, original_position);
+    }
 }
