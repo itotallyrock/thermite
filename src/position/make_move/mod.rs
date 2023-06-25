@@ -1,42 +1,12 @@
 use crate::chess_move::quiet::Quiet;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
 use crate::position::LegalPosition;
-use crate::square::EnPassantSquare;
 
 mod make;
 mod unmake;
 
 /// Common make/unmake methods
 impl LegalPosition {
-    /// Clear the [`HalfMoveClock`](crate::half_move_clock::HalfMoveClock) due to an irreversible [`chess_move::ChessMove`] being played
-    fn reset_halfmove_clock(&mut self) {
-        self.state.halfmove_clock.reset();
-    }
-
-    /// Increment the [`HalfMoveClock`](crate::half_move_clock::HalfMoveClock) indicating one player has finished their turn
-    fn increment_halfmove_clock(&mut self) {
-        let _ = self.state.halfmove_clock.increment();
-    }
-
-    /// Set the [`EnPassantSquare`] for move generation and maintain its associated hash
-    fn set_en_passant(&mut self, en_passant_square: EnPassantSquare) {
-        debug_assert_eq!(
-            self.state.en_passant_square, None,
-            "attempting to `set_en_passant` when it's already set"
-        );
-        // Update the state and hash with the new square
-        self.state.en_passant_square = Some(en_passant_square);
-        self.state.hash.toggle_en_passant_square(en_passant_square);
-    }
-
-    /// Clear the [`EnPassantSquare`] for future move generation and remove its key from the hash
-    fn clear_en_passant(&mut self) {
-        if let Some(en_passant_square) = self.state.en_passant_square {
-            self.state.hash.toggle_en_passant_square(en_passant_square);
-            self.state.en_passant_square = None;
-        }
-    }
-
     /// Simply change the player to move and its key from the hash
     fn switch_player_to_move(&mut self) {
         self.player_to_move = self.player_to_move.switch();

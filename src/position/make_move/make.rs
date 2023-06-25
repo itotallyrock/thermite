@@ -14,8 +14,38 @@ use crate::pieces::{
 };
 use crate::player_color::PlayerColor;
 use crate::position::{LegalPosition, LegalPositionState};
+use crate::square::EnPassantSquare;
 
 impl LegalPosition {
+    /// Clear the [`HalfMoveClock`](crate::half_move_clock::HalfMoveClock) due to an irreversible [`chess_move::ChessMove`] being played
+    fn reset_halfmove_clock(&mut self) {
+        self.state.halfmove_clock.reset();
+    }
+
+    /// Increment the [`HalfMoveClock`](crate::half_move_clock::HalfMoveClock) indicating one player has finished their turn
+    fn increment_halfmove_clock(&mut self) {
+        let _ = self.state.halfmove_clock.increment();
+    }
+
+    /// Set the [`EnPassantSquare`] for move generation and maintain its associated hash
+    fn set_en_passant(&mut self, en_passant_square: EnPassantSquare) {
+        debug_assert_eq!(
+            self.state.en_passant_square, None,
+            "attempting to `set_en_passant` when it's already set"
+        );
+        // Update the state and hash with the new square
+        self.state.en_passant_square = Some(en_passant_square);
+        self.state.hash.toggle_en_passant_square(en_passant_square);
+    }
+
+    /// Try to clear the [`EnPassantSquare`], if set, for future move generation and remove its key from the hash
+    fn try_clear_en_passant(&mut self) {
+        if let Some(en_passant_square) = self.state.en_passant_square {
+            self.state.hash.toggle_en_passant_square(en_passant_square);
+            self.state.en_passant_square = None;
+        }
+    }
+
     /// Update the [mask](BoardMask) of [pieces](NonKingPieceType) giving check
     fn update_checkers(&mut self) {
         let attackers = self.player_to_move_mask();
@@ -295,7 +325,7 @@ impl LegalPosition {
         let current_state = self.state;
 
         // Clear any single ply state
-        self.clear_en_passant();
+        self.try_clear_en_passant();
 
         // Increment our move counter
         self.increment_halfmove_clock();
