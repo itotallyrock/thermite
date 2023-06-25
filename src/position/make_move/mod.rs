@@ -156,6 +156,7 @@ impl LegalPosition {
 
 #[cfg(test)]
 mod test {
+    use crate::chess_move::{double_pawn_push::DoublePawnPush, quiet::Quiet};
     use crate::fen;
     use crate::pieces::PlacedPiece;
     use crate::pieces::{
@@ -163,7 +164,10 @@ mod test {
         PieceType::{Knight, Queen},
     };
     use crate::player_color::PlayerColor::{Black, White};
-    use crate::square::Square::{A6, E4};
+    use crate::square::{
+        File, Square,
+        Square::{A3, A6, C2, C7, E4, E5, E7, G6},
+    };
     use test_case::test_case;
 
     #[test_case("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4")]
@@ -190,6 +194,19 @@ mod test {
             .owned_by(piece.owned_piece.player)
             .placed_on(piece.square);
         position.remove_piece(placed_piece);
+        assert_eq!(position, original_position);
+    }
+
+    #[test_case("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/1r5P/8 b - - 4 8", Quiet::new(C7, C2, Queen.owned_by(Black)).unwrap())]
+    #[test_case("8/2q3kp/6p1/3Bp3/5n2/Q3BPK1/1r5P/8 w - - 4 8", Quiet::new(A3, E7, Queen.owned_by(White)).unwrap())]
+    #[test_case("2r5/p7/1kp2R2/4nQ1P/8/1P3P2/P1Rq2r1/1K6 b - - 2 4", DoublePawnPush::new(Black, File::A).into())]
+    #[test_case("k7/ppr5/P3ppn1/2Pp4/Q1n1b1p1/2P3Pr/4PKBq/R1B1NR2 b - - 2 4", Quiet::new(G6, E5, Knight.owned_by(Black)).unwrap())]
+    fn move_piece_is_symmetrical(fen: &str, quiet: Quiet) {
+        let original_position = fen!(fen);
+        let mut position = original_position.clone();
+        position.move_piece(quiet);
+        assert_eq!(position.owned_piece_on(quiet.to()), Some(quiet.piece()));
+        position.move_piece(quiet.reverse());
         assert_eq!(position, original_position);
     }
 }
