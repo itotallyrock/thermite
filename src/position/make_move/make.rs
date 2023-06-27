@@ -347,3 +347,332 @@ impl LegalPosition {
         current_state
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::castles::{
+        CastleDirection::{KingSide, QueenSide},
+        CastleRights,
+    };
+    use crate::chess_move::capture::Capture;
+    use crate::chess_move::castle::Castle;
+    use crate::chess_move::double_pawn_push::DoublePawnPush;
+    use crate::chess_move::en_passant_capture::EnPassantCapture;
+    use crate::chess_move::promoting_capture::PromotingCapture;
+    use crate::chess_move::promotion::Promotion;
+    use crate::chess_move::quiet::Quiet;
+    use crate::chess_move::ChessMove;
+    use crate::direction::PawnCaptureDirection;
+    use crate::fen;
+    use crate::half_move_clock::HalfMoveClock;
+    use crate::pieces::{NonKingPieceType, Piece, PieceType, PieceType::*, PromotablePieceType};
+    use crate::player_color::PlayerColor::{Black, White};
+    use crate::square::{
+        DoublePawnToSquare, EastShiftableFile, File, Square, Square::*, WestShiftableFile,
+    };
+    use test_case::test_case;
+
+    const STARTPOS: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    #[test]
+    fn make_move_switches_sides() {
+        let mut pos = fen!(STARTPOS);
+        let piece = Pawn.owned_by(White);
+        let chess_move = ChessMove::Quiet(Quiet::new(F2, F3, piece).unwrap());
+        assert_eq!(pos.player_to_move(), White);
+        let _ = pos.make_move(chess_move);
+        assert_eq!(pos.player_to_move(), Black);
+    }
+
+    #[test]
+    fn make_quiet_works() {
+        let mut pos = fen!(STARTPOS);
+        let piece = Pawn.owned_by(White);
+        let chess_move = ChessMove::Quiet(Quiet::new(F2, F3, piece).unwrap());
+        assert_eq!(pos.owned_piece_on(F2), Some(piece));
+        assert_eq!(pos.piece_type_on(F3), None);
+        let _ = pos.make_move(chess_move);
+        assert_eq!(pos.piece_type_on(F2), None);
+        assert_eq!(pos.owned_piece_on(F3), Some(piece));
+    }
+
+    #[test_case(
+        "4r3/1pP2kp1/3R4/1p3pP1/1r6/1P6/1K2p3/4R3 w - - 0 1",
+        Promotion::new(PromotablePieceType::Queen, File::C, White)
+    )]
+    #[test_case(
+        "4r3/1pP2kp1/3R4/1p3pP1/1r6/1P6/1K2p3/8 b - - 0 1",
+        Promotion::new(PromotablePieceType::Queen, File::E, Black)
+    )]
+    fn make_promotion_works(fen: &str, promotion: Promotion) {
+        let mut position = fen!(fen);
+        let chess_move = ChessMove::Promotion(promotion);
+        position.make_move(chess_move);
+        assert_eq!(
+            position.owned_piece_on(Square::from(promotion.to())),
+            Some(PieceType::from(promotion.piece).owned_by(promotion.player()))
+        );
+        assert_eq!(
+            position.owned_piece_on(Square::from(promotion.from())),
+            None
+        );
+    }
+
+    #[test_case(
+        "1k6/3R4/PPP5/4p3/4P3/6p1/1p4P1/2RK4 b - - 0 1",
+        PromotingCapture::new(
+            Promotion::new_east_capture(PromotablePieceType::Queen, EastShiftableFile::B, Black),
+            NonKingPieceType::Rook
+        )
+    )]
+    #[test_case(
+        "1k1r3r/p3P1p1/4p1p1/5p2/2Qq3P/5BP1/PP3PK1/2R5 w - - 0 1",
+        PromotingCapture::new(
+            Promotion::new_west_capture(PromotablePieceType::Queen, WestShiftableFile::E, White),
+            NonKingPieceType::Rook
+        )
+    )]
+    fn make_promoting_capture_works(fen: &str, promotion: PromotingCapture) {
+        let mut position = fen!(fen);
+        let chess_move = ChessMove::PromotingCapture(promotion);
+        position.make_move(chess_move);
+        assert_eq!(
+            position.owned_piece_on(Square::from(promotion.promotion().to())),
+            Some(
+                PieceType::from(promotion.promotion().piece)
+                    .owned_by(promotion.promotion().player())
+            )
+        );
+        assert_eq!(
+            position.owned_piece_on(Square::from(promotion.promotion().from())),
+            None
+        );
+    }
+
+    #[test]
+    fn try_remove_castle_rights_works() {
+        // Removing all
+        let mut position = fen!("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1");
+        position.try_remove_castle_rights(CastleRights::All);
+        assert_eq!(position.state.castles, CastleRights::None);
+
+        // Removing one at at time
+        let mut position = fen!("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1");
+        let previous_hash = position.state.hash;
+        position.try_remove_castle_rights(CastleRights::WhiteKing);
+        assert_eq!(position.state.castles, CastleRights::WhiteQueenBlackBoth);
+        assert_ne!(position.state.hash, previous_hash);
+        let previous_hash = position.state.hash;
+        position.try_remove_castle_rights(CastleRights::WhiteQueen);
+        assert_eq!(position.state.castles, CastleRights::BlackBoth);
+        assert_ne!(position.state.hash, previous_hash);
+        let previous_hash = position.state.hash;
+        position.try_remove_castle_rights(CastleRights::BlackKing);
+        assert_eq!(position.state.castles, CastleRights::BlackQueen);
+        assert_ne!(position.state.hash, previous_hash);
+        let previous_hash = position.state.hash;
+        position.try_remove_castle_rights(CastleRights::BlackQueen);
+        assert_eq!(position.state.castles, CastleRights::None);
+        assert_ne!(position.state.hash, previous_hash);
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Castle::new(White, KingSide),
+        CastleRights::WhiteBoth
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Castle::new(White, QueenSide),
+        CastleRights::WhiteBoth
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Castle::new(Black, KingSide),
+        CastleRights::BlackBoth
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Castle::new(Black, QueenSide),
+        CastleRights::BlackBoth
+    )]
+    fn castle_removes_rights(fen: &str, castle: Castle, removed_rights: CastleRights) {
+        let chess_move = ChessMove::Castle(castle);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Capture::new(Quiet::new(A1, A8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::BlackQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Capture::new(Quiet::new(H1, H8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::BlackKing
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Capture::new(Quiet::new(A8, A1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::WhiteQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Capture::new(Quiet::new(H8, H1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::WhiteKing
+    )]
+    fn capturing_castle_removes_rights(fen: &str, capture: Capture, removed_rights: CastleRights) {
+        let chess_move = ChessMove::Capture(capture);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Quiet::new(A1, A7, Rook.owned_by(White)).unwrap(),
+        CastleRights::WhiteQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Quiet::new(H1, H7, Rook.owned_by(White)).unwrap(),
+        CastleRights::WhiteKing
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Quiet::new(A8, A2, Rook.owned_by(Black)).unwrap(),
+        CastleRights::BlackQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Quiet::new(H8, H2, Rook.owned_by(Black)).unwrap(),
+        CastleRights::BlackKing
+    )]
+    fn quiet_before_castle_removes_rights(fen: &str, quiet: Quiet, removed_rights: CastleRights) {
+        let chess_move = ChessMove::Quiet(quiet);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Capture::new(Quiet::new(A1, A8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::WhiteQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        Capture::new(Quiet::new(H1, H8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::WhiteKing
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Capture::new(Quiet::new(A8, A1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::BlackQueen
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        Capture::new(Quiet::new(H8, H1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook),
+        CastleRights::BlackKing
+    )]
+    fn capturing_as_castle_removes_rights(
+        fen: &str,
+        capture: Capture,
+        removed_rights: CastleRights,
+    ) {
+        let chess_move = ChessMove::Capture(capture);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1", Quiet::new(E1, F1, King.owned_by(White)).unwrap(), CastleRights::WhiteBoth)]
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1", Quiet::new(E8, F8, King.owned_by(Black)).unwrap(), CastleRights::BlackBoth)]
+    fn moving_king_before_castle_removes_rights(
+        fen: &str,
+        quiet: Quiet,
+        removed_rights: CastleRights,
+    ) {
+        let chess_move = ChessMove::Quiet(quiet);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case("r3k2r/1pppPpp1/8/8/8/8/1PPPpPP1/R3K2R w KQkq - 0 1", Capture::new(Quiet::new(E1, E2, King.owned_by(White)).unwrap(), NonKingPieceType::Pawn), CastleRights::WhiteBoth)]
+    #[test_case("r3k2r/1pppPpp1/8/8/8/8/1PPPpPP1/R3K2R b KQkq - 0 1", Capture::new(Quiet::new(E8, E7, King.owned_by(Black)).unwrap(), NonKingPieceType::Pawn), CastleRights::BlackBoth)]
+    fn capturing_as_king_before_castle_removes_rights(
+        fen: &str,
+        capture: Capture,
+        removed_rights: CastleRights,
+    ) {
+        let chess_move = ChessMove::Capture(capture);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.castles & removed_rights, removed_rights);
+        position.make_move(chess_move);
+        assert_eq!(position.state.castles & removed_rights, CastleRights::None);
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1",
+        DoublePawnPush::new(White, File::E)
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 0 1",
+        DoublePawnPush::new(Black, File::E)
+    )]
+    fn double_pawn_push_sets_en_passant_square(fen: &str, push: DoublePawnPush) {
+        let chess_move = ChessMove::DoublePawnPush(push);
+        let mut position = fen!(fen);
+        assert_eq!(position.state.en_passant_square, None);
+        position.make_move(chess_move);
+        assert_eq!(
+            position.state.en_passant_square,
+            Some(push.en_passant_square())
+        );
+    }
+
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 12 24",
+        ChessMove::DoublePawnPush(DoublePawnPush::new(White, File::E))
+    )]
+    #[test_case(
+        "r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 12 23",
+        ChessMove::DoublePawnPush(DoublePawnPush::new(Black, File::E))
+    )]
+    #[test_case("r3k2r/1pppPpp1/8/8/8/8/1PPPpPP1/R3K2R w KQkq - 12 24", ChessMove::Capture(Capture::new(Quiet::new(E1, E2, King.owned_by(White)).unwrap(), NonKingPieceType::Pawn)))]
+    #[test_case("r3k2r/1pppPpp1/8/8/8/8/1PPPpPP1/R3K2R b KQkq - 12 23", ChessMove::Capture(Capture::new(Quiet::new(E8, E7, King.owned_by(Black)).unwrap(), NonKingPieceType::Pawn)))]
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 12 24", ChessMove::Capture(Capture::new(Quiet::new(A1, A8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook)))]
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 12 24", ChessMove::Capture(Capture::new(Quiet::new(H1, H8, Rook.owned_by(White)).unwrap(), NonKingPieceType::Rook)))]
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 12 23", ChessMove::Capture(Capture::new(Quiet::new(A8, A1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook)))]
+    #[test_case("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R b KQkq - 12 23", ChessMove::Capture(Capture::new(Quiet::new(H8, H1, Rook.owned_by(Black)).unwrap(), NonKingPieceType::Rook)))]
+    fn moves_reset_halfmove_clock(fen: &str, chess_move: ChessMove) {
+        let mut position = fen!(fen);
+        let _ = position.make_move(chess_move);
+        assert_eq!(position.state.halfmove_clock, HalfMoveClock::default());
+    }
+
+    #[test_case("4R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1", EnPassantCapture::new(DoublePawnToSquare::F5, PawnCaptureDirection::West, White).unwrap())]
+    fn en_passant_capture_work(fen: &str, capture: EnPassantCapture) {
+        let mut position = fen!(fen);
+        let chess_move = ChessMove::EnPassantCapture(capture);
+        let _ = position.make_move(chess_move);
+        assert_eq!(
+            position.owned_piece_on(Square::from(capture.to())),
+            Some(Pawn.owned_by(White))
+        );
+        assert_eq!(
+            position.owned_piece_on(Square::from(capture.captured_square())),
+            None
+        );
+        assert_eq!(position.owned_piece_on(Square::from(capture.from())), None);
+        assert_eq!(position.state.en_passant_square, None);
+    }
+}
