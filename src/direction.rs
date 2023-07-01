@@ -1,4 +1,5 @@
 use crate::player_color::PlayerColor;
+use enum_iterator::Sequence;
 use enum_map::Enum;
 use subenum::subenum;
 
@@ -11,7 +12,7 @@ use subenum::subenum;
     WhitePawnCaptureDirection,
     BlackPawnCaptureDirection
 )]
-#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Enum, Sequence, Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(i8)]
 pub enum Direction {
     /// Up on the board from white's perspective (towards black's back rank)
