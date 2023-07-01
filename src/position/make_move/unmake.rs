@@ -183,11 +183,11 @@ mod test {
     #[test_case(POS_2_CASTLES_B, ChessMove::Castle(Castle::new(Black, QueenSide)))]
     #[test_case(
         POS_3_PINNED_W,
-        ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
+        ChessMove::EnPassantCapture(EnPassantCapture::new_from(DoublePawnToSquare::F5, West, White).unwrap())
     )]
     #[test_case(
         POS_4_PROMO_W,
-        ChessMove::EnPassantCapture(EnPassantCapture::new(DoublePawnToSquare::F5, West, White).unwrap())
+        ChessMove::EnPassantCapture(EnPassantCapture::new_from(DoublePawnToSquare::F5, West, White).unwrap())
     )]
     #[test_case(
         POS_4_PROMO_W,

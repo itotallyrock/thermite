@@ -18,19 +18,43 @@ pub struct EnPassantCapture {
 }
 
 impl EnPassantCapture {
-    /// Create a new valid [`EnPassantCapture`]
+    /// Create a new valid [`EnPassantCapture`] given the capturing [pawn](PieceType::Pawn)'s starting [square](Square)
     /// Returns [`None`] if direction would shift off of the board.
     #[allow(clippy::missing_panics_doc)]
     #[must_use]
-    pub(crate) fn new(
+    #[cfg(test)]
+    pub(crate) fn new_from(
         from: DoublePawnToSquare,
         direction: PawnCaptureDirection,
         player: PlayerColor,
     ) -> Option<Self> {
         let to = Square::from(from).shift(direction.to_sided_direction(player))?;
-        let captured_pawn_direction = PawnCaptureDirection::get_pawn_push_for(player.switch());
+        let captured_pawn_direction = PawnCaptureDirection::get_pawn_push_for(player).opposite();
         let captured_pawn_square = to.shift(captured_pawn_direction).unwrap();
         let to = EnPassantSquare::try_from(to).unwrap();
+        let captured_pawn_square = DoublePawnToSquare::try_from(captured_pawn_square).unwrap();
+
+        Some(Self {
+            from,
+            to,
+            captured_pawn_square,
+            player,
+        })
+    }
+
+    /// Create a new valid [`EnPassantCapture`] given the target [en-passant square](EnPassantSquare) (or the capturing [pawn](PieceType::Pawn)'s destination [square](Square))
+    /// Returns [`None`] if direction would shift off of the board.
+    #[allow(clippy::missing_panics_doc)]
+    #[must_use]
+    pub(crate) fn new_en_passant_square(
+        to: EnPassantSquare,
+        direction: PawnCaptureDirection,
+        player: PlayerColor,
+    ) -> Option<Self> {
+        let from = Square::from(to).shift(direction.to_sided_direction(player).opposite())?;
+        let from = DoublePawnToSquare::try_from(from).unwrap();
+        let captured_pawn_direction = PawnCaptureDirection::get_pawn_push_for(player).opposite();
+        let captured_pawn_square = Square::from(to).shift(captured_pawn_direction).unwrap();
         let captured_pawn_square = DoublePawnToSquare::try_from(captured_pawn_square).unwrap();
 
         Some(Self {

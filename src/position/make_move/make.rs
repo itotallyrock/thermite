@@ -659,7 +659,7 @@ mod test {
         assert_eq!(position.state.halfmove_clock, HalfMoveClock::default());
     }
 
-    #[test_case("4R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1", EnPassantCapture::new(DoublePawnToSquare::F5, PawnCaptureDirection::West, White).unwrap())]
+    #[test_case("4R3/P5kp/2q2pp1/3BpP2/3nP3/Q3B1K1/1r5P/8 w - e6 0 1", EnPassantCapture::new_from(DoublePawnToSquare::F5, PawnCaptureDirection::West, White).unwrap())]
     fn en_passant_capture_work(fen: &str, capture: EnPassantCapture) {
         let mut position = fen!(fen);
         let chess_move = ChessMove::EnPassantCapture(capture);
