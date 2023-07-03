@@ -1,4 +1,4 @@
-use derive_more::{AsRef, Constructor, Display, FromStr, Into};
+use derive_more::{Add, AddAssign, AsRef, Constructor, Display, FromStr, Into, Sub, SubAssign};
 
 /// Represents a counter incrementing for a single player's move
 #[derive(
@@ -10,6 +10,10 @@ use derive_more::{AsRef, Constructor, Display, FromStr, Into};
     PartialEq,
     Debug,
     Hash,
+    Sub,
+    SubAssign,
+    Add,
+    AddAssign,
     AsRef,
     Into,
     Display,
