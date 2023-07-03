@@ -29,6 +29,8 @@ pub mod direction;
 pub mod evaluation;
 /// A clock for keeping track of half moves without a capture or pawn push before a draw
 pub mod half_move_clock;
+/// A counter for keeping track of visited chess positions
+pub mod node_count;
 /// A counter for the sum of the number of a piece on a board
 pub mod piece_count;
 /// A piece that can be placed on the board
