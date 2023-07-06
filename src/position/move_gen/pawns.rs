@@ -24,11 +24,11 @@ impl LegalPosition {
     }
 
     fn generate_pawn_pushes(&self, targets: BoardMask) -> impl Iterator<Item = ChessMove> + '_ {
-        let targets = self.empty_mask() & targets;
+        let empty = self.empty_mask();
         let push_direction: Direction = PawnPushDirection::for_player(self.player_to_move()).into();
         let opposite_push_direction = push_direction.opposite();
         let pawns = self.piece_mask(NonKingPieceType::Pawn) & self.player_to_move_mask();
-        let pushed_pawns = pawns.shift(push_direction) & targets;
+        let pushed_pawns = pawns.shift(push_direction) & empty;
         let (double_pawn_push_destination_rank, promotion_destination_rank) =
             match self.player_to_move {
                 PlayerColor::White => (Rank::Fourth, Rank::Eighth),
@@ -36,7 +36,9 @@ impl LegalPosition {
             };
         let double_pushed_pawns = pushed_pawns.shift(push_direction)
             & BoardMask::RANKS[double_pawn_push_destination_rank]
+            & empty
             & targets;
+        let pushed_pawns = pushed_pawns & targets;
         let promotion_destination_rank_mask = BoardMask::RANKS[promotion_destination_rank];
         let promoting_pushes = pushed_pawns & promotion_destination_rank_mask;
 
