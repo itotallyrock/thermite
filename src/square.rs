@@ -399,6 +399,7 @@ mod test {
     use core::str::FromStr;
     use enum_map::Enum;
 
+    use crate::bitboard::BoardMask;
     use test_case::test_case;
 
     #[test]
@@ -539,5 +540,31 @@ mod test {
     #[test_case(H8, 1, None)]
     fn checked_add_works(input: Square, offset: u8, expected: Option<Square>) {
         assert_eq!(input.checked_add(offset), expected);
+    }
+
+    #[test_case(A1, BoardMask::new(0x1))]
+    #[test_case(A8, BoardMask::new(0x0100_0000_0000_0000))]
+    #[test_case(H1, BoardMask::new(0x80))]
+    #[test_case(H8, BoardMask::new(0x8000_0000_0000_0000))]
+    #[test_case(C4, BoardMask::new(0x0400_0000))]
+    #[test_case(E6, BoardMask::new(0x1000_0000_0000))]
+    #[test_case(F2, BoardMask::new(0x2000))]
+    #[test_case(B7, BoardMask::new(0x0002_0000_0000_0000))]
+    fn to_mask_works(input: Square, expected: BoardMask) {
+        assert_eq!(input.to_mask(), expected);
+    }
+
+    #[test_case(A1, 0)]
+    #[test_case(A8, 56)]
+    #[test_case(H1, 7)]
+    #[test_case(H8, 63)]
+    #[test_case(C4, 26)]
+    #[test_case(E6, 44)]
+    #[test_case(F2, 13)]
+    #[test_case(F3, 21)]
+    #[test_case(B7, 49)]
+    #[test_case(B8, 57)]
+    fn to_offset_works(input: Square, expected: u8) {
+        assert_eq!(input as u8, expected);
     }
 }
