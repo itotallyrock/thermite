@@ -31,13 +31,19 @@ impl LegalPosition {
             .chain(self.generate_castle_moves())
     }
 
-    /// Generate pseudo-legal king/rook castle moves
-    /// - Could be illegal if the castle path is attacked
+    /// Generate legal king/rook castle moves
     fn generate_castle_moves(&self) -> impl Iterator<Item = ChessMove> + '_ {
         let occupied_mask = self.occupied_mask();
         Castle::all_for_player(self.player_to_move)
             .filter(|castle| self.state.castles.has_rights(castle.required_rights()))
             .filter(move |castle| (occupied_mask & castle.unattacked_mask()).is_empty())
+            .filter(move |castle| {
+                castle.unattacked_mask().into_iter().all(|pass_through_sq| {
+                    (self.attackers_to(pass_through_sq, self.occupied_mask())
+                        & self.opposite_player_mask())
+                    .is_empty()
+                })
+            })
             .map(ChessMove::Castle)
     }
 
