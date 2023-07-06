@@ -101,6 +101,10 @@ mod test {
     const KIWIPETE_E5D7: &str =
         "r3k2r/p1pNqpb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
     const POSITION_3: &str = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
+    const POSITION_3_E2E3: &str = "8/2p5/3p4/KP5r/1R3p1k/4P3/6P1/8 b - - 0 1";
+    const POSITION_3_B4B1: &str = "8/2p5/3p4/KP5r/5p1k/8/4P1P1/1R6 b - - 1 1";
+    const POSITION_3_B4B1_H4G3: &str = "8/2p5/3p4/KP5r/5p2/6k1/4P1P1/1R6 w - - 2 2";
+    const POSITION_3_B4B1_H4G3_B1G1: &str = "8/2p5/3p4/KP5r/5p2/6k1/4P1P1/6R1 b - - 3 2";
     const POSITION_4: &str = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
     const POSITION_4_MIRRORED: &str =
         "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1 ";
@@ -122,9 +126,13 @@ mod test {
     #[test_case(KIWIPETE, PlyCount::new(3), NodeCount::new(97_862))]
     #[test_case(KIWIPETE, PlyCount::new(4), NodeCount::new(4_085_603))]
     #[test_case(POSITION_3, PlyCount::new(1), NodeCount::new(14))]
+    #[test_case(POSITION_3_E2E3, PlyCount::new(1), NodeCount::new(15))]
     #[test_case(POSITION_3, PlyCount::new(2), NodeCount::new(191))]
     #[test_case(POSITION_3, PlyCount::new(3), NodeCount::new(2_812))]
     #[test_case(POSITION_3, PlyCount::new(4), NodeCount::new(43_238))]
+    #[test_case(POSITION_3_B4B1, PlyCount::new(3), NodeCount::new(4199))]
+    #[test_case(POSITION_3_B4B1_H4G3, PlyCount::new(2), NodeCount::new(312))]
+    #[test_case(POSITION_3_B4B1_H4G3_B1G1, PlyCount::new(1), NodeCount::new(21))]
     #[test_case(POSITION_3, PlyCount::new(5), NodeCount::new(674_624))]
     #[test_case(POSITION_4, PlyCount::new(1), NodeCount::new(6))]
     #[test_case(POSITION_4_MIRRORED, PlyCount::new(1), NodeCount::new(6))]
