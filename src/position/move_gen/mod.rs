@@ -1,3 +1,4 @@
+use crate::bitboard::BoardMask;
 use crate::chess_move::capture::Capture;
 use crate::chess_move::quiet::Quiet;
 use crate::chess_move::ChessMove;
@@ -50,6 +51,12 @@ impl LegalPosition {
         let quiet = self.create_quiet(from, to, piece);
         let captured_piece = self.get_captured_piece(to);
         Capture::new(quiet, captured_piece)
+    }
+
+    /// Check if a piece moving is pinned or not
+    fn is_non_pinned_piece(&self, from: Square, to: Square) -> bool {
+        (from.to_mask() & self.state.blockers_for[self.player_to_move]).is_empty()
+            || BoardMask::is_aligned(from, to, self.king_squares[self.player_to_move])
     }
 }
 

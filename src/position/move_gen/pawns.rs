@@ -7,20 +7,20 @@ use crate::chess_move::promotion::Promotion;
 use crate::chess_move::quiet::Quiet;
 use crate::chess_move::ChessMove;
 use crate::direction::{Direction, PawnCaptureDirection, PawnPushDirection};
-use crate::pieces::{NonKingPieceType, Piece, PieceType, PromotablePieceType};
+use crate::pieces::{NonKingPieceType, Piece, PieceType, PromotablePieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;
 use crate::position::LegalPosition;
 use crate::square::{EastShiftableFile, File, Rank, Square, WestShiftableFile};
 use enum_iterator::all;
 
 impl LegalPosition {
-    /// TODO
+    /// Generate all pawn moves (quiet pushes, captures, promotions, promotion captures, en-passant captures, and double-pawn pushes)
     pub(super) fn generate_pawn_moves(
         &self,
         targets: BoardMask,
     ) -> impl Iterator<Item = ChessMove> + '_ {
         self.generate_pawn_pushes(targets)
-            .chain(self.get_all_pawn_captures(targets))
+            .chain(self.generate_pawn_captures(targets))
     }
 
     fn generate_pawn_pushes(&self, targets: BoardMask) -> impl Iterator<Item = ChessMove> + '_ {
@@ -48,6 +48,9 @@ impl LegalPosition {
                     Promotion::new(promotion_piece, to_file, self.player_to_move)
                 })
             })
+            .filter(move |&promotion| {
+                self.is_non_pinned_piece(promotion.from().into(), promotion.to().into())
+            })
             .map(ChessMove::Promotion);
 
         let non_promoting_pushes = pushed_pawns & !promotion_destination_rank_mask;
@@ -57,6 +60,7 @@ impl LegalPosition {
                 let from = to.shift(opposite_push_direction).unwrap();
                 self.create_quiet(from, to, PieceType::Pawn)
             })
+            .filter(move |&quiet| self.is_non_pinned_piece(quiet.from(), quiet.to()))
             .map(ChessMove::Quiet);
 
         let double_push_moves = double_pushed_pawns
@@ -66,6 +70,12 @@ impl LegalPosition {
                 let player = self.player_to_move();
                 DoublePawnPush::new(player, file)
             })
+            .filter(move |&double_pawn_push| {
+                self.is_non_pinned_piece(
+                    double_pawn_push.from().into(),
+                    double_pawn_push.to().into(),
+                )
+            })
             .map(ChessMove::DoublePawnPush);
 
         promoting_push_moves
@@ -73,7 +83,7 @@ impl LegalPosition {
             .chain(double_push_moves)
     }
 
-    fn get_all_pawn_captures(&self, targets: BoardMask) -> impl Iterator<Item = ChessMove> + '_ {
+    fn generate_pawn_captures(&self, targets: BoardMask) -> impl Iterator<Item = ChessMove> + '_ {
         all::<PawnCaptureDirection>().flat_map(move |direction| {
             self.generate_pawn_captures_for_direction(targets, direction)
         })
@@ -107,6 +117,12 @@ impl LegalPosition {
                 .expect(
                     "shifting the opposite direction of previous shift will always be on the board",
                 )
+            })
+            .filter(move |&en_passant_capture| {
+                self.is_non_pinned_piece(
+                    en_passant_capture.from().into(),
+                    en_passant_capture.to().into(),
+                ) && self.is_non_discovery_en_passant(en_passant_capture)
             })
             .map(ChessMove::EnPassantCapture)
             .take(1);
@@ -158,6 +174,28 @@ impl LegalPosition {
         pawn_promoting_captures
             .chain(en_passant_captures)
             .chain(pawn_captures)
+    }
+
+    /// Check if an en-passant capture is legal that it doesnt captured a pawn that was pinned
+    fn is_non_discovery_en_passant(&self, capture: EnPassantCapture) -> bool {
+        let king_square = self.king_squares[self.player_to_move];
+        let enemies = self.opposite_player_mask();
+        let occupied_mask = self.occupied_mask()
+            ^ Square::from(capture.from()).to_mask()
+            ^ Square::from(capture.captured_square()).to_mask()
+            | Square::from(capture.to()).to_mask();
+        let queens = self.piece_mask(NonKingPieceType::Queen);
+        let cardinal_sliders = (self.piece_mask(NonKingPieceType::Rook) | queens) & enemies;
+        let ordinal_sliders = (self.piece_mask(NonKingPieceType::Bishop) | queens) & enemies;
+        (BoardMask::sliding_attacks_for(SlidingPieceType::Rook, king_square, occupied_mask)
+            & cardinal_sliders)
+            .is_empty()
+            && (BoardMask::sliding_attacks_for(
+                SlidingPieceType::Bishop,
+                king_square,
+                occupied_mask,
+            ) & ordinal_sliders)
+                .is_empty()
     }
 
     fn create_promoting_capture_promotion(

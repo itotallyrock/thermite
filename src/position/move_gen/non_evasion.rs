@@ -77,8 +77,7 @@ impl LegalPosition {
             .is_empty()
     }
 
-    /// Generate pseudo-legal moves for a promotable-piece (non-pawn/king)
-    /// - Could be illegal if the piece is pinned
+    /// Generate legal moves for a promotable-piece (non-pawn/king)
     fn generate_promotable_piece_type_moves(
         &self,
         piece: PromotablePieceType,
@@ -93,12 +92,14 @@ impl LegalPosition {
             let captures_mask = attacks_mask & self.opposite_player_mask();
             let capture_moves = captures_mask
                 .into_iter()
+                .filter(move |&to| self.is_non_pinned_piece(from, to))
                 .map(move |to| self.create_capture(from, to, PieceType::from(piece)))
                 .map(ChessMove::Capture);
 
             let quiet_mask = attacks_mask & self.empty_mask();
             let quiet_moves = quiet_mask
                 .into_iter()
+                .filter(move |&to| self.is_non_pinned_piece(from, to))
                 .map(move |to| self.create_quiet(from, to, PieceType::from(piece)))
                 .map(ChessMove::Quiet);
 
