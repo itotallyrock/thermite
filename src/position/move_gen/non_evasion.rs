@@ -36,7 +36,7 @@ impl LegalPosition {
         let occupied_mask = self.occupied_mask();
         Castle::all_for_player(self.player_to_move)
             .filter(|castle| self.state.castles.has_rights(castle.required_rights()))
-            .filter(move |castle| (occupied_mask & castle.unattacked_mask()).is_empty())
+            .filter(move |castle| (occupied_mask & castle.unoccupied_mask()).is_empty())
             .filter(move |castle| {
                 castle.unattacked_mask().into_iter().all(|pass_through_sq| {
                     (self.attackers_to(pass_through_sq, self.occupied_mask())

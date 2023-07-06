@@ -32,11 +32,18 @@ pub const ROOK_TO_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, Square>
         EnumMap::from_array([Square::D1, Square::D8]),
     ]);
 
-/// The square that the rook for a given side moves to when castling in a given direction
-pub const UNATTACKED_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, BoardMask>> =
+/// A mask of the squares that must be empty to castle
+pub const UNOCCUPIED_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, BoardMask>> =
     EnumMap::from_array([
         EnumMap::from_array([BoardMask(0x60), BoardMask(0x6000_0000_0000_0000)]),
         EnumMap::from_array([BoardMask(0xe), BoardMask(0x0e00_0000_0000_0000)]),
+    ]);
+
+/// A mask of the squares that cannot be attacked to castle
+pub const UNATTACKED_SQUARES: EnumMap<CastleDirection, EnumMap<PlayerColor, BoardMask>> =
+    EnumMap::from_array([
+        EnumMap::from_array([BoardMask(0x60), BoardMask(0x6000_0000_0000_0000)]),
+        EnumMap::from_array([BoardMask(0xc), BoardMask(0x0c00_0000_0000_0000)]),
     ]);
 
 /// The direction to castle in for either side
