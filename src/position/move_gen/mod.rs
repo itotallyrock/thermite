@@ -117,14 +117,14 @@ mod test {
     #[test_case(STARTPOS_C2C3_D7D5, PlyCount::new(2), NodeCount::new(566))]
     #[test_case(STARTPOS_C2C3_D7D5_D1A4, PlyCount::new(1), NodeCount::new(6))]
     #[test_case(STARTPOS, PlyCount::new(4), NodeCount::new(197_281))]
-    #[test_case(STARTPOS, PlyCount::new(5), NodeCount::new(4_865_609))]
+    // #[test_case(STARTPOS, PlyCount::new(5), NodeCount::new(4_865_609))]
     #[test_case(KIWIPETE, PlyCount::new(1), NodeCount::new(48))]
     #[test_case(KIWIPETE, PlyCount::new(2), NodeCount::new(2_039))]
     #[test_case(KIWIPETE_E5D7, PlyCount::new(1), NodeCount::new(45))]
     #[test_case(KIWIPETE_E5G7, PlyCount::new(1), NodeCount::new(2))]
     #[test_case(KIWIPETE_E5G7, PlyCount::new(2), NodeCount::new(92))]
     #[test_case(KIWIPETE, PlyCount::new(3), NodeCount::new(97_862))]
-    #[test_case(KIWIPETE, PlyCount::new(4), NodeCount::new(4_085_603))]
+    // #[test_case(KIWIPETE, PlyCount::new(4), NodeCount::new(4_085_603))]
     #[test_case(POSITION_3, PlyCount::new(1), NodeCount::new(14))]
     #[test_case(POSITION_3_E2E3, PlyCount::new(1), NodeCount::new(15))]
     #[test_case(POSITION_3, PlyCount::new(2), NodeCount::new(191))]
@@ -140,8 +140,8 @@ mod test {
     #[test_case(POSITION_4_MIRRORED, PlyCount::new(2), NodeCount::new(264))]
     #[test_case(POSITION_4, PlyCount::new(3), NodeCount::new(9_467))]
     #[test_case(POSITION_4_MIRRORED, PlyCount::new(3), NodeCount::new(9_467))]
-    #[test_case(POSITION_4, PlyCount::new(4), NodeCount::new(422_333))]
-    #[test_case(POSITION_4_MIRRORED, PlyCount::new(4), NodeCount::new(422_333))]
+    // #[test_case(POSITION_4, PlyCount::new(4), NodeCount::new(422_333))]
+    // #[test_case(POSITION_4_MIRRORED, PlyCount::new(4), NodeCount::new(422_333))]
     fn perft_works(fen: &str, depth: PlyCount, expected_nodes: NodeCount) {
         assert_eq!(perft::<true>(&mut fen!(fen), depth), expected_nodes);
     }

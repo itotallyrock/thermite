@@ -131,7 +131,7 @@ mod test {
         en_passant_capture::EnPassantCapture, promoting_capture::PromotingCapture,
         promotion::Promotion, quiet::Quiet, ChessMove,
     };
-    use crate::direction::PawnCaptureDirection::{East, West};
+    use crate::direction::PawnCaptureDirection::West;
     use crate::fen;
     use crate::pieces::{
         NonKingPieceType, Piece,
@@ -141,7 +141,7 @@ mod test {
     use crate::player_color::PlayerColor::{Black, White};
     use crate::square::{
         DoublePawnToSquare, EastShiftableFile, File,
-        Square::{B1, C3, E1, E2, E3, E8, F1, F2, F3, F5, F8, G1, G3, G4, G7, H1, H4, H5, H6, H8},
+        Square::{B1, C3, E1, E2, E3, E8, F1, F2, F3, F8, G1, G3, G4, G7, H1, H4, H5, H6, H8},
         WestShiftableFile,
     };
     use test_case::test_case;

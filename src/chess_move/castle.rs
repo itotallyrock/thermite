@@ -154,10 +154,18 @@ mod test {
     use test_case::test_case;
 
     #[test_case(Castle::new(White, KingSide), BoardMask::new(0x60))]
-    #[test_case(Castle::new(White, QueenSide), BoardMask::new(0xE))]
-    #[test_case(Castle::new(Black, QueenSide), BoardMask::new(0x0E00_0000_0000_0000))]
+    #[test_case(Castle::new(White, QueenSide), BoardMask::new(0xC))]
+    #[test_case(Castle::new(Black, QueenSide), BoardMask::new(0x0C00_0000_0000_0000))]
     #[test_case(Castle::new(Black, KingSide), BoardMask::new(0x6000_0000_0000_0000))]
     fn unattacked_mask_works(castle: Castle, expected_mask: BoardMask) {
         assert_eq!(castle.unattacked_mask(), expected_mask);
+    }
+
+    #[test_case(Castle::new(White, KingSide), BoardMask::new(0x60))]
+    #[test_case(Castle::new(White, QueenSide), BoardMask::new(0xE))]
+    #[test_case(Castle::new(Black, QueenSide), BoardMask::new(0x0E00_0000_0000_0000))]
+    #[test_case(Castle::new(Black, KingSide), BoardMask::new(0x6000_0000_0000_0000))]
+    fn unoccupied_mask_works(castle: Castle, expected_mask: BoardMask) {
+        assert_eq!(castle.unoccupied_mask(), expected_mask);
     }
 }

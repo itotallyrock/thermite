@@ -241,7 +241,6 @@ mod test {
     use crate::bitboard::BoardMask;
     use crate::castles::CastleRights;
     use crate::half_move_clock::HalfMoveClock;
-    use crate::pieces::PieceType::{King, Pawn};
     use crate::pieces::{NonKingPieceType, Piece, PieceType, PlacedPiece};
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
@@ -368,7 +367,7 @@ mod test {
         assert_eq!(position.state.en_passant_square, en_passant_square);
     }
 
-    #[test_case("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", &[King.owned_by(PlayerColor::White).placed_on(E1)])]
+    #[test_case("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", &[PieceType::King.owned_by(PlayerColor::White).placed_on(E1)])]
     fn from_fen_sets_piece_squares_correctly(fen: &str, expected: &[PlacedPiece]) {
         let position = fen!(fen);
         for expected_piece in expected {
