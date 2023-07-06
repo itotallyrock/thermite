@@ -58,6 +58,7 @@ impl LegalPosition {
         let captures_mask = king_attacks & self.opposite_player_mask();
         let captures = captures_mask
             .into_iter()
+            .filter(move |&king_to| self.is_legal_king_move(from, king_to))
             .map(move |king_to| self.create_capture(from, king_to, PieceType::King))
             .map(ChessMove::Capture);
 
