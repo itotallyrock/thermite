@@ -13,7 +13,7 @@ pub struct Capture {
 }
 
 impl Capture {
-    /// TODO
+    /// Create new capturing move given a quiet move and captured piece
     pub(crate) const fn new(quiet: Quiet, captured_piece: NonKingPieceType) -> Self {
         Self {
             quiet,

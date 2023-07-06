@@ -8,8 +8,8 @@ use crate::position::LegalPosition;
 use crate::square::Square;
 
 impl LegalPosition {
-    /// TODO
-    pub(super) fn get_non_evasion_moves(&self) -> impl Iterator<Item = ChessMove> + '_ {
+    /// Generate all non-evasion, or normal chess moves when not evading a check
+    pub(super) fn generate_non_evasion_moves(&self) -> impl Iterator<Item = ChessMove> + '_ {
         let targets = self.attackable_mask();
         self.generate_non_king_moves(targets)
             .chain(self.generate_king_moves(targets))

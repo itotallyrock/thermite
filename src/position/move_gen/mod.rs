@@ -12,14 +12,13 @@ mod non_evasion;
 mod pawns;
 
 impl LegalPosition {
-    /// TODO
-    // TODO: Wrap in a ScoredChessMove which contains a score for ordering and impl Ord and use in a BinaryHeap?
+    /// Generate all legal chess moves for the current position
     #[must_use]
     pub fn generate_legal_moves(&self) -> Vec<ChessMove> {
         if self.in_check() {
             self.generate_evasion_moves().collect()
         } else {
-            self.get_non_evasion_moves().collect()
+            self.generate_non_evasion_moves().collect()
         }
     }
 
