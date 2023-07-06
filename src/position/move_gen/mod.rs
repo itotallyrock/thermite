@@ -69,7 +69,7 @@ mod test {
     use crate::fen;
     use test_case::test_case;
 
-    pub fn perft<const IS_ROOT: bool>(position: &mut LegalPosition, depth: PlyCount) -> NodeCount {
+    pub fn perft(position: &mut LegalPosition, depth: PlyCount) -> NodeCount {
         if depth == PlyCount::new(0) {
             NodeCount::new(1)
         } else {
@@ -78,10 +78,7 @@ mod test {
                 .into_iter()
                 .map(|m| {
                     let state = position.make_move(m);
-                    let nodes = perft::<false>(position, depth - PlyCount::new(1));
-                    if IS_ROOT {
-                        println!("{m}: {nodes}");
-                    }
+                    let nodes = perft(position, depth - PlyCount::new(1));
                     position.unmake_move(m, state);
 
                     nodes
@@ -143,6 +140,6 @@ mod test {
     // #[test_case(POSITION_4, PlyCount::new(4), NodeCount::new(422_333))]
     // #[test_case(POSITION_4_MIRRORED, PlyCount::new(4), NodeCount::new(422_333))]
     fn perft_works(fen: &str, depth: PlyCount, expected_nodes: NodeCount) {
-        assert_eq!(perft::<true>(&mut fen!(fen), depth), expected_nodes);
+        assert_eq!(perft(&mut fen!(fen), depth), expected_nodes);
     }
 }
