@@ -238,13 +238,16 @@ impl FromStr for PositionBuilder {
 
 #[cfg(test)]
 mod test {
+    use crate::bitboard::BoardMask;
     use crate::castles::CastleRights;
     use crate::half_move_clock::HalfMoveClock;
-    use crate::pieces::{Piece, PieceType};
+    use crate::pieces::PieceType::{King, Pawn};
+    use crate::pieces::{NonKingPieceType, Piece, PieceType, PlacedPiece};
     use crate::player_color::PlayerColor;
     use crate::ply_count::PlyCount;
     use crate::position::PositionBuilder;
     use crate::square::{EnPassantSquare, Square, Square::*};
+    use enum_map::EnumMap;
     use test_case::test_case;
 
     #[test_case(CastleRights::None)]
@@ -363,5 +366,28 @@ mod test {
     fn from_fen_sets_en_passant_correctly(fen: &str, en_passant_square: Option<EnPassantSquare>) {
         let position = fen!(fen);
         assert_eq!(position.state.en_passant_square, en_passant_square);
+    }
+
+    #[test_case("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", &[King.owned_by(PlayerColor::White).placed_on(E1)])]
+    fn from_fen_sets_piece_squares_correctly(fen: &str, expected: &[PlacedPiece]) {
+        let position = fen!(fen);
+        for expected_piece in expected {
+            assert_eq!(
+                position.owned_piece_on(expected_piece.square),
+                Some(expected_piece.owned_piece)
+            );
+        }
+    }
+
+    #[test_case("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1", EnumMap::from_array([
+        BoardMask::new(0x002d_5008_1280_e700),// Pawn 
+        BoardMask::new(0x2210_0004_0000),// Knight
+        BoardMask::new(0x0040_0100_0000_1800),// Bishop
+        BoardMask::new(0x8100_0000_0000_0081),// Rook
+        BoardMask::new(0x0010_0000_0020_0000),// Queen
+    ]))]
+    fn from_fen_sets_masks_correctly(fen: &str, masks: EnumMap<NonKingPieceType, BoardMask>) {
+        let position = fen!(fen);
+        assert_eq!(position.pieces_masks, masks);
     }
 }

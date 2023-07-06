@@ -1,6 +1,17 @@
+use enum_iterator::all;
+use enum_map::EnumMap;
+
+use crate::bitboard::BoardMask;
+use crate::chess_move::castle::Castle;
 use crate::chess_move::quiet::Quiet;
 use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
-use crate::position::LegalPosition;
+use crate::player_color::PlayerColor;
+use crate::position::hash_history::HashHistory;
+use crate::position::legal_position::State;
+use crate::position::material_evaluation::MaterialEvaluation;
+use crate::position::{IllegalPosition, LegalPosition, PositionBuilder};
+use crate::square::Square;
+use crate::zobrist::ZobristHash;
 
 mod make;
 mod unmake;
@@ -154,21 +165,94 @@ impl LegalPosition {
     }
 }
 
+impl TryFrom<PositionBuilder> for LegalPosition {
+    type Error = IllegalPosition;
+
+    fn try_from(position: PositionBuilder) -> Result<Self, Self::Error> {
+        let PositionBuilder {
+            halfmove_clock,
+            halfmove_count: _,
+            squares,
+            starting_player: player_to_move,
+            castle_rights: castles,
+            en_passant_square,
+        } = position;
+        let (king_squares, side_masks, mut hash) = all::<PlayerColor>().try_fold(
+            (
+                EnumMap::from_array([Square::E1, Square::E8]),
+                EnumMap::default(),
+                ZobristHash::default(),
+            ),
+            |(mut king_squares, mut side_masks, mut hash), player_color| {
+                let player_king = PieceType::King.owned_by(player_color);
+                let king_square = squares
+                    .iter()
+                    .find_map(|(s, &p)| p.filter(|&p| p == player_king).map(|_| s))
+                    .ok_or(IllegalPosition::MissingKing(player_color))?;
+                king_squares[player_color] = king_square;
+                side_masks[player_color] = king_square.to_mask();
+                hash.toggle_piece_square(player_king.placed_on(king_square));
+                Ok((king_squares, side_masks, hash))
+            },
+        )?;
+
+        // Update hashed fields that we include in the initial `pseudo_legal_position`
+        if player_to_move != PlayerColor::White {
+            hash.switch_sides();
+        }
+        if let Some(en_passant_square) = en_passant_square {
+            hash.toggle_en_passant_square(en_passant_square);
+        }
+        Castle::all()
+            .filter(|castle| castles.has_rights(castle.required_rights()))
+            .for_each(|castle| hash.toggle_castle_ability(castle));
+
+        let mut pseudo_legal_position = Self {
+            material_eval: MaterialEvaluation::default(),
+            player_to_move,
+            pieces_masks: EnumMap::default(),
+            side_masks,
+            king_squares,
+            state: State {
+                hash,
+                halfmove_clock,
+                en_passant_square,
+                castles,
+                checkers: BoardMask::default(),
+                pinners_for: EnumMap::default(),
+                blockers_for: EnumMap::default(),
+                check_squares: EnumMap::default(),
+            },
+            hash_history: HashHistory::default(),
+        };
+
+        // Add each piece
+        squares
+            .iter()
+            .filter_map(|(s, p)| {
+                p.filter(|p| p.piece != PieceType::King)
+                    .map(|p| p.placed_on(s))
+            })
+            .for_each(|p| pseudo_legal_position.add_piece(p));
+
+        pseudo_legal_position.update_masks();
+        // TODO: Check legality (ie. back rank pawns)
+
+        Ok(pseudo_legal_position)
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::chess_move::{double_pawn_push::DoublePawnPush, quiet::Quiet};
+    use test_case::test_case;
+
+    use crate::chess_move::double_pawn_push::DoublePawnPush;
+    use crate::chess_move::quiet::Quiet;
     use crate::fen;
     use crate::pieces::PlacedPiece;
-    use crate::pieces::{
-        NonKingPieceType, Piece,
-        PieceType::{Knight, Queen},
-    };
-    use crate::player_color::PlayerColor::{Black, White};
-    use crate::square::{
-        File, Square,
-        Square::{A3, A6, C2, C7, E4, E5, E7, G6},
-    };
-    use test_case::test_case;
+    use crate::pieces::{NonKingPieceType, Piece, PieceType::*};
+    use crate::player_color::PlayerColor::*;
+    use crate::square::{File, Square::*};
 
     #[test_case("1r4k1/p4pbp/6p1/8/8/5QPb/PPP2P1P/R1BNrBK1 b - - 2 4")]
     fn switch_sides_is_symmetrical(fen: &str) {
