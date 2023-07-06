@@ -171,6 +171,7 @@ impl LegalPosition {
                     captured_piece,
                 )
             })
+            .filter(move |&capture| self.is_non_pinned_piece(capture.from(), capture.to()))
             .map(ChessMove::Capture);
 
         pawn_promoting_captures
