@@ -91,7 +91,15 @@ mod test {
     }
 
     const STARTPOS: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const STARTPOS_C2C3: &str = "rnbqkbnr/pppppppp/8/8/8/2P5/PP1PPPPP/RNBQKBNR b KQkq - 0 1";
+    const STARTPOS_C2C3_D7D5: &str = "rnbqkbnr/ppp1pppp/8/3p4/8/2P5/PP1PPPPP/RNBQKBNR w KQkq - 0 2";
+    const STARTPOS_C2C3_D7D5_D1A4: &str =
+        "rnbqkbnr/ppp1pppp/8/3p4/Q7/2P5/PP1PPPPP/RNB1KBNR b KQkq - 1 2";
     const KIWIPETE: &str = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+    const KIWIPETE_E5G7: &str =
+        "r3k2r/p1ppqpN1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+    const KIWIPETE_E5D7: &str =
+        "r3k2r/p1pNqpb1/bn2pnp1/3P4/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
     const POSITION_3: &str = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1";
     const POSITION_4: &str = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
     const POSITION_4_MIRRORED: &str =
@@ -101,10 +109,16 @@ mod test {
     #[test_case(STARTPOS, PlyCount::new(1), NodeCount::new(20))]
     #[test_case(STARTPOS, PlyCount::new(2), NodeCount::new(400))]
     #[test_case(STARTPOS, PlyCount::new(3), NodeCount::new(8_902))]
+    #[test_case(STARTPOS_C2C3, PlyCount::new(3), NodeCount::new(9_272))]
+    #[test_case(STARTPOS_C2C3_D7D5, PlyCount::new(2), NodeCount::new(566))]
+    #[test_case(STARTPOS_C2C3_D7D5_D1A4, PlyCount::new(1), NodeCount::new(6))]
     #[test_case(STARTPOS, PlyCount::new(4), NodeCount::new(197_281))]
     #[test_case(STARTPOS, PlyCount::new(5), NodeCount::new(4_865_609))]
     #[test_case(KIWIPETE, PlyCount::new(1), NodeCount::new(48))]
     #[test_case(KIWIPETE, PlyCount::new(2), NodeCount::new(2_039))]
+    #[test_case(KIWIPETE_E5D7, PlyCount::new(1), NodeCount::new(45))]
+    #[test_case(KIWIPETE_E5G7, PlyCount::new(1), NodeCount::new(2))]
+    #[test_case(KIWIPETE_E5G7, PlyCount::new(2), NodeCount::new(92))]
     #[test_case(KIWIPETE, PlyCount::new(3), NodeCount::new(97_862))]
     #[test_case(KIWIPETE, PlyCount::new(4), NodeCount::new(4_085_603))]
     #[test_case(POSITION_3, PlyCount::new(1), NodeCount::new(14))]
