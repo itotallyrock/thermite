@@ -5,6 +5,7 @@ use crate::chess_move::ChessMove;
 use crate::pieces::{NonKingPieceType, Piece, PieceType};
 use crate::position::LegalPosition;
 use crate::square::Square;
+use alloc::vec::Vec;
 
 mod evasions;
 mod non_evasion;

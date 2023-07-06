@@ -1,12 +1,10 @@
 use crate::bitboard::BoardMask;
 use crate::castles::CastleRights;
-use crate::chess_move::castle::Castle;
 use crate::half_move_clock::HalfMoveClock;
-use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType, PlacedPiece};
+use crate::pieces::{NonKingPieceType, OwnedPiece, Piece, PieceType};
 use crate::player_color::PlayerColor;
 use crate::position::hash_history::HashHistory;
 use crate::position::material_evaluation::MaterialEvaluation;
-use crate::position::position_builder::PositionBuilder;
 use crate::square::{EnPassantSquare, Square};
 use crate::zobrist::ZobristHash;
 use derive_more::{AsMut, AsRef};
