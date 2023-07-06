@@ -47,8 +47,7 @@ impl LegalPosition {
             .map(ChessMove::Castle)
     }
 
-    /// Generate pseudo-legal king moves, without castles
-    /// - Could be illegal if the king's destination square is attacked
+    /// Generate legal king moves, without castles
     pub(super) fn generate_non_castling_king_moves(
         &self,
         target: BoardMask,
@@ -65,10 +64,17 @@ impl LegalPosition {
         let quiet_mask = king_attacks & self.empty_mask();
         let quiets = quiet_mask
             .into_iter()
+            .filter(move |&king_to| self.is_legal_king_move(from, king_to))
             .map(move |king_to| self.create_quiet(from, king_to, PieceType::King))
             .map(ChessMove::Quiet);
 
         captures.chain(quiets)
+    }
+
+    /// If the target king square is unattacked
+    fn is_legal_king_move(&self, from: Square, to: Square) -> bool {
+        (self.attackers_to(to, self.occupied_mask() ^ from.to_mask()) & self.opposite_player_mask())
+            .is_empty()
     }
 
     /// Generate pseudo-legal moves for a promotable-piece (non-pawn/king)
