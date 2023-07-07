@@ -1,6 +1,5 @@
 use crate::chess_move::promotion::Promotion;
 use crate::pieces::NonKingPieceType;
-#[cfg(debug_assertions)]
 use crate::square::Square;
 
 /// A valid double-pawn push, or a special starting rank unobstructed two square pawn push

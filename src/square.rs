@@ -131,11 +131,7 @@ impl Square {
     pub const fn rank(self) -> Rank {
         // SAFETY: Because this value is at most 63usize divided by 8 (Rank::LENGTH) gives a maximum
         // of 7 for our `Rank`. Which is valid for our discriminant as there are 8 variants.
-        // ALLOW: truncation is not possible when Rank::LENGTH is under 255 and 8 is well under
-        #[allow(clippy::cast_possible_truncation)]
-        unsafe {
-            core::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8)
-        }
+        unsafe { core::mem::transmute::<u8, Rank>((self as u8) / Rank::LENGTH as u8) }
     }
 
     /// Get the [`File`] for a [`Square`]

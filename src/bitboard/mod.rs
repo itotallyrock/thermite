@@ -82,11 +82,7 @@ impl BoardMask {
     /// How many set [`Square`](Square) the mask contains
     #[must_use]
     pub const fn num_squares(&self) -> u8 {
-        // ALLOW: Count ones for u64 can at most be 64 which is always within u8's 255 max
-        #[allow(clippy::cast_possible_truncation)]
-        {
-            self.0.count_ones() as u8
-        }
+        self.0.count_ones() as u8
     }
 
     /// If the current [`bitboard`](BoardMask) contains no set bits

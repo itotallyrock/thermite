@@ -29,7 +29,6 @@ impl HalfMoveClock {
     /// # Errors
     /// If the supplied ply count would overflow the [limit](HALF_MOVE_LIMIT)
     pub fn increment(&mut self) -> Result<(), InvalidHalfMoveClock> {
-        #[allow(clippy::cast_possible_truncation)]
         if self.0 < PlyCount::new(HALF_MOVE_LIMIT as u8) {
             self.0.increment();
             Ok(())
