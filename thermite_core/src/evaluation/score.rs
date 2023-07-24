@@ -138,6 +138,7 @@ mod test {
     )]
     #[test_case(Score::Stalemate, Score::Mated(PlyCount::new(1)), Ordering::Greater)]
     #[test_case(Score::Stalemate, Score::Mating(PlyCount::new(1)), Ordering::Less)]
+    #[test_case(Score::Stalemate, Score::Stalemate, Ordering::Equal)]
     #[test_case(
         Score::Approximate(PawnEvaluation::new(123.0)),
         Score::Approximate(PawnEvaluation::new(123.0)),
@@ -147,5 +148,6 @@ mod test {
     #[test_case(Score::Approximate(PawnEvaluation::new(2_147_483_647.0)), Score::Approximate(PawnEvaluation::new(-128_599.0)), Ordering::Greater)]
     fn ord_works(a: Score, b: Score, expected: Ordering) {
         assert_eq!(a.partial_cmp(&b), Some(expected));
+        assert_eq!(b.partial_cmp(&a), Some(expected.reverse()));
     }
 }
