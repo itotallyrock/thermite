@@ -32,7 +32,7 @@ jobs:
         run: cargo test --locked --all-features --all-targets
       # https://github.com/rust-lang/cargo/issues/6669
       - name: cargo test --doc
-        run: cargo test --locked --all-features --doc
+        run: cargo test --locked --all-features --doc --workspace
   minimal:
     runs-on: ubuntu-latest
     name: ubuntu / stable / minimal-versions
