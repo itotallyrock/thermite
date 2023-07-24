@@ -5,6 +5,8 @@ use core::ops::Neg;
 /// The search evaluation of a position
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Score {
+    /// Neither side wins
+    Stalemate,
     /// Giving checkmate in a certain number of [plies](PlyCount)
     Mating(PlyCount),
     /// Getting checkmated in a certain number of [plies](PlyCount)
@@ -21,6 +23,7 @@ impl Neg for Score {
             Self::Mating(plies) => Self::Mated(plies),
             Self::Mated(plies) => Self::Mating(plies),
             Self::Approximate(pawn_evaluation) => Self::Approximate(-pawn_evaluation),
+            Self::Stalemate => Self::Stalemate,
         }
     }
 }
@@ -42,6 +45,7 @@ mod test {
     #[test_case(Score::Mating(PlyCount::new(50)), Score::Mated(PlyCount::new(50)))]
     #[test_case(Score::Mating(PlyCount::new(230)), Score::Mated(PlyCount::new(230)))]
     #[test_case(Score::Mated(PlyCount::new(230)), Score::Mating(PlyCount::new(230)))]
+    #[test_case(Score::Stalemate, Score::Stalemate)]
     #[test_case(
         Score::Approximate(PawnEvaluation::new(0.0)),
         Score::Approximate(PawnEvaluation::new(0.0))
