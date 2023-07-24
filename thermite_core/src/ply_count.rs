@@ -27,7 +27,7 @@ impl PlyCount {
     /// Increment the counter by one, saturating at the max
     ///
     /// ```
-    /// use thermite::ply_count::PlyCount;
+    /// use thermite_core::ply_count::PlyCount;
     ///
     /// let mut a = PlyCount::new(0);
     /// a.increment();
@@ -40,7 +40,7 @@ impl PlyCount {
     /// Decrease the counter by one, saturating at 0
     ///
     /// ```
-    /// use thermite::ply_count::PlyCount;
+    /// use thermite_core::ply_count::PlyCount;
     ///
     /// let mut a = PlyCount::new(1);
     /// a.decrement();

@@ -79,7 +79,7 @@ impl Piece for NonKingPieceType {
     /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given non-king piece)
     ///
     /// ```
-    /// use thermite::pieces::{NonKingPieceType, Piece};
+    /// use thermite_core::pieces::{NonKingPieceType, Piece};
     /// assert_eq!(NonKingPieceType::Bishop.get_lower_char(), 'b');
     /// assert_eq!(NonKingPieceType::Pawn.get_lower_char(), 'p');
     /// assert_eq!(NonKingPieceType::Knight.get_lower_char(), 'n');
@@ -101,7 +101,7 @@ impl Piece for NonPawnPieceType {
     /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given non-pawn piece)
     ///
     /// ```
-    /// use thermite::pieces::{Piece, NonPawnPieceType};
+    /// use thermite_core::pieces::{Piece, NonPawnPieceType};
     /// assert_eq!(NonPawnPieceType::Bishop.get_lower_char(), 'b');
     /// assert_eq!(NonPawnPieceType::King.get_lower_char(), 'k');
     /// assert_eq!(NonPawnPieceType::Knight.get_lower_char(), 'n');
@@ -123,7 +123,7 @@ impl Piece for SlidingPieceType {
     /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given sliding piece)
     ///
     /// ```
-    /// use thermite::pieces::{Piece, SlidingPieceType};
+    /// use thermite_core::pieces::{Piece, SlidingPieceType};
     /// assert_eq!(SlidingPieceType::Bishop.get_lower_char(), 'b');
     /// assert_eq!(SlidingPieceType::Queen.get_lower_char(), 'q');
     /// assert_eq!(SlidingPieceType::Rook.get_lower_char(), 'r');
@@ -141,7 +141,7 @@ impl Piece for PromotablePieceType {
     /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given promotable piece)
     ///
     /// ```
-    /// use thermite::pieces::{Piece, PromotablePieceType};
+    /// use thermite_core::pieces::{Piece, PromotablePieceType};
     /// assert_eq!(PromotablePieceType::Bishop.get_lower_char(), 'b');
     /// assert_eq!(PromotablePieceType::Knight.get_lower_char(), 'n');
     /// assert_eq!(PromotablePieceType::Queen.get_lower_char(), 'q');
@@ -161,8 +161,8 @@ impl Piece for PieceType {
     /// Associate this [piece](PieceType) with a [player](PlayerColor)
     ///
     /// ```
-    /// use thermite::pieces::{OwnedPiece, Piece, PieceType};
-    /// use thermite::player_color::PlayerColor;
+    /// use thermite_core::pieces::{OwnedPiece, Piece, PieceType};
+    /// use thermite_core::player_color::PlayerColor;
     ///
     /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::White), OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::White });
     /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::Black), OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::Black });
@@ -182,7 +182,7 @@ impl Piece for PieceType {
     /// Get the lower-case (or [white](PlayerColor::White) FEN char representation of a given piece)
     ///
     /// ```
-    /// use thermite::pieces::{Piece, PieceType};
+    /// use thermite_core::pieces::{Piece, PieceType};
     /// assert_eq!(PieceType::Bishop.get_lower_char(), 'b');
     /// assert_eq!(PieceType::Pawn.get_lower_char(), 'p');
     /// assert_eq!(PieceType::King.get_lower_char(), 'k');
@@ -205,7 +205,7 @@ impl Piece for PieceType {
     /// Get the upper-case (or [black](PlayerColor::Black) FEN char representation of a given piece)
     ///
     /// ```
-    /// use thermite::pieces::{Piece, PieceType};
+    /// use thermite_core::pieces::{Piece, PieceType};
     /// assert_eq!(PieceType::King.get_upper_char(), 'K');
     /// assert_eq!(PieceType::Rook.get_upper_char(), 'R');
     /// assert_eq!(PieceType::Pawn.get_upper_char(), 'P');
@@ -248,9 +248,9 @@ impl<P: Piece> OwnedPiece<P> {
     /// Associate this [player's piece](OwnedPiece) with a specific [`Square`] on the board
     ///
     /// ```
-    /// use thermite::pieces::{OwnedPiece, Piece, PieceType, PlacedPiece};
-    /// use thermite::player_color::PlayerColor;
-    /// use thermite::square::Square;
+    /// use thermite_core::pieces::{OwnedPiece, Piece, PieceType, PlacedPiece};
+    /// use thermite_core::player_color::PlayerColor;
+    /// use thermite_core::square::Square;
     ///
     /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::White).placed_on(Square::A2), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::White}, square: Square::A2 });
     /// assert_eq!(PieceType::Pawn.owned_by(PlayerColor::Black).placed_on(Square::A2), PlacedPiece { owned_piece: OwnedPiece { piece: PieceType::Pawn, player: PlayerColor::Black}, square: Square::A2 });

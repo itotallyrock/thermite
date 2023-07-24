@@ -96,8 +96,8 @@ impl CastleRights {
     /// Get the rights for a specific side
     ///
     /// ```
-    /// use thermite::castles::CastleRights;
-    /// use thermite::player_color::PlayerColor;
+    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::player_color::PlayerColor;
     ///
     /// assert_eq!(CastleRights::for_player(PlayerColor::White), CastleRights::WhiteBoth);
     /// assert_eq!(CastleRights::for_player(PlayerColor::Black), CastleRights::BlackBoth);
@@ -127,8 +127,8 @@ impl CastleRights {
     /// Clear the available rights (if any) for a given [player](PlayerColor)
     ///
     /// ```
-    /// use thermite::castles::CastleRights;
-    /// use thermite::player_color::PlayerColor;
+    /// use thermite_core::castles::CastleRights;
+    /// use thermite_core::player_color::PlayerColor;
     ///
     /// let mut rights = CastleRights::All;
     ///
@@ -160,7 +160,7 @@ impl FromStr for CastleRights {
     ///
     /// ```
     /// use std::str::FromStr;
-    /// use thermite::castles::{CastleRights, IllegalCastleRights};
+    /// use thermite_core::castles::{CastleRights, IllegalCastleRights};
     ///
     /// assert_eq!(CastleRights::from_str("KQkq"), Ok(CastleRights::All));
     /// assert_eq!(CastleRights::from_str("KQ"), Ok(CastleRights::WhiteBoth));

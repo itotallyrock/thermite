@@ -254,6 +254,10 @@ dependencies = [
 [[package]]
 name = "thermite"
 version = "0.1.0"
+
+[[package]]
+name = "thermite_core"
+version = "0.1.0"
 dependencies = [
  "arrayvec",
  "bitintr",

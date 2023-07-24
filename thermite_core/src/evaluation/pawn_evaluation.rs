@@ -28,7 +28,7 @@ impl PawnEvaluation {
     /// Get the absolute value of the evaluation
     ///
     /// ```
-    /// use thermite::evaluation::PawnEvaluation;
+    /// use thermite_core::evaluation::PawnEvaluation;
     /// assert_eq!(PawnEvaluation::new(1.0).abs(), PawnEvaluation::new(1.0));
     /// assert_eq!(PawnEvaluation::new(-0.01).abs(), PawnEvaluation::new(0.01));
     /// assert_eq!(PawnEvaluation::new(12.3).abs(), PawnEvaluation::new(12.3));

@@ -89,7 +89,7 @@ impl Square {
     /// Create a [`Square`] given a [`File`] and [`Rank`]
     ///
     /// ```
-    /// use thermite::square::{File, Rank, Square};
+    /// use thermite_core::square::{File, Rank, Square};
     /// assert_eq!(Square::new(File::A, Rank::First), Square::A1);
     /// assert_eq!(Square::new(File::B, Rank::Fifth), Square::B5);
     /// assert_eq!(Square::new(File::C, Rank::Seventh), Square::C7);
@@ -104,8 +104,8 @@ impl Square {
     /// Convert a square to a single bit set `BoardMask`
     ///
     /// ```
-    /// use thermite::bitboard::BoardMask;
-    /// use thermite::square::Square;
+    /// use thermite_core::bitboard::BoardMask;
+    /// use thermite_core::square::Square;
     ///
     /// assert_eq!(Square::A1.to_mask(), BoardMask::new(0b1));
     /// assert_eq!(Square::B1.to_mask(), BoardMask::new(0b10));
@@ -120,7 +120,7 @@ impl Square {
     /// Get the [`Rank`] for a [`Square`]
     ///
     /// ```
-    /// use thermite::square::{Rank, Square};
+    /// use thermite_core::square::{Rank, Square};
     ///
     /// assert_eq!(Square::A1.rank(), Rank::First);
     /// assert_eq!(Square::B3.rank(), Rank::Third);
@@ -137,7 +137,7 @@ impl Square {
     /// Get the [`File`] for a [`Square`]
     ///
     /// ```
-    /// use thermite::square::{File, Square};
+    /// use thermite_core::square::{File, Square};
     ///
     /// assert_eq!(Square::A3.file(), File::A);
     /// assert_eq!(Square::H8.file(), File::H);
@@ -152,7 +152,7 @@ impl Square {
     /// Try to add an offset to a square
     ///
     /// ```
-    /// use thermite::square::Square;
+    /// use thermite_core::square::Square;
     ///
     /// assert_eq!(Square::A1.checked_add(8), Some(Square::A2));
     /// assert_eq!(Square::A1.checked_add(1), Some(Square::B1));
@@ -167,8 +167,8 @@ impl Square {
     /// Try to move a square one tile in a given direction, [`None`] if shifted off the edge
     ///
     /// ```
-    /// use thermite::direction::Direction;
-    /// use thermite::square::Square;
+    /// use thermite_core::direction::Direction;
+    /// use thermite_core::square::Square;
     /// assert_eq!(Square::A1.shift(Direction::North), Some(Square::A2));
     /// assert_eq!(Square::H8.shift(Direction::South), Some(Square::H7));
     /// assert_eq!(Square::F5.shift(Direction::SouthWest), Some(Square::E4));
@@ -190,7 +190,7 @@ impl Square {
     ///
     /// ```
     ///
-    /// use thermite::square::Square;
+    /// use thermite_core::square::Square;
     /// assert_eq!(Square::A1.checked_sub(0), Some(Square::A1));
     /// assert_eq!(Square::A1.checked_sub(1), None);
     /// assert_eq!(Square::H1.checked_sub(7), Some(Square::A1));
@@ -211,7 +211,7 @@ impl FromStr for Square {
     ///
     /// ```
     /// use std::str::FromStr;
-    /// use thermite::square::{IllegalSquare, Square};
+    /// use thermite_core::square::{IllegalSquare, Square};
     ///
     /// assert_eq!(Square::from_str("A1"), Ok(Square::A1));
     /// assert_eq!(Square::from_str("C8"), Ok(Square::C8));

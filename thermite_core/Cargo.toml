@@ -1,0 +1,32 @@
+[package]
+name = "thermite_core"
+description = "The main functionality required to play a game of chess and evaluate a position"
+categories = ["games", "algorithms"]
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = ["std"]
+std = ["arrayvec/std", "once_cell/std", "subenum/std"]
+
+[dependencies]
+derive_more = "0.99.17"
+enum-map = "2.5.0"
+subenum = { git = "https://github.com/itotallyrock/subenum.git", rev = "4301f92fc3b73389a4d2904b31fbb6207af8246d", default-features = false }
+bitmask-enum = "2.1.0"
+arrayvec = { version = "0.7.2", default-features = false }
+enum-iterator = "1.4.1"
+once_cell = { version = "1.17.1", features = ["critical-section"], default-features = false }
+bitintr = "0.3.0"
+
+[dev-dependencies]
+test-case = "3.1.0"
+critical-section = { version = "1.1", features = ["std"]}
+fastrand = "2.0.0"
