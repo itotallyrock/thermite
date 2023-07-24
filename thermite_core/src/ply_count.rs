@@ -21,7 +21,7 @@ use derive_more::{Add, AddAssign, AsRef, Constructor, Display, FromStr, Into, Su
     PartialOrd,
     Ord,
 )]
-pub struct PlyCount(u8);
+pub struct PlyCount(pub(crate) u8);
 
 impl PlyCount {
     /// Increment the counter by one, saturating at the max
