@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         target: [thumbv7m-none-eabi, aarch64-unknown-none]
+        project: ['thermite_core']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,4 +26,4 @@ jobs:
       - name: rustup target add ${{ matrix.target }}
         run: rustup target add ${{ matrix.target }}
       - name: cargo check
-        run: cargo check --target ${{ matrix.target }} --no-default-features
+        run: cargo check --target ${{ matrix.target }} --no-default-features --manifest-path "${{ matrix.project }}/Cargo.toml"
