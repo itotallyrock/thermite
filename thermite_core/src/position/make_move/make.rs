@@ -322,7 +322,7 @@ impl LegalPosition {
 
     /// Perform a legal [move](ChessMove) on the [board](LegalPosition) returning a copy of the [`LegalPositionState`] from before the move was made in order to [undo the move](LegalPosition::unmake_move).
     pub fn make_move(&mut self, chess_move: ChessMove) -> LegalPositionState {
-        let current_state = self.state;
+        let previous_state = self.state;
 
         // Clear any single ply state
         self.try_clear_en_passant();
@@ -344,7 +344,7 @@ impl LegalPosition {
 
         self.switch_perspectives();
 
-        current_state
+        previous_state
     }
 }
 

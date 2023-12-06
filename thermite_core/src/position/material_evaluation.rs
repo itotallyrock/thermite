@@ -25,7 +25,7 @@ const PLAYER_WEIGHT: EnumMap<PlayerColor, PawnEvaluation> =
 
 impl MaterialEvaluation {
     /// Get a neutral or empty evaluation
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self(PawnEvaluation::new(0.0))
     }
 
