@@ -1,8 +1,8 @@
-use std::sync::LazyLock;
 use crate::evaluation::PawnEvaluation;
 use crate::pieces::{NonKingPieceType, OwnedPiece};
 use crate::player_color::PlayerColor;
 use enum_map::EnumMap;
+use std::sync::LazyLock;
 
 /// A [board](position::LegalPosition)'s material [`PawnEvaluation`]
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]

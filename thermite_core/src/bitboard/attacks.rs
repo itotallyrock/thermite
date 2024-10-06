@@ -5,9 +5,9 @@ use crate::pieces::{NonPawnPieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use alloc::vec::Vec;
-use std::sync::LazyLock;
 use enum_iterator::all;
 use enum_map::EnumMap;
+use std::sync::LazyLock;
 
 /// Maximum number of blocker [square](Square)s (or the number of [piece](crate::pieces::PieceType)s that can be along the cardinals) for a [rook](crate::pieces::PieceType::Rook) on a given [square](Square)
 ///
@@ -132,7 +132,8 @@ fn get_sliding_attacks<const IS_ROOK: bool>() -> EnumMap<Square, Vec<BoardMask>>
 
 /// Precomputed attack mask lookup for a [Rook](crate::pieces::PieceType::Rook) on a [square](Square) on an [occupied board](BoardMask)
 /// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a rook).
-static ROOK_ATTACKS: LazyLock<EnumMap<Square, Vec<BoardMask>>> = LazyLock::new(get_sliding_attacks::<true>);
+static ROOK_ATTACKS: LazyLock<EnumMap<Square, Vec<BoardMask>>> =
+    LazyLock::new(get_sliding_attacks::<true>);
 
 /// Precomputed attack mask lookup for a [Bishop](crate::pieces::PieceType::Bishop) on a [square](Square) on an [occupied board](BoardMask)
 /// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a bishop).

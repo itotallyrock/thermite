@@ -1,9 +1,9 @@
-use std::sync::LazyLock;
 use crate::bitboard::BoardMask;
 use crate::pieces::{NonPawnPieceType, PieceType, SlidingPieceType};
 use crate::square::Square;
 use enum_iterator::all;
 use enum_map::EnumMap;
+use std::sync::LazyLock;
 
 /// Get an iterator over all square combinations, including duplicate start & end pairs
 fn all_square_pairs() -> impl Iterator<Item = (Square, Square)> {
