@@ -5,7 +5,6 @@ use crate::pieces::{NonPawnPieceType, SlidingPieceType};
 use crate::player_color::PlayerColor;
 use crate::square::Square;
 use alloc::vec::Vec;
-use bitintr::{Pdep, Pext};
 use enum_iterator::all;
 use enum_map::EnumMap;
 use once_cell::sync::Lazy;
@@ -66,15 +65,17 @@ static ROOK_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
     BoardMask(0x7E01010101010100), BoardMask(0x7C02020202020200), BoardMask(0x7A04040404040400), BoardMask(0x7608080808080800), BoardMask(0x6E10101010101000), BoardMask(0x5E20202020202000), BoardMask(0x3E40404040404000), BoardMask(0x7E80808080808000),
 ]);
 
-impl Pdep for BoardMask {
+impl BoardMask {
     fn pdep(self, occupancy_mask: Self) -> Self {
-        Self(Pdep::pdep(self.0, occupancy_mask.0))
+        // Self(Pdep::pdep(self.0, occupancy_mask.0))
+        todo!("pdep")
     }
 }
 
-impl Pext for BoardMask {
+impl BoardMask {
     fn pext(self, occupancy_mask: Self) -> Self {
-        Self(Pext::pext(self.0, occupancy_mask.0))
+        // Self(Pext::pext(self.0, occupancy_mask.0))
+        todo!("pext")
     }
 }
 

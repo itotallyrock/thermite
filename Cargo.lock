@@ -9,12 +9,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
-name = "bitintr"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ba5a5c4df8ac8673f22698f443ef1ce3853d7f22d5a15ebf66b9a7553b173dd"
-
-[[package]]
 name = "bitmask-enum"
 version = "2.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -219,7 +213,6 @@ name = "thermite_core"
 version = "0.1.0"
 dependencies = [
  "arrayvec",
- "bitintr",
  "bitmask-enum",
  "critical-section",
  "derive_more",
