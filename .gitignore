@@ -1,1 +1,4 @@
 /target
+callgrind.out.*
+/logs
+*.log
