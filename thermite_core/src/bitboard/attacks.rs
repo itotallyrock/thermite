@@ -67,11 +67,19 @@ static ROOK_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
 
 impl BoardMask {
     const fn pdep(self, occupancy_mask: Self) -> Self {
-        #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2"))] {
-            return Self(core::arch::x86_64::_pdep_u64(self.0, occupancy_mask.0))
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        ))]
+        {
+            return Self(core::arch::x86_64::_pdep_u64(self.0, occupancy_mask.0));
         }
 
-        #[cfg(not(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2")))] {
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        )))]
+        {
             let mut mask = occupancy_mask.0;
             let mut res = 0;
             let mut bb: u64 = 1;
@@ -93,11 +101,19 @@ impl BoardMask {
 
 impl BoardMask {
     const fn pext(self, occupancy_mask: Self) -> Self {
-        #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2"))] {
-            return Self(core::arch::x86_64::_pext_u64(self.0, occupancy_mask.0))
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        ))]
+        {
+            return Self(core::arch::x86_64::_pext_u64(self.0, occupancy_mask.0));
         }
 
-        #[cfg(not(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2")))] {
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        )))]
+        {
             let mut mask = occupancy_mask.0;
             let mut res = 0;
             let mut bb: u64 = 1;
