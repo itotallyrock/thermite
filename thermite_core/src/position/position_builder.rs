@@ -84,7 +84,7 @@ pub enum FenParseError {
     MissingPosition,
     /// Missing the side to move, 'w' or 'b' after the position.
     MissingSide,
-    /// Missing castle rights, 'KQkq', 'Kq', etc, '-' after side to move.
+    /// Missing castle rights, `KQkq`, `Kq`, etc., `-` after side to move.
     MissingCastleRights,
     /// Missing the en-passant square after the castle rights
     MissingEnPassant,

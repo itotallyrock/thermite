@@ -55,7 +55,7 @@ impl PawnEvaluation {
 impl PartialEq for PawnEvaluation {
     fn eq(&self, other: &Self) -> bool {
         // f32::EPSILON.sqrt()
-        const EPSILON: PawnEvaluation = Self(0.000_345_266_98);
+        const EPSILON: PawnEvaluation = PawnEvaluation(0.000_345_266_98);
         (*self - *other).abs() <= EPSILON
     }
 }
