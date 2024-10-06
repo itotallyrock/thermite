@@ -66,18 +66,54 @@ static ROOK_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
 ]);
 
 impl BoardMask {
-    fn pdep(self, occupancy_mask: Self) -> Self {
-        // Self(Pdep::pdep(self.0, occupancy_mask.0))
-        // todo!("pdep")
-        Self::EMPTY
+    const fn pdep(self, occupancy_mask: Self) -> Self {
+        #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2"))] {
+            return Self(core::arch::x86_64::_pdep_u64(self.0, occupancy_mask.0))
+        }
+
+        #[cfg(not(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2")))] {
+            let mut mask = occupancy_mask.0;
+            let mut res = 0;
+            let mut bb: u64 = 1;
+            loop {
+                if mask == 0 {
+                    break;
+                }
+                if self.0 & bb != 0 {
+                    res |= mask & mask.wrapping_neg();
+                }
+                mask &= mask - 1;
+                bb = bb.wrapping_add(bb);
+            }
+
+            Self(res)
+        }
     }
 }
 
 impl BoardMask {
-    fn pext(self, occupancy_mask: Self) -> Self {
-        // Self(Pext::pext(self.0, occupancy_mask.0))
-        // todo!("pext")
-        Self::EMPTY
+    const fn pext(self, occupancy_mask: Self) -> Self {
+        #[cfg(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2"))] {
+            return Self(core::arch::x86_64::_pext_u64(self.0, occupancy_mask.0))
+        }
+
+        #[cfg(not(all(any(target_arch = "x86", target_arch = "x86_64"), target_feature = "bmi2")))] {
+            let mut mask = occupancy_mask.0;
+            let mut res = 0;
+            let mut bb: u64 = 1;
+            loop {
+                if mask == 0 {
+                    break;
+                }
+                if self.0 & mask & (mask.wrapping_neg()) != 0 {
+                    res |= bb;
+                }
+                mask &= mask - 1;
+                bb = bb.wrapping_add(bb);
+            }
+
+            Self(res)
+        }
     }
 }
 
