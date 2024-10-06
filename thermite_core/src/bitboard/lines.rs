@@ -1,9 +1,9 @@
+use std::sync::LazyLock;
 use crate::bitboard::BoardMask;
 use crate::pieces::{NonPawnPieceType, PieceType, SlidingPieceType};
 use crate::square::Square;
 use enum_iterator::all;
 use enum_map::EnumMap;
-use once_cell::sync::Lazy;
 
 /// Get an iterator over all square combinations, including duplicate start & end pairs
 fn all_square_pairs() -> impl Iterator<Item = (Square, Square)> {
@@ -35,7 +35,7 @@ fn connectable_iter() -> impl Iterator<Item = (Square, Square, NonPawnPieceType,
 
 /// The intersection between two aligned squares including the second (end) [`Square`]'s mask
 /// If non-aligned, only the end [`Square`]'s mask will be included.
-static LINE_BETWEEN: Lazy<EnumMap<Square, EnumMap<Square, BoardMask>>> = Lazy::new(|| {
+static LINE_BETWEEN: LazyLock<EnumMap<Square, EnumMap<Square, BoardMask>>> = LazyLock::new(|| {
     let mut items: EnumMap<Square, EnumMap<Square, BoardMask>> = EnumMap::default();
 
     // Add the intersection of the aligned sliding attacks from both squares to get the in-between
@@ -54,7 +54,7 @@ static LINE_BETWEEN: Lazy<EnumMap<Square, EnumMap<Square, BoardMask>>> = Lazy::n
 });
 
 /// Full board crossing line through two aligned [squares](Square)
-static LINE_THROUGH: Lazy<EnumMap<Square, EnumMap<Square, BoardMask>>> = Lazy::new(|| {
+static LINE_THROUGH: LazyLock<EnumMap<Square, EnumMap<Square, BoardMask>>> = LazyLock::new(|| {
     let mut items: EnumMap<Square, EnumMap<Square, BoardMask>> = EnumMap::default();
 
     for (a, b, piece, a_attacks) in connectable_iter() {
