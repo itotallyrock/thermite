@@ -17,7 +17,7 @@ default = ["std"]
 std = ["arrayvec/std", "once_cell/std", "subenum/std", "derive_more/std"]
 
 [dependencies]
-derive_more = { version = "1.0.0-beta.3", default-features = false, features = ["add", "add_assign", "as_ref", "mul", "mul_assign", "as_mut", "deref", "deref_mut", "constructor", "into", "display", "from_str", "sum", "not"] }
+derive_more = { version = "1.0.0", default-features = false, features = ["add", "add_assign", "as_ref", "mul", "mul_assign", "deref", "deref_mut", "into", "constructor", "display", "from_str", "sum", "not"] }
 enum-map = "2.6.3"
 subenum = { version = "1.1.1", default-features = false }
 bitmask-enum = "2.2.2"
@@ -28,5 +28,5 @@ bitintr = "0.3.0"
 
 [dev-dependencies]
 test-case = "3.1.0"
-critical-section = { version = "1.1", features = ["std"]}
+critical-section = { version = "1.1", features = ["std"] }
 fastrand = "2.0.0"
