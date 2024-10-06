@@ -22,7 +22,7 @@ enum-map = "2.6.3"
 subenum = { version = "1.1.1", default-features = false }
 bitmask-enum = "2.2.2"
 arrayvec = { version = "0.7.4", default-features = false }
-enum-iterator = "1.4.1"
+enum-iterator = "2.1.0"
 once_cell = { version = "1.18.0", features = ["critical-section"], default-features = false }
 
 [dev-dependencies]

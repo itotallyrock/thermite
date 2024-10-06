@@ -2,14 +2,14 @@ use crate::evaluation::PawnEvaluation;
 use crate::pieces::{NonKingPieceType, OwnedPiece};
 use crate::player_color::PlayerColor;
 use enum_map::EnumMap;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 /// A [board](position::LegalPosition)'s material [`PawnEvaluation`]
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct MaterialEvaluation(PawnEvaluation);
 
 /// Piece approximate valuations
-static PIECE_VALUES: Lazy<EnumMap<NonKingPieceType, PawnEvaluation>> = Lazy::new(|| {
+static PIECE_VALUES: LazyLock<EnumMap<NonKingPieceType, PawnEvaluation>> = LazyLock::new(|| {
     EnumMap::from_array([
         PawnEvaluation(1.26),  // Pawn
         PawnEvaluation(7.81),  // Knight

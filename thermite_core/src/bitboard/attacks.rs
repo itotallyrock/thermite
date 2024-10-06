@@ -7,7 +7,7 @@ use crate::square::Square;
 use alloc::vec::Vec;
 use enum_iterator::all;
 use enum_map::EnumMap;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 /// Maximum number of blocker [square](Square)s (or the number of [piece](crate::pieces::PieceType)s that can be along the cardinals) for a [rook](crate::pieces::PieceType::Rook) on a given [square](Square)
 ///
@@ -66,16 +66,70 @@ static ROOK_OCCUPANCY_MASK: EnumMap<Square, BoardMask> = EnumMap::from_array([
 ]);
 
 impl BoardMask {
-    fn pdep(self, occupancy_mask: Self) -> Self {
-        // Self(Pdep::pdep(self.0, occupancy_mask.0))
-        todo!("pdep")
+    const fn pdep(self, occupancy_mask: Self) -> Self {
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        ))]
+        {
+            return Self(core::arch::x86_64::_pdep_u64(self.0, occupancy_mask.0));
+        }
+
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        )))]
+        {
+            let mut mask = occupancy_mask.0;
+            let mut res = 0;
+            let mut bb: u64 = 1;
+            loop {
+                if mask == 0 {
+                    break;
+                }
+                if self.0 & bb != 0 {
+                    res |= mask & mask.wrapping_neg();
+                }
+                mask &= mask - 1;
+                bb = bb.wrapping_add(bb);
+            }
+
+            Self(res)
+        }
     }
 }
 
 impl BoardMask {
-    fn pext(self, occupancy_mask: Self) -> Self {
-        // Self(Pext::pext(self.0, occupancy_mask.0))
-        todo!("pext")
+    const fn pext(self, occupancy_mask: Self) -> Self {
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        ))]
+        {
+            return Self(core::arch::x86_64::_pext_u64(self.0, occupancy_mask.0));
+        }
+
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "bmi2"
+        )))]
+        {
+            let mut mask = occupancy_mask.0;
+            let mut res = 0;
+            let mut bb: u64 = 1;
+            loop {
+                if mask == 0 {
+                    break;
+                }
+                if self.0 & mask & (mask.wrapping_neg()) != 0 {
+                    res |= bb;
+                }
+                mask &= mask - 1;
+                bb = bb.wrapping_add(bb);
+            }
+
+            Self(res)
+        }
     }
 }
 
@@ -130,16 +184,17 @@ fn get_sliding_attacks<const IS_ROOK: bool>() -> EnumMap<Square, Vec<BoardMask>>
 
 /// Precomputed attack mask lookup for a [Rook](crate::pieces::PieceType::Rook) on a [square](Square) on an [occupied board](BoardMask)
 /// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a rook).
-static ROOK_ATTACKS: Lazy<EnumMap<Square, Vec<BoardMask>>> = Lazy::new(get_sliding_attacks::<true>);
+static ROOK_ATTACKS: LazyLock<EnumMap<Square, Vec<BoardMask>>> =
+    LazyLock::new(get_sliding_attacks::<true>);
 
 /// Precomputed attack mask lookup for a [Bishop](crate::pieces::PieceType::Bishop) on a [square](Square) on an [occupied board](BoardMask)
 /// Occupancy is indexed by PEXT to determine an offset using a masked extraction for relevant occupancy squares (squares that can block a bishop).
-static BISHOP_ATTACKS: Lazy<EnumMap<Square, Vec<BoardMask>>> =
-    Lazy::new(get_sliding_attacks::<false>);
+static BISHOP_ATTACKS: LazyLock<EnumMap<Square, Vec<BoardMask>>> =
+    LazyLock::new(get_sliding_attacks::<false>);
 
 /// Precomputed attack mask lookup for a piece on a square on an empty board
-static PSEUDO_ATTACKS: Lazy<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
-    Lazy::new(|| {
+static PSEUDO_ATTACKS: LazyLock<EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>>> =
+    LazyLock::new(|| {
         let mut piece_mask_map: EnumMap<NonPawnPieceType, EnumMap<Square, BoardMask>> =
             EnumMap::default();
         for sq in all::<Square>() {
